@@ -50,26 +50,31 @@ system_msg = """
 
 
 if "messages" not in st.session_state:
-    st.session_state.messages = [{'role': 'system', 'content': system_msg}]
+    st.session_state.messages = [{'role': 'system', 'content': system_msg},{'role':'user', 'content': '哪里不舒服'},{'role':'assistant', 'content': '乳房不舒服'}]
 
 if not st.session_state.messages:
-    st.session_state.messages = [{'role': 'system', 'content': system_msg}]
+    st.session_state.messages = [{'role': 'system', 'content': system_msg},{'role':'user', 'content': '哪里不舒服'},{'role':'assistant', 'content': '乳房不舒服'}]
 
-for message in st.session_state.messages:
-    if message['role'] != 'system':
-        with st.chat_message(message["role"]):
-            st.text(message["content"])
+if st.session_state.login:
+    for message in st.session_state.messages:
+        if message['role'] != 'system':
+            if message['role']=='user':
+                with st.chat_message('医'):
+                    st.text(message["content"])
+            if message['role']=='assistant':
+                with st.chat_message('患'):
+                    st.text(message["content"])       
 
 prompt = st.chat_input("")
 
 if prompt:
-    with st.chat_message("user"):
+    with st.chat_message('医'):
         st.text(prompt)
 
     st.session_state.messages.append({'role': 'user', 'content': prompt})
 
 
-    with st.chat_message("assistant"):
+    with st.chat_message('患'):
         response = Generation.call(
             'qwen-1.8b-chat',
             messages=st.session_state.messages,
