@@ -5,14 +5,20 @@ from dashscope import Generation
 from dashscope.api_entities.dashscope_response import Role
 
 st.set_page_config(
-    page_title="BreastVSP",
+    page_title="乳房疾病病例分析",
     page_icon="👩",
     layout="centered",
     initial_sidebar_state="auto",
-    menu_items=None
+    menu_items=None,
 )
 
-st.title('乳房疾病病例分析')
+st.title("乳房疾病病例分析")
+
+with st.popover("登录"):
+    name = st.text_input("姓名：")
+    grade = st.selectbox("年级", tuple(range(2010, 2030)))
+
+st.write(f"**姓名：** {name}，**年级：** {grade}")
 
 if "login" not in st.session_state:
     st.session_state.login = False
@@ -20,26 +26,30 @@ if "login" not in st.session_state:
 if not st.session_state.login:
     login_placeholder = st.empty()
     with login_placeholder.container():
-        with st.form('login_form'):
-            st.session_state.name = st.text_input('姓名', value='无名氏')
-            st.session_state.grade = st.selectbox('年级',tuple(range(2010,2030)))
-            login_bt = st.form_submit_button('登录', use_container_width=True)
+        with st.form("login_form"):
+            st.session_state.name = st.text_input("姓名", value="无名氏")
+            st.session_state.grade = st.selectbox("年级", tuple(range(2010, 2030)))
+            login_bt = st.form_submit_button("登录", use_container_width=True)
 
     if login_bt:
         if st.session_state.name:
             login_placeholder.empty()
             st.session_state.login = True
         else:
-            st.error('请输入姓名', icon="🚨")
+            st.error("请输入姓名", icon="🚨")
 if st.session_state.login:
     st.divider()
-    st.write(f"**医生：** {st.session_state.name}， **年级：** {st.session_state.grade}")
-    st.session_state.patient='赵淑娟'
+    st.write(
+        f"**医生：** {st.session_state.name}， **年级：** {st.session_state.grade}"
+    )
+    st.session_state.patient = "赵淑娟"
     st.session_state.id = 1
-    st.write('**地点：** 乳腺外科门诊')
-    st.write('请输入你的问诊话语，结束请输入**我问完了**')
+    st.write("**地点：** 乳腺外科门诊")
+    st.write("请输入你的问诊话语，结束请输入**我问完了**")
     st.divider()
-    st.write(f"**患者姓名：** {st.session_state.patient}， **就诊编号：** {st.session_state.id}")
+    st.write(
+        f"**患者姓名：** {st.session_state.patient}， **就诊编号：** {st.session_state.id}"
+    )
 
 system_msg = """
 你是一名乳房疾病的患者，现在你正在乳腺外科门诊诊室和医生谈话。下面是你的特征：女,32岁。左乳房红肿,疼痛1周,伴发热2天。1周前开始感觉左乳房疼痛,逐渐加重,伴低热,因哺乳中,未服药,2天来寒战、高热,左乳明显红、肿、热、痛,不敢触摸,并伴有局部波动感,4周前顺利分娩1男婴,母乳喂养。
@@ -50,40 +60,52 @@ system_msg = """
 
 
 if "messages" not in st.session_state:
-    st.session_state.messages = [{'role': 'system', 'content': system_msg},{'role':'user', 'content': '哪里不舒服'},{'role':'assistant', 'content': '乳房不舒服'}]
+    st.session_state.messages = [
+        {"role": "system", "content": system_msg},
+        {"role": "user", "content": "哪里不舒服"},
+        {"role": "assistant", "content": "乳房不舒服"},
+    ]
 
 if not st.session_state.messages:
-    st.session_state.messages = [{'role': 'system', 'content': system_msg},{'role':'user', 'content': '哪里不舒服'},{'role':'assistant', 'content': '乳房不舒服'}]
+    st.session_state.messages = [
+        {"role": "system", "content": system_msg},
+        {"role": "user", "content": "哪里不舒服"},
+        {"role": "assistant", "content": "乳房不舒服"},
+    ]
 
 if st.session_state.login:
     for message in st.session_state.messages:
-        if message['role'] != 'system':
-            if message['role']=='user':
-                with st.chat_message('医'):
+        if message["role"] != "system":
+            if message["role"] == "user":
+                with st.chat_message("医"):
                     st.text(message["content"])
-            if message['role']=='assistant':
-                with st.chat_message('患'):
-                    st.text(message["content"])       
+            if message["role"] == "assistant":
+                with st.chat_message("患"):
+                    st.text(message["content"])
 
 prompt = st.chat_input("")
 
 if prompt:
-    with st.chat_message('医'):
+    with st.chat_message("医"):
         st.text(prompt)
 
-    st.session_state.messages.append({'role': 'user', 'content': prompt})
+    st.session_state.messages.append({"role": "user", "content": prompt})
 
-
-    with st.chat_message('患'):
+    with st.chat_message("患"):
         response = Generation.call(
-            'qwen-1.8b-chat',
+            "qwen-1.8b-chat",
             messages=st.session_state.messages,
             # set the random seed, optional, default to 1234 if not set
             seed=random.randint(1, 10000),
-            result_format='message',  # set the result to be "message"  format.
+            result_format="message",  # set the result to be "message"  format.
         )
         if response.status_code == HTTPStatus.OK:
             response_placeholder = st.empty()
-            response_placeholder.text(response.output.choices[0]['message']['content'])
-            
-        st.session_state.messages.append({'role': response.output.choices[0]['message']['role'],'content': response.output.choices[0]['message']['content']})
+            response_placeholder.text(response.output.choices[0]["message"]["content"])
+
+        st.session_state.messages.append(
+            {
+                "role": response.output.choices[0]["message"]["role"],
+                "content": response.output.choices[0]["message"]["content"],
+            }
+        )
