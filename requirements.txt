@@ -1,5 +1,6 @@
 # UI
 streamlit
+streamlit-extras
 
 # TONGYI
 dashscope

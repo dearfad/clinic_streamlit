@@ -68,8 +68,8 @@ if prompt:
 
     with st.chat_message("患"):
         response = Generation.call(
-            # "qwen-1.8b-chat",
-            "baichuan-7b-v1",
+            "qwen-1.8b-chat",
+            # "baichuan-7b-v1",
             messages=st.session_state.messages,
             # set the random seed, optional, default to 1234 if not set
             # seed=random.randint(1, 10000),
