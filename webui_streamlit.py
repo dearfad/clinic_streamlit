@@ -19,9 +19,15 @@ st.set_page_config(
 )
 
 st.markdown(
-    "<style>div[class^='block-container']{padding-top:2rem;}</style>",
+    """<style>
+        div[class^='block-container'] {padding-top:2rem;}
+        #MainMenu {visibility: hidden;}
+        .stDeployButton {visibility: hidden;}
+        footer {visibility: hidden;}
+    </style>""",
     unsafe_allow_html=True,
 )
+
 st.subheader("📄 病例分析", divider="rainbow")
 st.caption("吉林大学中日联谊医院乳腺外科")
 st.write("> **作为一名乳腺外科医生，与患者正在进行沟通，请尝试做出你的诊断。** 问诊完毕请输入 “**我问完了**”")
@@ -51,17 +57,17 @@ if "messages" not in st.session_state:
     st.session_state.messages = [
         Message(name="医生", role="user", content="你好"),
         Message(name="患者", role="assistant", content="大夫，你好"),
-        Message(name="医生", role="user", content="哪里不舒服？"),
+        # Message(name="医生", role="user", content="哪里不舒服？"),
     ]
     chat_param = build_chat_param(st.session_state.messages)
-    res = st.session_state.api.chat(chat_param)
-    st.session_state.messages.append(
-        Message(
-            name="患者",
-            role="assistant",
-            content=res.to_dict()["data"]["choices"][0]["messages"][0]["content"],
-        )
-    )
+    # res = st.session_state.api.chat(chat_param)
+    # st.session_state.messages.append(
+    #     Message(
+    #         name="患者",
+    #         role="assistant",
+    #         content=res.to_dict()["data"]["choices"][0]["messages"][0]["content"],
+    #     )
+    # )
 
 with st.container(border=True):
     col1, col2 = st.columns([1, 3], gap="large")
