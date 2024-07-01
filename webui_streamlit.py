@@ -1,5 +1,6 @@
 import streamlit as st
 import random
+import pandas as pd
 from xingchen import (
     Configuration,
     ApiClient,
@@ -56,10 +57,17 @@ def build_chat_param(character_id, messages, user_id):
 ########## END OF XINGCHEN CONFIG ##########
 
 ########## CASES ###########################
-st.session_state.character_list = [
-    "37d0bb98a0194eefbecdba794fb1b42c",
-    "5b90fa5b76f0425aab4413efd9d3c257",
-]
+
+if "cases" not in st.session_state:
+    st.session_state.cases = pd.read_excel("cases.xlsx", index_col='id')
+
+if "character_list" not in st.session_state:
+    st.session_state.character_list = [
+        "37d0bb98a0194eefbecdba794fb1b42c",
+        "5b90fa5b76f0425aab4413efd9d3c257",
+        "de2f24bd946e4c3fa80047d6877f557b"
+    ]
+    random.shuffle(st.session_state.character_list)
 ############################################
 
 ######### INIT #############################
@@ -81,12 +89,18 @@ if "page" not in st.session_state:
     st.session_state.grade = ""
     st.session_state.major = ""
 
+if "user_question" not in st.session_state:
+    st.session_state.user_question = []
+    st.session_state.user_answer = []
+    st.session_state.correct_answer = []
 
+if "answering" not in st.session_state:
+    st.session_state.answering = False
 ###########################################
 def make_inquiries():
-    character_id = st.session_state.character_list[st.session_state.character_index]
+    st.session_state.character_id = st.session_state.character_list[st.session_state.character_index]
     character = st.session_state.character_api.character_details(
-        character_id=character_id
+        character_id=st.session_state.character_id
     )
     st.session_state.patient_name = character.data.name
     st.session_state.patient_avatar = character.data.avatar
@@ -95,7 +109,7 @@ def make_inquiries():
         caption=st.session_state.patient_name,
     )
     chat_param = build_chat_param(
-        character_id, st.session_state.messages, st.session_state.user_id
+        st.session_state.character_id, st.session_state.messages, st.session_state.user_id
     )
 
     for message in st.session_state.messages:
@@ -115,7 +129,7 @@ def make_inquiries():
             )
             with st.chat_message("患"):
                 chat_param = build_chat_param(
-                    character_id,
+                    st.session_state.character_id,
                     st.session_state.messages,
                     st.session_state.user_id,
                 )
@@ -138,27 +152,49 @@ def make_inquiries():
 
 
 def make_explain():
-    answer = st.radio(
-        "根据问诊，该患者的初步诊断是：",
-        ["**乳腺炎**", "**乳腺癌**", "**乳腺增生**", "**乳管内乳头状瘤**"],
-    )
 
-    if st.button("提交答案"):
-        if answer == "**乳腺炎**":
-            st.write("你的答案：**正确**")
-        else:
-            st.write("你的答案：**错误**")
+        case_question = st.session_state.cases.loc[st.session_state.character_id, 'question'].split('?')
+        case_answer = st.session_state.cases.loc[st.session_state.character_id, 'answer'].split(';')
+        for index, question in enumerate(case_question):
+            if not st.session_state.answering:
+                st.session_state.user_question.append(question)
+            answer_list = []
+            for answer in case_answer[index].split(','):
+                answer_list.append(answer)
+            if not st.session_state.answering:
+                st.session_state.correct_answer.append(answer_list[0])
 
-        st.session_state.character_index = st.session_state.character_index + 1
-        if st.session_state.character_index == len(st.session_state.character_list):
-            st.session_state.page = "result"
-            if st.button('结束', type="primary", use_container_width=True):
-                st.rerun()
-        else:
-            st.session_state.page = "inquiry"
-            del st.session_state.messages
-            if st.button('下一位患者', use_container_width=True):
-                st.rerun()
+            key = 'a'+str(index)
+            answer = st.radio(
+                question,
+                answer_list,
+                key=key
+            )
+        if not st.session_state.answering:
+            st.session_state.answering = True
+        st.write(st.session_state.user_question)
+
+        if st.button("提交答案"):
+
+
+            for a in range(len(case_question)):
+                k = 'a' + str(a)
+                st.session_state.user_answer.append(st.session_state[k])
+
+
+
+
+            st.session_state.character_index = st.session_state.character_index + 1
+            if st.session_state.character_index == len(st.session_state.character_list):
+                st.session_state.page = "result"
+                if st.button('结束', type="primary", use_container_width=True):
+                    st.rerun()
+            else:
+                st.session_state.page = "inquiry"
+                st.session_state.answering = False
+                del st.session_state.messages
+                if st.button('下一位患者', use_container_width=True):
+                    st.rerun()
 
 
 ############################################
@@ -170,7 +206,7 @@ match st.session_state.page:
             "专业", ("临床医学", "放射", "口腔", "其他")
         )
         st.info(
-            "作为一名乳腺外科医生，请用正常语气与门诊患者沟通，问诊完毕后请输入 **我问完了** 按钮，并回答患者提出的相关问题。",
+            "作为一名乳腺外科医生，请用正常语气与门诊患者沟通，问诊完毕后请输入 **我问完了**，并回答患者提出的相关问题。",
             icon="ℹ️",
         )
         if st.button("我明白了", use_container_width=True):
@@ -184,85 +220,6 @@ match st.session_state.page:
         make_explain()
     case "result":
         st.write("result")
-
-#     character_id = character_list[st.session_state.character_index]
-#     character = st.session_state.character_api.character_details(
-#         character_id=character_id
-#     )
-#     st.session_state.patient_name = character.data.name
-#     st.session_state.patient_avatar = character.data.avatar
-#     with st.container(border=True):
-#         col1, col2 = st.columns([1, 3], gap="large")
-#         with col1:
-#             st.image("http:" + st.session_state.patient_avatar.file_url)
-#         with col2:
-#             st.write(f"**姓名**: {st.session_state.patient_name}")
-
-#     if "messages" not in st.session_state:
-#         st.session_state.messages = [
-#             Message(name="医生", role="user", content="你好"),
-#             Message(name="患者", role="assistant", content="大夫，你好"),
-#         ]
-#         chat_param = build_chat_param(
-#             character_id, st.session_state.messages, st.session_state.user_id
-#         )
-
-#     if st.session_state.question:
-#         answer = st.radio(
-#             "根据问诊，该患者的初步诊断是：",
-#             ["**乳腺炎**", "**乳腺癌**", "**乳腺增生**", "**乳管内乳头状瘤**"],
-#         )
-
-#         if st.button("提交答案"):
-#             if answer == "**乳腺炎**":
-#                 st.write("你的答案：**正确**")
-#             else:
-#                 st.write("你的答案：**错误**")
-
-#             st.session_state.question = False
-#             st.session_state.character_index = st.session_state.character_index + 1
-#             if st.session_state.character_index == len(character_list):
-#                 st.session_state.finished = True
-#             del st.session_state.messages
-#             st.rerun()
-#     else:
-#         for message in st.session_state.messages:
-#             if message.role == "user":
-#                 with st.chat_message("医"):
-#                     st.write(message.content)
-#             if message.role == "assistant":
-#                 with st.chat_message("患"):
-#                     st.write(message.content)
-
-#         if prompt := st.chat_input(""):
-#             if prompt != "我问完了":
-#                 with st.chat_message("医"):
-#                     st.write(prompt)
-#                 st.session_state.messages.append(
-#                     Message(name="医生", role="user", content=prompt)
-#                 )
-
-#                 with st.chat_message("患"):
-#                     chat_param = build_chat_param(
-#                         character_id,
-#                         st.session_state.messages,
-#                         st.session_state.user_id,
-#                     )
-#                     response = st.session_state.chat_api.chat(chat_param)
-#                     st.session_state.messages.append(
-#                         Message(
-#                             name="患者",
-#                             role="assistant",
-#                             content=response.to_dict()["data"]["choices"][0][
-#                                 "messages"
-#                             ][0]["content"],
-#                         )
-#                     )
-#                     st.write(
-#                         response.to_dict()["data"]["choices"][0]["messages"][0][
-#                             "content"
-#                         ]
-#                     )
-#             else:
-#                 st.session_state.question = True
-#                 st.rerun()
+        st.write(st.session_state.user_question)
+        st.write(st.session_state.correct_answer)
+        st.write(st.session_state.user_answer)

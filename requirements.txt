@@ -6,3 +6,4 @@ xingchen
 
 # DATA
 pandas
+openpyxl
