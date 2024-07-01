@@ -1,8 +1,8 @@
 # UI
 streamlit
 
-# TONGYI
-dashscope
-
 # XINGCHEN
 xingchen
+
+# DATA
+pandas
