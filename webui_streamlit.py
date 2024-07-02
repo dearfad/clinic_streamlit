@@ -59,13 +59,13 @@ def build_chat_param(character_id, messages, user_id):
 ########## CASES ###########################
 
 if "cases" not in st.session_state:
-    st.session_state.cases = pd.read_excel("cases.xlsx", index_col='id')
+    st.session_state.cases = pd.read_excel("cases.xlsx", index_col="id")
 
 if "character_list" not in st.session_state:
     st.session_state.character_list = [
         "37d0bb98a0194eefbecdba794fb1b42c",
         "5b90fa5b76f0425aab4413efd9d3c257",
-        "de2f24bd946e4c3fa80047d6877f557b"
+        "de2f24bd946e4c3fa80047d6877f557b",
     ]
     random.shuffle(st.session_state.character_list)
 ############################################
@@ -96,20 +96,30 @@ if "user_question" not in st.session_state:
 
 if "answering" not in st.session_state:
     st.session_state.answering = False
+
+
 ###########################################
 def make_inquiries():
-    st.session_state.character_id = st.session_state.character_list[st.session_state.character_index]
+    st.session_state.character_id = st.session_state.character_list[
+        st.session_state.character_index
+    ]
     character = st.session_state.character_api.character_details(
         character_id=st.session_state.character_id
     )
     st.session_state.patient_name = character.data.name
     st.session_state.patient_avatar = character.data.avatar
-    st.image(
-        "http:" + st.session_state.patient_avatar.file_url,
-        caption=st.session_state.patient_name,
-    )
+
+    col_left, col_center, col_right = st.columns(3)
+    with col_center:
+        st.image(
+                "http:" + st.session_state.patient_avatar.file_url,
+                caption=st.session_state.patient_name,
+                use_column_width=True
+            )
     chat_param = build_chat_param(
-        st.session_state.character_id, st.session_state.messages, st.session_state.user_id
+        st.session_state.character_id,
+        st.session_state.messages,
+        st.session_state.user_id,
     )
 
     for message in st.session_state.messages:
@@ -153,48 +163,57 @@ def make_inquiries():
 
 def make_explain():
 
-        case_question = st.session_state.cases.loc[st.session_state.character_id, 'question'].split('?')
-        case_answer = st.session_state.cases.loc[st.session_state.character_id, 'answer'].split(';')
-        for index, question in enumerate(case_question):
-            if not st.session_state.answering:
-                st.session_state.user_question.append(question)
-            answer_list = []
-            for answer in case_answer[index].split(','):
-                answer_list.append(answer)
-            if not st.session_state.answering:
-                st.session_state.correct_answer.append(answer_list[0])
-
-            key = 'a'+str(index)
-            answer = st.radio(
-                question,
-                answer_list,
-                key=key
-            )
+    case_question = st.session_state.cases.loc[
+        st.session_state.character_id, "question"
+    ].split("?")
+    case_answer = st.session_state.cases.loc[
+        st.session_state.character_id, "answer"
+    ].split(";")
+    for index, question in enumerate(case_question):
         if not st.session_state.answering:
-            st.session_state.answering = True
-        st.write(st.session_state.user_question)
+            st.session_state.user_question.append(question)
+        answer_list = []
+        for answer in case_answer[index].split(","):
+            answer_list.append(answer)
+        if not st.session_state.answering:
+            st.session_state.correct_answer.append(answer_list[0])
 
-        if st.button("提交答案"):
+        key = "a" + str(index)
+        answer = st.radio(question, answer_list, key=key)
+    if not st.session_state.answering:
+        st.session_state.answering = True
+
+    if st.button("提交答案", use_container_width=True):
+
+        for a in range(len(case_question)):
+            k = "a" + str(a)
+            st.session_state.user_answer.append(st.session_state[k])
+
+        st.session_state.character_index = st.session_state.character_index + 1
+        if st.session_state.character_index == len(st.session_state.character_list):
+            st.session_state.page = "result"
+        else:
+            st.session_state.page = "inquiry"
+            st.session_state.answering = False
+            del st.session_state.messages
+        st.rerun()
 
 
-            for a in range(len(case_question)):
-                k = 'a' + str(a)
-                st.session_state.user_answer.append(st.session_state[k])
-
-
-
-
-            st.session_state.character_index = st.session_state.character_index + 1
-            if st.session_state.character_index == len(st.session_state.character_list):
-                st.session_state.page = "result"
-                if st.button('结束', type="primary", use_container_width=True):
-                    st.rerun()
-            else:
-                st.session_state.page = "inquiry"
-                st.session_state.answering = False
-                del st.session_state.messages
-                if st.button('下一位患者', use_container_width=True):
-                    st.rerun()
+def show_result():
+    total = len(st.session_state.user_question)
+    score = 0
+    for i,question in enumerate(st.session_state.user_question):
+        st.write(f"问题{i}: {question}")
+        st.write(f"正确答案: {st.session_state.correct_answer[i]}")
+        st.write(f"用户答案: {st.session_state.user_answer[i]}")
+        if st.session_state.correct_answer[i]==st.session_state.user_answer[i]:
+            st.markdown('结果: :green[正确]')
+            score += 1
+        else:
+            st.write('结果: :red[错误]')
+        st.divider()
+    st.subheader(f"医生 {st.session_state.name}")
+    st.subheader(f"正确率 {round(score/total*100)}%")
 
 
 ############################################
@@ -213,13 +232,8 @@ match st.session_state.page:
             st.session_state.page = "inquiry"
             st.rerun()
     case "inquiry":
-        st.write("医生：", st.session_state.name)
         make_inquiries()
     case "explain":
-        st.write("explain")
         make_explain()
     case "result":
-        st.write("result")
-        st.write(st.session_state.user_question)
-        st.write(st.session_state.correct_answer)
-        st.write(st.session_state.user_answer)
+        show_result()
