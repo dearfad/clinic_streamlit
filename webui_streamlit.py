@@ -27,7 +27,16 @@ st.html(
             padding-bottom: 1rem;
         }
         .st-emotion-cache-arzcut{
+            padding-top: 1rem;
             padding-bottom: 1rem;
+            padding-left: 3rem;
+            padding-right: 3rem;
+        }
+        .stChatMessage{
+            padding-top: 0rem;
+            padding-bottom: 0rem;
+            padding-left: 0rem;
+            padding-right: 0rem;
         }
     </style>"""
 )
@@ -99,6 +108,21 @@ if "answering" not in st.session_state:
 
 
 ###########################################
+def show_login():
+    st.session_state.name = st.text_input("姓名", "无名")
+    st.session_state.grade = st.selectbox("年级", (range(2016, 2030, 1)))
+    st.session_state.major = st.selectbox(
+            "专业", ("临床医学", "放射", "口腔", "其他")
+        )
+    st.info(
+            "作为一名乳腺外科医生，请用正常语气与门诊患者沟通，问诊完毕后请输入 **我问完了**，并回答患者提出的相关问题。",
+            icon="ℹ️",
+        )
+    if st.button("我明白了", use_container_width=True):
+            st.session_state.page = "inquiry"
+            st.rerun()
+
+
 def make_inquiries():
     st.session_state.character_id = st.session_state.character_list[
         st.session_state.character_index
@@ -112,10 +136,10 @@ def make_inquiries():
     col_left, col_center, col_right = st.columns(3)
     with col_center:
         st.image(
-                "http:" + st.session_state.patient_avatar.file_url,
-                caption=st.session_state.patient_name,
-                use_column_width=True
-            )
+            "http:" + st.session_state.patient_avatar.file_url,
+            caption=st.session_state.patient_name,
+            use_column_width=True,
+        )
     chat_param = build_chat_param(
         st.session_state.character_id,
         st.session_state.messages,
@@ -128,7 +152,7 @@ def make_inquiries():
                 st.write(message.content)
         if message.role == "assistant":
             with st.chat_message("患"):
-                st.write(message.content)
+                st.markdown(f"**{message.content}**")
 
     if prompt := st.chat_input(""):
         if prompt != "我问完了":
@@ -153,8 +177,8 @@ def make_inquiries():
                         ],
                     )
                 )
-                st.write(
-                    response.to_dict()["data"]["choices"][0]["messages"][0]["content"]
+                st.markdown(
+                    f'**{response.to_dict()["data"]["choices"][0]["messages"][0]["content"]}**'
                 )
         else:
             st.session_state.page = "explain"
@@ -202,15 +226,15 @@ def make_explain():
 def show_result():
     total = len(st.session_state.user_question)
     score = 0
-    for i,question in enumerate(st.session_state.user_question):
+    for i, question in enumerate(st.session_state.user_question):
         st.write(f"问题{i}: {question}")
         st.write(f"正确答案: {st.session_state.correct_answer[i]}")
         st.write(f"用户答案: {st.session_state.user_answer[i]}")
-        if st.session_state.correct_answer[i]==st.session_state.user_answer[i]:
-            st.markdown('结果: :green[正确]')
+        if st.session_state.correct_answer[i] == st.session_state.user_answer[i]:
+            st.markdown("结果: :green[正确]")
             score += 1
         else:
-            st.write('结果: :red[错误]')
+            st.write("结果: :red[错误]")
         st.divider()
     st.subheader(f"医生 {st.session_state.name}")
     st.subheader(f"正确率 {round(score/total*100)}%")
@@ -219,18 +243,7 @@ def show_result():
 ############################################
 match st.session_state.page:
     case "login":
-        st.session_state.name = st.text_input("姓名", "无名")
-        st.session_state.grade = st.selectbox("年级", (range(2016, 2030, 1)))
-        st.session_state.major = st.selectbox(
-            "专业", ("临床医学", "放射", "口腔", "其他")
-        )
-        st.info(
-            "作为一名乳腺外科医生，请用正常语气与门诊患者沟通，问诊完毕后请输入 **我问完了**，并回答患者提出的相关问题。",
-            icon="ℹ️",
-        )
-        if st.button("我明白了", use_container_width=True):
-            st.session_state.page = "inquiry"
-            st.rerun()
+        show_login()
     case "inquiry":
         make_inquiries()
     case "explain":
