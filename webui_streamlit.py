@@ -1,5 +1,6 @@
 import streamlit as st
 import random
+import datetime
 import pandas as pd
 from xingchen import (
     Configuration,
@@ -111,16 +112,15 @@ if "answering" not in st.session_state:
 def show_login():
     st.session_state.name = st.text_input("姓名", "无名")
     st.session_state.grade = st.selectbox("年级", (range(2016, 2030, 1)))
-    st.session_state.major = st.selectbox(
-            "专业", ("临床医学", "放射", "口腔", "其他")
-        )
+    st.session_state.major = st.selectbox("专业", ("临床医学", "放射", "口腔", "其他"))
     st.info(
-            "作为一名乳腺外科医生，请用正常语气与门诊患者沟通，问诊完毕后请输入 **我问完了**，并回答患者提出的相关问题。",
-            icon="ℹ️",
-        )
+        "作为一名乳腺外科医生，请用正常语气与门诊患者沟通，问诊完毕后请输入 **我问完了**，并回答患者提出的相关问题。",
+        icon="ℹ️",
+    )
     if st.button("我明白了", use_container_width=True):
-            st.session_state.page = "inquiry"
-            st.rerun()
+        st.session_state.starttime = datetime.datetime.now()
+        st.session_state.page = "inquiry"
+        st.rerun()
 
 
 def make_inquiries():
@@ -181,6 +181,7 @@ def make_inquiries():
                     f'**{response.to_dict()["data"]["choices"][0]["messages"][0]["content"]}**'
                 )
         else:
+            st.session_state.endtime = datetime.datetime.now()
             st.session_state.page = "explain"
             st.rerun()
 
@@ -224,14 +225,20 @@ def make_explain():
 
 
 def save_data():
-    data = pd.read_excel('data.xlsx')
-    log = pd.DataFrame()
-    log['name'] = st.session_state.name
-    log['grade'] = st.session_state.grade
-    log['major'] =  st.session_state.major
-    data = pd.concat([data,log])
-    st.write(data)
-    data.to_excel('data.xlsx')
+    data = pd.read_excel("data.xlsx")
+    log = pd.DataFrame(
+        {
+            "name": st.session_state.name,
+            "grade": st.session_state.grade,
+            "major": st.session_state.major,
+            "starttime": st.session_state.starttime,
+            "endtime": st.session_state.endtime,
+        },
+        index=[0],
+    )
+    data = pd.concat([data, log])
+    data.to_excel("data.xlsx", index=False)
+
 
 def show_result():
     total = len(st.session_state.user_question)
