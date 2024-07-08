@@ -223,6 +223,16 @@ def make_explain():
         st.rerun()
 
 
+def save_data():
+    data = pd.read_excel('data.xlsx')
+    log = pd.DataFrame()
+    log['name'] = st.session_state.name
+    log['grade'] = st.session_state.grade
+    log['major'] =  st.session_state.major
+    data = pd.concat([data,log])
+    st.write(data)
+    data.to_excel('data.xlsx')
+
 def show_result():
     total = len(st.session_state.user_question)
     score = 0
@@ -238,6 +248,7 @@ def show_result():
         st.divider()
     st.subheader(f"医生 {st.session_state.name}")
     st.subheader(f"正确率 {round(score/total*100)}%")
+    save_data()
 
 
 ############################################
