@@ -78,6 +78,7 @@ if "character_list" not in st.session_state:
         "de2f24bd946e4c3fa80047d6877f557b",
     ]
     random.shuffle(st.session_state.character_list)
+    st.session_state.chatlog = dict.fromkeys(st.session_state.character_list)
 ############################################
 
 ######### INIT #############################
@@ -187,7 +188,7 @@ def make_inquiries():
 
 
 def make_explain():
-
+    st.session_state.chatlog[st.session_state.character_id] = st.session_state.messages
     case_question = st.session_state.cases.loc[
         st.session_state.character_id, "question"
     ].split("?")
@@ -233,6 +234,7 @@ def save_data():
             "major": st.session_state.major,
             "starttime": st.session_state.starttime,
             "endtime": st.session_state.endtime,
+            "chat": str(st.session_state.chatlog),
         },
         index=[0],
     )
