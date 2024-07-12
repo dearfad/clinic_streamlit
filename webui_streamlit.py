@@ -123,6 +123,14 @@ def show_login():
         st.session_state.page = "inquiry"
         st.rerun()
 
+def show_chat():
+    for message in st.session_state.messages:
+        if message.role == "user":
+            with st.chat_message("医"):
+                st.write(message.content)
+        if message.role == "assistant":
+            with st.chat_message("患"):
+                st.markdown(f"**{message.content}**")
 
 def make_inquiries():
     st.session_state.character_id = st.session_state.character_list[
@@ -147,13 +155,7 @@ def make_inquiries():
         st.session_state.user_id,
     )
 
-    for message in st.session_state.messages:
-        if message.role == "user":
-            with st.chat_message("医"):
-                st.write(message.content)
-        if message.role == "assistant":
-            with st.chat_message("患"):
-                st.markdown(f"**{message.content}**")
+    show_chat()
 
     if prompt := st.chat_input(""):
         if prompt != "我问完了":
@@ -184,11 +186,16 @@ def make_inquiries():
         else:
             st.session_state.endtime = datetime.datetime.now()
             st.session_state.page = "explain"
+            st.session_state.chatlog[st.session_state.character_id] = st.session_state.messages
             st.rerun()
 
 
 def make_explain():
-    st.session_state.chatlog[st.session_state.character_id] = st.session_state.messages
+
+    with st.container(border=True):
+        st.markdown("**对话记录**")
+        show_chat()
+
     case_question = st.session_state.cases.loc[
         st.session_state.character_id, "question"
     ].split("?")
@@ -234,7 +241,10 @@ def save_data():
             "major": st.session_state.major,
             "starttime": st.session_state.starttime,
             "endtime": st.session_state.endtime,
-            "chat": str(st.session_state.chatlog),
+            "chatlog": str(st.session_state.chatlog),
+            "user_question": str(st.session_state.user_question),
+            "correct_answer": str(st.session_state.correct_answer),
+            "user_answer": str(st.session_state.user_answer),
         },
         index=[0],
     )
