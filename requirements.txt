@@ -7,3 +7,4 @@ xingchen
 # DATA
 pandas
 openpyxl
+faker

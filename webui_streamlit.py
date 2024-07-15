@@ -2,103 +2,46 @@ import streamlit as st
 import random
 import datetime
 import pandas as pd
-from xingchen import (
-    Configuration,
-    ApiClient,
-    ChatApiSub,
-    CharacterApiSub,
-    ChatReqParams,
-    CharacterKey,
-    Message,
-    UserProfile,
-)
+from utils import chat, PAGE_STYLE
+from faker import Faker
 
-########## PAGE SETTING ##################
+########## PAGE SETTING #############################
 st.set_page_config(
     page_title="乳腺外科虚拟门诊",
     page_icon="👩",
     layout="centered",
 )
-
-st.html(
-    """<style>
-        header {visibility: hidden;}
-        .block-container{
-            padding-top: 1rem;
-            padding-bottom: 1rem;
-        }
-        .st-emotion-cache-arzcut{
-            padding-top: 1rem;
-            padding-bottom: 1rem;
-            padding-left: 3rem;
-            padding-right: 3rem;
-        }
-        .stChatMessage{
-            padding-top: 0rem;
-            padding-bottom: 0rem;
-            padding-left: 0rem;
-            padding-right: 0rem;
-        }
-    </style>"""
-)
-
-########## END OF PAGE SETTING ##########
-
-st.subheader("📄 虚拟门诊", divider="gray")
+st.html(PAGE_STYLE)
+st.subheader("👩 虚拟门诊", divider="gray")
 st.caption("吉林大学中日联谊医院乳腺外科")
+####################################################
 
 
-########## XINGCHEN CONFIG ##################
-configuration = Configuration(host="https://nlp.aliyuncs.com")
-configuration.access_token = "lm-bw72h4Q9oFOyuE47ncPxbg=="
-with ApiClient(configuration) as api_client:
-    st.session_state.chat_api = ChatApiSub(api_client)
-    st.session_state.character_api = CharacterApiSub(api_client)
-
-
-def build_chat_param(character_id, messages, user_id):
-    return ChatReqParams(
-        bot_profile=CharacterKey(character_id=character_id),
-        messages=messages,
-        user_profile=UserProfile(user_id=user_id),
-    )
-
-
-########## END OF XINGCHEN CONFIG ##########
-
-########## CASES ###########################
+######### INIT #############################
 
 if "cases" not in st.session_state:
     st.session_state.cases = pd.read_excel("cases.xlsx", index_col="id")
 
 if "character_list" not in st.session_state:
-    st.session_state.character_list = [
-        "37d0bb98a0194eefbecdba794fb1b42c",
-        "5b90fa5b76f0425aab4413efd9d3c257",
-        "de2f24bd946e4c3fa80047d6877f557b",
-    ]
+    st.session_state.character_list = list(st.session_state.cases.index)
     random.shuffle(st.session_state.character_list)
     st.session_state.chatlog = dict.fromkeys(st.session_state.character_list)
-############################################
 
-######### INIT #############################
-if "user_id" not in st.session_state:
-    st.session_state.user_id = str(random.randint(1, 1000))
 
 if "character_index" not in st.session_state:
     st.session_state.character_index = 0
 
+if "faker" not in st.session_state:
+    st.session_state.faker = Faker("zh_CN")
+
 if "messages" not in st.session_state:
     st.session_state.messages = [
-        Message(name="医生", role="user", content="你好"),
-        Message(name="患者", role="assistant", content="大夫，你好"),
+        {"role": "user", "content": "你好"},
+        {"role": "assistant", "content": "大夫，你好"},
     ]
 
 if "page" not in st.session_state:
     st.session_state.page = "login"
-    st.session_state.name = ""
-    st.session_state.grade = ""
-    st.session_state.major = ""
 
 if "user_question" not in st.session_state:
     st.session_state.user_question = []
@@ -123,74 +66,58 @@ def show_login():
         st.session_state.page = "inquiry"
         st.rerun()
 
+
 def show_chat():
     for message in st.session_state.messages:
-        if message.role == "user":
+        if message["role"] == "user":
             with st.chat_message("医"):
-                st.write(message.content)
-        if message.role == "assistant":
+                st.write(message["content"])
+        if message["role"] == "assistant":
             with st.chat_message("患"):
-                st.markdown(f"**{message.content}**")
+                st.markdown(f"**{message['content']}**")
 
-def make_inquiries():
+
+def show_inquiries():
+
     st.session_state.character_id = st.session_state.character_list[
         st.session_state.character_index
     ]
-    character = st.session_state.character_api.character_details(
-        character_id=st.session_state.character_id
-    )
-    st.session_state.patient_name = character.data.name
-    st.session_state.patient_avatar = character.data.avatar
 
-    col_left, col_center, col_right = st.columns(3)
+    col_left, col_center, col_right = st.columns([1, 3, 1])
     with col_center:
         st.image(
-            "http:" + st.session_state.patient_avatar.file_url,
-            caption=st.session_state.patient_name,
+            "https://cdn.seovx.com/?mom=302",
+            caption=st.session_state.faker.name(),
             use_column_width=True,
         )
-    chat_param = build_chat_param(
-        st.session_state.character_id,
-        st.session_state.messages,
-        st.session_state.user_id,
-    )
 
     show_chat()
 
     if prompt := st.chat_input(""):
         if prompt != "我问完了":
             with st.chat_message("医"):
+                st.session_state.messages.append({"role": "user", "content": prompt})
                 st.write(prompt)
-            st.session_state.messages.append(
-                Message(name="医生", role="user", content=prompt)
-            )
             with st.chat_message("患"):
-                chat_param = build_chat_param(
-                    st.session_state.character_id,
-                    st.session_state.messages,
-                    st.session_state.user_id,
+                response = chat(
+                    role_server="xingchen",
+                    character_id=st.session_state.character_id,
+                    messages=st.session_state.messages,
                 )
-                response = st.session_state.chat_api.chat(chat_param)
                 st.session_state.messages.append(
-                    Message(
-                        name="患者",
-                        role="assistant",
-                        content=response.to_dict()["data"]["choices"][0]["messages"][0][
-                            "content"
-                        ],
-                    )
+                    {"role": "assistant", "content": response}
                 )
-                st.markdown(
-                    f'**{response.to_dict()["data"]["choices"][0]["messages"][0]["content"]}**'
-                )
+                st.markdown(f"**{response}**")
         else:
             st.session_state.endtime = datetime.datetime.now()
             st.session_state.page = "explain"
-            st.session_state.chatlog[st.session_state.character_id] = st.session_state.messages
+            st.session_state.chatlog[st.session_state.character_id] = (
+                st.session_state.messages
+            )
             st.rerun()
 
 
-def make_explain():
+def show_question():
 
     with st.container(border=True):
         st.markdown("**对话记录**")
@@ -256,7 +183,7 @@ def show_result():
     total = len(st.session_state.user_question)
     score = 0
     for i, question in enumerate(st.session_state.user_question):
-        st.write(f"问题{i}: {question}")
+        st.write(f"问题 **{i}**: {question}")
         st.write(f"正确答案: {st.session_state.correct_answer[i]}")
         st.write(f"用户答案: {st.session_state.user_answer[i]}")
         if st.session_state.correct_answer[i] == st.session_state.user_answer[i]:
@@ -275,8 +202,8 @@ match st.session_state.page:
     case "login":
         show_login()
     case "inquiry":
-        make_inquiries()
+        show_inquiries()
     case "explain":
-        make_explain()
+        show_question()
     case "result":
         show_result()
