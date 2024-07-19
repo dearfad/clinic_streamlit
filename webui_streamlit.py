@@ -54,9 +54,9 @@ if "answering" not in st.session_state:
 
 ###########################################
 def show_login():
-    st.session_state.name = st.text_input("姓名", "无名")
-    st.session_state.grade = st.selectbox("年级", (range(2016, 2030, 1)))
-    st.session_state.major = st.selectbox("专业", ("临床医学", "放射", "口腔", "其他"))
+    st.text_input("姓名", "无名", key='name')
+    st.selectbox("年级", (range(2016, 2030, 1)), key='grade')
+    st.selectbox("专业", ("临床医学", "放射", "口腔", "其他"), key='major')
     st.info(
         "作为一名乳腺外科医生，请用正常语气与门诊患者沟通，问诊完毕后请输入 **我问完了**，并回答患者提出的相关问题。",
         icon="ℹ️",
@@ -82,9 +82,9 @@ def show_inquiries():
     st.session_state.character_id = st.session_state.character_list[
         st.session_state.character_index
     ]
-
     col_left, col_center, col_right = st.columns([1, 3, 1])
     with col_center:
+        st.caption(f"患者编号：**{st.session_state.character_index+1} / {len(st.session_state.character_list)}**")
         st.image(
             "https://cdn.seovx.com/?mom=302",
             caption=st.session_state.faker.name(),
