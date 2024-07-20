@@ -2,12 +2,12 @@ import streamlit as st
 import random
 import datetime
 import pandas as pd
-from utils import chat, PAGE_STYLE
+from utils import chat, PAGE_STYLE, ADMIN, get_cases
 from faker import Faker
 
 ########## PAGE SETTING #############################
 st.set_page_config(
-    page_title="乳腺外科虚拟门诊",
+    page_title="虚拟门诊",
     page_icon="👩",
     layout="centered",
 )
@@ -20,19 +20,13 @@ st.caption("吉林大学中日联谊医院乳腺外科")
 ######### INIT #############################
 
 if "cases" not in st.session_state:
-    st.session_state.cases = pd.read_excel("cases.xlsx", index_col="id")
-
-if "character_list" not in st.session_state:
-    st.session_state.character_list = list(st.session_state.cases.index)
-    random.shuffle(st.session_state.character_list)
-    st.session_state.chatlog = dict.fromkeys(st.session_state.character_list)
-
-
-if "character_index" not in st.session_state:
+    st.session_state.cases = get_cases("breast")
+    st.session_state.log_chat = dict.fromkeys(st.session_state.cases['id'])
+    st.session_state.questions = dict.fromkeys(st.session_state.cases['questions'])
+    st.write(st.session_state.questions)
     st.session_state.character_index = 0
-
-if "faker" not in st.session_state:
     st.session_state.faker = Faker("zh_CN")
+    st.session_state.page = "login"
 
 if "messages" not in st.session_state:
     st.session_state.messages = [
@@ -40,30 +34,28 @@ if "messages" not in st.session_state:
         {"role": "assistant", "content": "大夫，你好"},
     ]
 
-if "page" not in st.session_state:
-    st.session_state.page = "login"
 
-if "user_question" not in st.session_state:
-    st.session_state.user_question = []
-    st.session_state.user_answer = []
-    st.session_state.correct_answer = []
-
-if "answering" not in st.session_state:
-    st.session_state.answering = False
+###########################################
+def show_admin():
+    log = pd.read_excel("data.xlsx")
+    st.write(log)
 
 
 ###########################################
 def show_login():
-    st.text_input("姓名", "无名", key='name')
-    st.selectbox("年级", (range(2016, 2030, 1)), key='grade')
-    st.selectbox("专业", ("临床医学", "放射", "口腔", "其他"), key='major')
+    st.session_state.name = st.text_input("姓名", "无名")
+    st.session_state.grade = st.selectbox("年级", (range(2016, 2030, 1)))
+    st.session_state.major = st.selectbox("专业", ("临床医学", "放射", "口腔", "其他"))
     st.info(
         "作为一名乳腺外科医生，请用正常语气与门诊患者沟通，问诊完毕后请输入 **我问完了**，并回答患者提出的相关问题。",
         icon="ℹ️",
     )
     if st.button("我明白了", use_container_width=True):
-        st.session_state.starttime = datetime.datetime.now()
-        st.session_state.page = "inquiry"
+        if st.session_state.name == ADMIN:
+            st.session_state.page = "admin"
+        else:
+            st.session_state.starttime = datetime.datetime.now()
+            st.session_state.page = "inquiry"
         st.rerun()
 
 
@@ -79,12 +71,14 @@ def show_chat():
 
 def show_inquiries():
 
-    st.session_state.character_id = st.session_state.character_list[
-        st.session_state.character_index
+    st.session_state.character_id = st.session_state.cases.loc[
+        st.session_state.character_index, 'id'
     ]
     col_left, col_center, col_right = st.columns([1, 3, 1])
     with col_center:
-        st.caption(f"患者编号：**{st.session_state.character_index+1} / {len(st.session_state.character_list)}**")
+        st.caption(
+            f"患者编号：**{st.session_state.character_index+1} / {len(st.session_state.cases)}**"
+        )
         st.image(
             "https://cdn.seovx.com/?mom=302",
             caption=st.session_state.faker.name(),
@@ -124,24 +118,16 @@ def show_question():
         show_chat()
 
     case_question = st.session_state.cases.loc[
-        st.session_state.character_id, "question"
-    ].split("?")
-    case_answer = st.session_state.cases.loc[
-        st.session_state.character_id, "answer"
-    ].split(";")
+        st.session_state.character_index, "questions"
+    ]
+    st.write(case_question)
     for index, question in enumerate(case_question):
-        if not st.session_state.answering:
-            st.session_state.user_question.append(question)
-        answer_list = []
-        for answer in case_answer[index].split(","):
-            answer_list.append(answer)
-        if not st.session_state.answering:
-            st.session_state.correct_answer.append(answer_list[0])
+        # st.session_state.user_question.append(question['question'])
+        # answer_list = question['answer_list']
+        # st.session_state.correct_answer.append(question['correct_answer'])
 
         key = "a" + str(index)
-        answer = st.radio(question, answer_list, key=key)
-    if not st.session_state.answering:
-        st.session_state.answering = True
+        answer = st.radio(question['question'], question['answer_list'], key=key)
 
     if st.button("提交答案", use_container_width=True):
 
@@ -154,7 +140,6 @@ def show_question():
             st.session_state.page = "result"
         else:
             st.session_state.page = "inquiry"
-            st.session_state.answering = False
             del st.session_state.messages
         st.rerun()
 
@@ -169,9 +154,7 @@ def save_data():
             "starttime": st.session_state.starttime,
             "endtime": st.session_state.endtime,
             "chatlog": str(st.session_state.chatlog),
-            "user_question": str(st.session_state.user_question),
-            "correct_answer": str(st.session_state.correct_answer),
-            "user_answer": str(st.session_state.user_answer),
+            "questions": str(st.session_state.questions),
         },
         index=[0],
     )
@@ -182,6 +165,9 @@ def save_data():
 def show_result():
     total = len(st.session_state.user_question)
     score = 0
+    st.write(st.session_state.user_question)
+    st.write(st.session_state.correct_answer)
+    st.write(st.session_state.user_answer)
     for i, question in enumerate(st.session_state.user_question):
         st.write(f"问题 **{i}**: {question}")
         st.write(f"正确答案: {st.session_state.correct_answer[i]}")
@@ -201,6 +187,8 @@ def show_result():
 match st.session_state.page:
     case "login":
         show_login()
+    case "admin":
+        show_admin()
     case "inquiry":
         show_inquiries()
     case "explain":

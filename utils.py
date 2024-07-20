@@ -1,5 +1,6 @@
 import streamlit as st
 import random
+import pandas as pd
 from xingchen import (
     Configuration,
     ApiClient,
@@ -30,7 +31,15 @@ PAGE_STYLE = """<style>
         }
     </style>"""
 
+ADMIN = 'DEARFAD'
 
+############### READ DATA  ###################################
+@st.cache_data
+def read_cases(path):
+    data = pd.read_json(path, orient='records')
+    return data
+
+#############################################################
 class XingChen:
     configuration = Configuration(host="https://nlp.aliyuncs.com")
     configuration.access_token = "lm-bw72h4Q9oFOyuE47ncPxbg=="
@@ -86,3 +95,7 @@ def chat(role_server, character_id, messages):
             if "baichuan" not in st.session_state:
                 baichuan = BaiChuan(character_id)
             return baichuan.chat(messages)
+
+def get_cases(chapter):
+    data = read_cases(f"cases/{chapter}.json")
+    return data.sample(frac=1, ignore_index=True)
