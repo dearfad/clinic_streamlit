@@ -61,7 +61,9 @@ class User:
         self.chapter = chapter
         self.chatlog = get_qa(chapter, num, seq)
         self.chatlog['start_time'] = ''
+        self.chatlog['conversation_end_time'] = ''
         self.chatlog['end_time'] = ''
+        self.chatlog['messages'] = ''
 
 
 #############################################################

@@ -75,6 +75,7 @@ def show_admin():
 
 def show_inquiries():
     st.write(st.session_state.user.chatlog)
+    st.write(st.session_state.user.chatlog['questions'][0])
     st.session_state.character_id = st.session_state.user.chatlog.loc[
         st.session_state.case_index, "id"
     ]
@@ -91,9 +92,9 @@ def show_inquiries():
         )
 
     show_chat()
-
-    st.session_state.user.chatlog.loc[st.session_state.case_index, 'start_time'] = datetime.datetime.now()
-    st.write(st.session_state.user.chatlog.loc[st.session_state.case_index, 'start_time'])
+    if st.session_state.user.chatlog.loc[st.session_state.case_index, 'start_time'] == '':
+        st.session_state.user.chatlog.loc[st.session_state.case_index,
+                                          'start_time'] = datetime.datetime.now()
 
     if prompt := st.chat_input(""):
         if prompt != "我问完了":
@@ -112,41 +113,36 @@ def show_inquiries():
                     {"role": "assistant", "content": response}
                 )
         else:
-            st.session_state.endtime = datetime.datetime.now()
+            st.session_state.user.chatlog.loc[st.session_state.case_index,
+                                              'conversation_end_time'] = datetime.datetime.now()
+            st.session_state.user.chatlog.loc[st.session_state.case_index,
+                                              'messages'] = str(st.session_state.messages)
             st.session_state.page = "explain"
-            st.session_state.chatlog[st.session_state.character_id] = (
-                st.session_state.messages
-            )
             st.rerun()
 
 
 def show_question():
-
     with st.container(border=True):
         st.markdown("**对话记录**")
         show_chat()
 
-    case_question = st.session_state.cases.loc[
-        st.session_state.character_index, "questions"
+    case_question = st.session_state.user.chatlog.loc[
+        st.session_state.case_index, "questions"
     ]
-    st.write(case_question)
     for index, question in enumerate(case_question):
-        # st.session_state.user_question.append(question['question'])
-        # answer_list = question['answer_list']
-        # st.session_state.correct_answer.append(question['correct_answer'])
-
         key = "a" + str(index)
         answer = st.radio(question["question"],
                           question["answer_list"], key=key)
 
     if st.button("提交答案", use_container_width=True):
+        st.session_state.user.chatlog.loc[st.session_state.case_index, 'end_time'] = datetime.datetime.now()
 
         for a in range(len(case_question)):
             k = "a" + str(a)
-            st.session_state.user_answer.append(st.session_state[k])
+            case_question[a]['user_answer'] = st.session_state[k]
 
-        st.session_state.character_index = st.session_state.character_index + 1
-        if st.session_state.character_index == len(st.session_state.character_list):
+        st.session_state.case_index = st.session_state.case_index + 1
+        if st.session_state.case_index == len(st.session_state.user.chatlog):
             st.session_state.page = "result"
         else:
             st.session_state.page = "inquiry"
