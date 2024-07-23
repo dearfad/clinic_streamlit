@@ -31,13 +31,32 @@ PAGE_STYLE = """<style>
         }
     </style>"""
 
-ADMIN = 'DEARFAD'
+ADMIN = "DEARFAD"
+
+CHAPTER = {
+    'breast': '乳房疾病',
+}
 
 ############### READ DATA  ###################################
 @st.cache_data
 def read_cases(path):
-    data = pd.read_json(path, orient='records')
-    return data
+    return pd.read_json(path, orient="records")
+
+
+def get_qa(chapter, num, seq):
+    data = read_cases(f"cases/{chapter}.json")
+    if num=='all' and seq=='random':
+        return data.sample(frac=1, ignore_index=True)
+
+class User:
+    def __init__(self, name, grade, major):
+        self.name = name
+        self.grade = grade
+        self.major = major
+    def load_questions(self, chapter='breast', num='all', seq='random'):
+        self.chapter = chapter
+        self.chatlog = get_qa(chapter, num, seq)
+
 
 #############################################################
 class XingChen:
@@ -50,11 +69,7 @@ class XingChen:
             self.character_api = CharacterApiSub(api_client)
             self.user_id = str(random.randint(1, 1000))
             self.character_id = character_id
-            # self.character = self.character_api.character_details(
-            #     character_id=self.character_id
-            # )
-            # self.character_name = self.character.data.name
-            # self.character_avatar = self.character.data.avatar
+
 
     def chat(self, messages):
         chat_param = ChatReqParams(
@@ -65,24 +80,21 @@ class XingChen:
         return self.chat_api.chat(chat_param).to_dict()["data"]["choices"][0][
             "messages"
         ][0]["content"]
-
-    # character = st.session_state.character_api.character_details(
-    #     character_id=st.session_state.character_id
-    # )
-    # st.session_state.patient_name = character.data.name
-    # st.session_state.patient_avatar = character.data.avatar
-
-    # col_left, col_center, col_right = st.columns(3)
-    # with col_center:
-    #     st.image(
-    #         "http:" + st.session_state.patient_avatar.file_url,
-    #         caption=st.session_state.patient_name,
-    #         use_column_width=True,
-    #     )
+    
+    def detail(self):
+        self.character = self.character_api.character_details(
+                character_id=self.character_id
+            )
+        self.character_name = self.character.data.name
+        self.character_avatar_url = "http:" + self.character.data.avatar.file_url
 
 
 def BaiChuan():
-    pass
+    def __init__(self):
+        pass
+
+    def chat(self, messages):
+        pass
 
 
 def chat(role_server, character_id, messages):
@@ -96,6 +108,4 @@ def chat(role_server, character_id, messages):
                 baichuan = BaiChuan(character_id)
             return baichuan.chat(messages)
 
-def get_cases(chapter):
-    data = read_cases(f"cases/{chapter}.json")
-    return data.sample(frac=1, ignore_index=True)
+

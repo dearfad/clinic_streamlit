@@ -2,7 +2,7 @@ import streamlit as st
 import random
 import datetime
 import pandas as pd
-from utils import chat, PAGE_STYLE, ADMIN, get_cases
+from utils import chat, PAGE_STYLE, ADMIN, CHAPTER, User
 from faker import Faker
 
 ########## PAGE SETTING #############################
@@ -16,23 +16,48 @@ st.subheader("👩 虚拟门诊", divider="gray")
 st.caption("吉林大学中日联谊医院乳腺外科")
 ####################################################
 
+########## LOGIN PAGE #############################
+if "page" not in st.session_state:
+    st.session_state.page = 'login'
+
+def show_login():
+    name = st.text_input("姓名", "无名", key='name')
+    grade = st.selectbox("年级", (range(2016, 2030, 1)), key='grade')
+    major = st.selectbox("专业", ("临床医学", "放射", "口腔", "其他"))
+    chapter = st.selectbox("章节", ("breast",), format_func=lambda x: CHAPTER[x],)
+    st.info(
+        "作为一名乳腺外科医生，请用正常语气与门诊患者沟通，问诊完毕后请输入 **我问完了**，并回答患者提出的相关问题。",
+        icon="ℹ️",
+    )
+    if st.button("我明白了", use_container_width=True):
+        if st.session_state.name == ADMIN:
+            st.session_state.page = "admin"
+        else:
+            st.session_state.user = User(name, grade, major)
+            st.session_state.user.load_questions(chapter)
+            st.session_state.page = "inquiry"
+            st.session_state.starttime = datetime.datetime.now()
+        st.rerun()
 
 ######### INIT #############################
+def init():
+    if "user" not in st.session_state:
+        st.session_state.user = User()
 
-if "cases" not in st.session_state:
-    st.session_state.cases = get_cases("breast")
-    st.session_state.log_chat = dict.fromkeys(st.session_state.cases['id'])
-    st.session_state.questions = dict.fromkeys(st.session_state.cases['questions'])
-    st.write(st.session_state.questions)
-    st.session_state.character_index = 0
-    st.session_state.faker = Faker("zh_CN")
-    st.session_state.page = "login"
+    if "cases" not in st.session_state:
+        st.session_state.cases = get_cases("breast")
+        st.session_state.log_chat = dict.fromkeys(st.session_state.cases['id'])
+        st.session_state.questions = dict.fromkeys(st.session_state.cases['questions'])
+        st.write(st.session_state.questions)
+        st.session_state.character_index = 0
+        st.session_state.faker = Faker("zh_CN")
+        st.session_state.page = "login"
 
-if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {"role": "user", "content": "你好"},
-        {"role": "assistant", "content": "大夫，你好"},
-    ]
+    if "messages" not in st.session_state:
+        st.session_state.messages = [
+            {"role": "user", "content": "你好"},
+            {"role": "assistant", "content": "大夫，你好"},
+        ]
 
 
 ###########################################
@@ -42,21 +67,6 @@ def show_admin():
 
 
 ###########################################
-def show_login():
-    st.session_state.name = st.text_input("姓名", "无名")
-    st.session_state.grade = st.selectbox("年级", (range(2016, 2030, 1)))
-    st.session_state.major = st.selectbox("专业", ("临床医学", "放射", "口腔", "其他"))
-    st.info(
-        "作为一名乳腺外科医生，请用正常语气与门诊患者沟通，问诊完毕后请输入 **我问完了**，并回答患者提出的相关问题。",
-        icon="ℹ️",
-    )
-    if st.button("我明白了", use_container_width=True):
-        if st.session_state.name == ADMIN:
-            st.session_state.page = "admin"
-        else:
-            st.session_state.starttime = datetime.datetime.now()
-            st.session_state.page = "inquiry"
-        st.rerun()
 
 
 def show_chat():
@@ -70,7 +80,7 @@ def show_chat():
 
 
 def show_inquiries():
-
+    st.write(st.session_state.user.qalog.questions)
     st.session_state.character_id = st.session_state.cases.loc[
         st.session_state.character_index, 'id'
     ]
