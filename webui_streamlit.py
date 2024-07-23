@@ -16,15 +16,22 @@ st.subheader("👩 虚拟门诊", divider="gray")
 st.caption("吉林大学中日联谊医院乳腺外科")
 ####################################################
 
-########## LOGIN PAGE #############################
+########## INIT AND LOGIN PAGE #############################
 if "page" not in st.session_state:
-    st.session_state.page = 'login'
+    st.session_state.faker = Faker("zh_CN")
+    st.session_state.page = "login"
+    st.session_state.case_index = 0
+
 
 def show_login():
-    name = st.text_input("姓名", "无名", key='name')
-    grade = st.selectbox("年级", (range(2016, 2030, 1)), key='grade')
+    name = st.text_input("姓名", "无名", key="name")
+    grade = st.selectbox("年级", (range(2016, 2030, 1)), key="grade")
     major = st.selectbox("专业", ("临床医学", "放射", "口腔", "其他"))
-    chapter = st.selectbox("章节", ("breast",), format_func=lambda x: CHAPTER[x],)
+    chapter = st.selectbox(
+        "章节",
+        ("breast",),
+        format_func=lambda x: CHAPTER[x],
+    )
     st.info(
         "作为一名乳腺外科医生，请用正常语气与门诊患者沟通，问诊完毕后请输入 **我问完了**，并回答患者提出的相关问题。",
         icon="ℹ️",
@@ -36,37 +43,16 @@ def show_login():
             st.session_state.user = User(name, grade, major)
             st.session_state.user.load_questions(chapter)
             st.session_state.page = "inquiry"
-            st.session_state.starttime = datetime.datetime.now()
         st.rerun()
 
-######### INIT #############################
-def init():
-    if "user" not in st.session_state:
-        st.session_state.user = User()
 
-    if "cases" not in st.session_state:
-        st.session_state.cases = get_cases("breast")
-        st.session_state.log_chat = dict.fromkeys(st.session_state.cases['id'])
-        st.session_state.questions = dict.fromkeys(st.session_state.cases['questions'])
-        st.write(st.session_state.questions)
-        st.session_state.character_index = 0
-        st.session_state.faker = Faker("zh_CN")
-        st.session_state.page = "login"
+######### END OF INIT AND LOGIN PAGE #############################
 
-    if "messages" not in st.session_state:
-        st.session_state.messages = [
-            {"role": "user", "content": "你好"},
-            {"role": "assistant", "content": "大夫，你好"},
-        ]
-
-
-###########################################
-def show_admin():
-    log = pd.read_excel("data.xlsx")
-    st.write(log)
-
-
-###########################################
+if "messages" not in st.session_state:
+    st.session_state.messages = [
+        {"role": "user", "content": "你好"},
+        {"role": "assistant", "content": "大夫，你好"},
+    ]
 
 
 def show_chat():
@@ -78,16 +64,25 @@ def show_chat():
             with st.chat_message("患"):
                 st.markdown(f"**{message['content']}**")
 
+##################################################################
+
+
+def show_admin():
+    log = pd.read_excel("data.xlsx")
+    st.write(log)
+##################################################################
+
 
 def show_inquiries():
-    st.write(st.session_state.user.qalog.questions)
-    st.session_state.character_id = st.session_state.cases.loc[
-        st.session_state.character_index, 'id'
+    st.write(st.session_state.user.chatlog)
+    st.session_state.character_id = st.session_state.user.chatlog.loc[
+        st.session_state.case_index, "id"
     ]
     col_left, col_center, col_right = st.columns([1, 3, 1])
     with col_center:
         st.caption(
-            f"患者编号：**{st.session_state.character_index+1} / {len(st.session_state.cases)}**"
+            f"患者编号：**{st.session_state.case_index +
+                      1} / {len(st.session_state.user.chatlog)}**"
         )
         st.image(
             "https://cdn.seovx.com/?mom=302",
@@ -97,21 +92,25 @@ def show_inquiries():
 
     show_chat()
 
+    st.session_state.user.chatlog.loc[st.session_state.case_index, 'start_time'] = datetime.datetime.now()
+    st.write(st.session_state.user.chatlog.loc[st.session_state.case_index, 'start_time'])
+
     if prompt := st.chat_input(""):
         if prompt != "我问完了":
             with st.chat_message("医"):
-                st.session_state.messages.append({"role": "user", "content": prompt})
                 st.write(prompt)
+                st.session_state.messages.append(
+                    {"role": "user", "content": prompt})
             with st.chat_message("患"):
                 response = chat(
                     role_server="xingchen",
                     character_id=st.session_state.character_id,
                     messages=st.session_state.messages,
                 )
+                st.markdown(f"**{response}**")
                 st.session_state.messages.append(
                     {"role": "assistant", "content": response}
                 )
-                st.markdown(f"**{response}**")
         else:
             st.session_state.endtime = datetime.datetime.now()
             st.session_state.page = "explain"
@@ -137,7 +136,8 @@ def show_question():
         # st.session_state.correct_answer.append(question['correct_answer'])
 
         key = "a" + str(index)
-        answer = st.radio(question['question'], question['answer_list'], key=key)
+        answer = st.radio(question["question"],
+                          question["answer_list"], key=key)
 
     if st.button("提交答案", use_container_width=True):
 

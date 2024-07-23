@@ -1,6 +1,8 @@
 import streamlit as st
 import random
 import pandas as pd
+import numpy as np
+import datetime
 from xingchen import (
     Configuration,
     ApiClient,
@@ -53,9 +55,13 @@ class User:
         self.name = name
         self.grade = grade
         self.major = major
+        self.starttime = datetime.datetime.now()
+        self.endtime = ''
     def load_questions(self, chapter='breast', num='all', seq='random'):
         self.chapter = chapter
         self.chatlog = get_qa(chapter, num, seq)
+        self.chatlog['start_time'] = ''
+        self.chatlog['end_time'] = ''
 
 
 #############################################################
