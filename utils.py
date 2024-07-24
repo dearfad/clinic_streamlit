@@ -1,7 +1,8 @@
 import streamlit as st
 import random
 import pandas as pd
-import numpy as np
+import pickle
+import os
 import datetime
 from xingchen import (
     Configuration,
@@ -117,3 +118,16 @@ def chat(role_server, character_id, messages):
             return baichuan.chat(messages)
 
 
+def save_data():
+   
+    if not os.path.exists('users.pkl'):
+        users = []
+        users.append(st.session_state.user)
+        with open('users.pkl', 'wb') as file:
+            pickle.dump(users, file)
+    else:
+        with open('users.pkl', 'rb') as file:
+            users = pickle.load(file)
+        users.append(st.session_state.user)
+        with open('users.pkl', 'wb') as file:
+            pickle.dump(users, file)

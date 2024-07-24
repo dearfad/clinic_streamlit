@@ -1,9 +1,8 @@
 import streamlit as st
-import random
 import datetime
-import pandas as pd
-from utils import chat, PAGE_STYLE, ADMIN, CHAPTER, User
+from utils import chat, PAGE_STYLE, ADMIN, CHAPTER, User, save_data
 from faker import Faker
+import pickle
 
 ########## PAGE SETTING #############################
 st.set_page_config(
@@ -68,23 +67,21 @@ def show_chat():
 
 
 def show_admin():
-    log = pd.read_excel("data.xlsx")
-    st.write(log)
+    with open('users.pkl', 'rb') as file:
+        users = pickle.load(file)
+    for user in users:
+        st.write(user.name)
 ##################################################################
 
 
 def show_inquiries():
-    st.write(st.session_state.user.chatlog)
-    st.write(st.session_state.user.chatlog['questions'][0])
     st.session_state.character_id = st.session_state.user.chatlog.loc[
         st.session_state.case_index, "id"
     ]
     col_left, col_center, col_right = st.columns([1, 3, 1])
     with col_center:
         st.caption(
-            f"患者编号：**{st.session_state.case_index +
-                      1} / {len(st.session_state.user.chatlog)}**"
-        )
+            f"患者编号：**{st.session_state.case_index+1} / {len(st.session_state.user.chatlog)}**")
         st.image(
             "https://cdn.seovx.com/?mom=302",
             caption=st.session_state.faker.name(),
@@ -94,7 +91,7 @@ def show_inquiries():
     show_chat()
     if st.session_state.user.chatlog.loc[st.session_state.case_index, 'start_time'] == '':
         st.session_state.user.chatlog.loc[st.session_state.case_index,
-                                          'start_time'] = datetime.datetime.now()
+                                          'start_time'] = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
     if prompt := st.chat_input(""):
         if prompt != "我问完了":
@@ -114,7 +111,7 @@ def show_inquiries():
                 )
         else:
             st.session_state.user.chatlog.loc[st.session_state.case_index,
-                                              'conversation_end_time'] = datetime.datetime.now()
+                                              'conversation_end_time'] = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
             st.session_state.user.chatlog.loc[st.session_state.case_index,
                                               'messages'] = str(st.session_state.messages)
             st.session_state.page = "explain"
@@ -135,7 +132,8 @@ def show_question():
                           question["answer_list"], key=key)
 
     if st.button("提交答案", use_container_width=True):
-        st.session_state.user.chatlog.loc[st.session_state.case_index, 'end_time'] = datetime.datetime.now()
+        st.session_state.user.chatlog.loc[st.session_state.case_index,
+                                          'end_time'] = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
         for a in range(len(case_question)):
             k = "a" + str(a)
@@ -150,42 +148,23 @@ def show_question():
         st.rerun()
 
 
-def save_data():
-    data = pd.read_excel("data.xlsx")
-    log = pd.DataFrame(
-        {
-            "name": st.session_state.name,
-            "grade": st.session_state.grade,
-            "major": st.session_state.major,
-            "starttime": st.session_state.starttime,
-            "endtime": st.session_state.endtime,
-            "chatlog": str(st.session_state.chatlog),
-            "questions": str(st.session_state.questions),
-        },
-        index=[0],
-    )
-    data = pd.concat([data, log])
-    data.to_excel("data.xlsx", index=False)
+
 
 
 def show_result():
-    total = len(st.session_state.user_question)
+    st.write(st.session_state.user.chatlog)
     score = 0
-    st.write(st.session_state.user_question)
-    st.write(st.session_state.correct_answer)
-    st.write(st.session_state.user_answer)
-    for i, question in enumerate(st.session_state.user_question):
-        st.write(f"问题 **{i}**: {question}")
-        st.write(f"正确答案: {st.session_state.correct_answer[i]}")
-        st.write(f"用户答案: {st.session_state.user_answer[i]}")
-        if st.session_state.correct_answer[i] == st.session_state.user_answer[i]:
-            st.markdown("结果: :green[正确]")
-            score += 1
-        else:
-            st.write("结果: :red[错误]")
-        st.divider()
-    st.subheader(f"医生 {st.session_state.name}")
-    st.subheader(f"正确率 {round(score/total*100)}%")
+    count = 0
+    for question in st.session_state.user.chatlog['questions']:
+        for q in question:
+            st.write(q['question'])
+            st.write(q['correct_answer'])
+            st.write(q['user_answer'])
+            count += 1
+            if q['correct_answer'] == q['user_answer']:
+                score += 1
+    st.subheader(f"医生 {st.session_state.user.name}")
+    st.subheader(f"正确率 {round(score/count*100)}%")
     save_data()
 
 
