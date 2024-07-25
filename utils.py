@@ -86,9 +86,14 @@ class XingChen:
             messages=messages,
             user_profile=UserProfile(user_id=self.user_id),
         )
-        return self.chat_api.chat(chat_param).to_dict()["data"]["choices"][0][
-            "messages"
-        ][0]["content"]
+        try:
+            response = self.chat_api.chat(chat_param).to_dict()
+            if response['success']:
+                return response["data"]["choices"][0]["messages"][0]["content"]
+            else:
+                return f"( 似乎自己在思索什么，嘴里反复说着数字 ~ {response['code']} ~ )"
+        except:
+            return f"( 脑子坏掉了，等会再问我吧 ~ )"
     
     def detail(self):
         self.character = self.character_api.character_details(

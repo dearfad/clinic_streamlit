@@ -83,7 +83,7 @@ def show_inquiries():
         st.caption(
             f"患者编号：**{st.session_state.case_index+1} / {len(st.session_state.user.chatlog)}**")
         st.image(
-            "https://cdn.seovx.com/?mom=302",
+            "https://cdn.seovx.com/d/?mom=302",
             caption=st.session_state.faker.name(),
             use_column_width=True,
         )
