@@ -69,8 +69,8 @@ def show_chat():
 def show_admin():
     with open('users.pkl', 'rb') as file:
         users = pickle.load(file)
-    for user in users:
-        st.write(user.name)
+    
+    user = st.selectbox('users', users)
 ##################################################################
 
 
@@ -130,6 +130,10 @@ def show_question():
         key = "a" + str(index)
         answer = st.radio(question["question"],
                           question["answer_list"], key=key)
+    
+    if st.button('再问一下', use_container_width=True):
+        st.session_state.page = 'inquiry'
+        st.rerun()
 
     if st.button("提交答案", use_container_width=True):
         st.session_state.user.chatlog.loc[st.session_state.case_index,
@@ -141,6 +145,7 @@ def show_question():
 
         st.session_state.case_index = st.session_state.case_index + 1
         if st.session_state.case_index == len(st.session_state.user.chatlog):
+            save_data()
             st.session_state.page = "result"
         else:
             st.session_state.page = "inquiry"
@@ -165,7 +170,7 @@ def show_result():
                 score += 1
     st.subheader(f"医生 {st.session_state.user.name}")
     st.subheader(f"正确率 {round(score/count*100)}%")
-    save_data()
+    
 
 
 ############################################
