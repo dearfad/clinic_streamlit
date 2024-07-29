@@ -1,5 +1,6 @@
 import streamlit as st
 import datetime
+import time
 from utils import chat, PAGE_STYLE, ADMIN, CHAPTER, User, save_data
 from faker import Faker
 import pickle
@@ -170,20 +171,26 @@ def show_result():
     score = 0
     total_questions_count = 0
     for i, question in enumerate(st.session_state.user.chatlog['questions']):
+        st.divider()
         with st.container(border=True):
             st.markdown("**对话记录**")
-            # st.write(st.session_state.user.chatlog.loc[i, 'messages'])
             st.session_state.messages = eval(st.session_state.user.chatlog.loc[i, 'messages'])
             show_chat()
         for q in question:
             total_questions_count += 1
             st.markdown(f"**Q{total_questions_count}: {q['question']}**")
-            st.write(q['correct_answer'])
-            st.write(q['user_answer'])
+            st.markdown(f"正确答案: :green[{q['correct_answer']}]")
             if q['correct_answer'] == q['user_answer']:
                 score += 1
-    st.subheader(f"医生 {st.session_state.user.name}")
-    st.subheader(f"正确率 {round(score/total_questions_count*100)}%")
+                st.markdown(f"你的回答: :green[{q['user_answer']}]")
+            else:
+                st.markdown(f"你的回答: :red[{q['user_answer']}]")
+        start_time = datetime.datetime.strptime(st.session_state.user.chatlog.loc[i,'start_time'], "%d/%m/%Y %H:%M:%S")
+        end_time = datetime.datetime.strptime(st.session_state.user.chatlog.loc[i,'end_time'], "%d/%m/%Y %H:%M:%S")
+        st.markdown(f'**耗时: {end_time-start_time}**')
+        st.markdown(f'**询问次数: {st.session_state.user.chatlog.loc[i, 'inquiry_count']}**')
+    st.divider()
+    st.subheader(f":heart: 准确率: {round(score/total_questions_count*100)}%")
     
 def show_admin():
     with open('users.pkl', 'rb') as file:

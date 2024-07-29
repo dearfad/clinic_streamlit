@@ -4,6 +4,7 @@ import pandas as pd
 import pickle
 import os
 import datetime
+from typing import List, Dict
 from xingchen import (
     Configuration,
     ApiClient,
@@ -50,6 +51,7 @@ def get_qa(chapter, num, seq):
     data = read_cases(f"cases/{chapter}.json")
     if num=='all' and seq=='random':
         return data.sample(frac=1, ignore_index=True)
+
 
 class User:
     def __init__(self, name, grade, major):
