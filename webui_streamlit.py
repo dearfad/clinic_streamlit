@@ -44,6 +44,11 @@ def show_login():
             st.session_state.page = "inquiry"
         st.rerun()
 
+################## DEBUG ONLY #######################################  
+    if st.button('ADMIN', use_container_width=True):
+        st.session_state.page = 'admin'
+        st.rerun()
+
 
 ######### END OF INIT AND LOGIN PAGE #############################
 
@@ -66,13 +71,8 @@ def show_chat():
 ##################################################################
 
 
-def show_admin():
-    with open('users.pkl', 'rb') as file:
-        users = pickle.load(file)
-    
-    user = st.selectbox('users', users)
-##################################################################
 
+##################################################################
 
 def show_inquiries():
     st.session_state.character_id = st.session_state.user.chatlog.loc[
@@ -133,6 +133,7 @@ def show_question():
     
     if st.button('再问一下', use_container_width=True):
         st.session_state.page = 'inquiry'
+        st.session_state.user.chatlog.loc[st.session_state.case_index, 'inquiry_count'] += 1
         st.rerun()
 
     if st.button("提交答案", use_container_width=True):
@@ -157,21 +158,39 @@ def show_question():
 
 
 def show_result():
-    st.write(st.session_state.user.chatlog)
+    col_name, col_grade, col_major = st.columns(3)
+    with col_name:
+        st.markdown(f"姓名: {st.session_state.user.name}")
+    with col_grade:
+        st.markdown(f"年级: {st.session_state.user.grade}")
+    with col_major:
+        st.markdown(f"专业: {st.session_state.user.major}")
+
+        
     score = 0
-    count = 0
-    for question in st.session_state.user.chatlog['questions']:
+    total_questions_count = 0
+    for i, question in enumerate(st.session_state.user.chatlog['questions']):
+        with st.container(border=True):
+            st.markdown("**对话记录**")
+            # st.write(st.session_state.user.chatlog.loc[i, 'messages'])
+            st.session_state.messages = eval(st.session_state.user.chatlog.loc[i, 'messages'])
+            show_chat()
         for q in question:
-            st.write(q['question'])
+            total_questions_count += 1
+            st.markdown(f"**Q{total_questions_count}: {q['question']}**")
             st.write(q['correct_answer'])
             st.write(q['user_answer'])
-            count += 1
             if q['correct_answer'] == q['user_answer']:
                 score += 1
     st.subheader(f"医生 {st.session_state.user.name}")
-    st.subheader(f"正确率 {round(score/count*100)}%")
+    st.subheader(f"正确率 {round(score/total_questions_count*100)}%")
     
-
+def show_admin():
+    with open('users.pkl', 'rb') as file:
+        users = pickle.load(file)
+    
+    st.session_state.user = st.selectbox('users', users, format_func=lambda x: str(f"{x.name} {x.grade} {x.major}"),)
+    show_result()
 
 ############################################
 match st.session_state.page:

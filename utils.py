@@ -65,6 +65,7 @@ class User:
         self.chatlog['conversation_end_time'] = ''
         self.chatlog['end_time'] = ''
         self.chatlog['messages'] = ''
+        self.chatlog['inquiry_count'] = 1
 
 
 #############################################################
