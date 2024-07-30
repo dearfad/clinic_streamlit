@@ -3,7 +3,7 @@ import random
 import pandas as pd
 import pickle
 import os
-import datetime
+from datetime import datetime
 from typing import List, Dict
 from xingchen import (
     Configuration,
@@ -58,7 +58,7 @@ class User:
         self.name = name
         self.grade = grade
         self.major = major
-        self.starttime = datetime.datetime.now()
+        self.starttime = datetime.now()
         self.endtime = ''
     def load_questions(self, chapter='breast', num='all', seq='random'):
         self.chapter = chapter
