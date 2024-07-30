@@ -1,5 +1,5 @@
 import streamlit as st
-import datetime
+from datetime import datetime
 import time
 from utils import chat, PAGE_STYLE, ADMIN, CHAPTER, User, save_data
 from faker import Faker
@@ -92,7 +92,7 @@ def show_inquiries():
     show_chat()
     if st.session_state.user.chatlog.loc[st.session_state.case_index, 'start_time'] == '':
         st.session_state.user.chatlog.loc[st.session_state.case_index,
-                                          'start_time'] = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                                          'start_time'] = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
 
     if prompt := st.chat_input(""):
         if prompt != "我问完了":
@@ -112,7 +112,8 @@ def show_inquiries():
                 )
         else:
             st.session_state.user.chatlog.loc[st.session_state.case_index,
-                                              'conversation_end_time'] = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                                              'conversation_end_time'] = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
+            st.session_state.messages.append({"role": "user", "content": prompt})
             st.session_state.user.chatlog.loc[st.session_state.case_index,
                                               'messages'] = str(st.session_state.messages)
             st.session_state.page = "explain"
@@ -139,7 +140,7 @@ def show_question():
 
     if st.button("提交答案", use_container_width=True):
         st.session_state.user.chatlog.loc[st.session_state.case_index,
-                                          'end_time'] = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                                          'end_time'] = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
 
         for a in range(len(case_question)):
             k = "a" + str(a)
@@ -158,46 +159,64 @@ def show_question():
 
 
 
-def show_result():
-    col_name, col_grade, col_major = st.columns(3)
-    with col_name:
-        st.markdown(f"姓名: {st.session_state.user.name}")
-    with col_grade:
-        st.markdown(f"年级: {st.session_state.user.grade}")
-    with col_major:
-        st.markdown(f"专业: {st.session_state.user.major}")
+def show_result(user:User) -> None:
 
+    with st.container(border=True):
+        col_name, col_grade, col_major = st.columns(3)
+        with col_name:
+            st.markdown(f"**姓名: {user.name}**")
+        with col_grade:
+            st.markdown(f"年级: {user.grade}")
+        with col_major:
+            st.markdown(f"专业: {user.major}")
+
+        user_start_time = datetime.strptime(user.chatlog.loc[0,'start_time'], "%Y/%m/%d %H:%M:%S")
+        user_end_time = datetime.strptime(user.chatlog.loc[len(user.chatlog['questions'])-1,'end_time'], "%Y/%m/%d %H:%M:%S")
+        st.markdown(f":date: {user.chatlog.loc[0,'start_time']}")
+        st.markdown(f":stopwatch: {user_end_time-user_start_time}")
         
     score = 0
     total_questions_count = 0
-    for i, question in enumerate(st.session_state.user.chatlog['questions']):
+    normal_inquiry_count = len(user.chatlog['questions'])
+    total_inquiry_count = 0
+
+    for i, question in enumerate(user.chatlog['questions']):
         st.divider()
+        start_time = datetime.strptime(user.chatlog.loc[i,'start_time'], "%Y/%m/%d %H:%M:%S")
+        conversation_end_time = datetime.strptime(user.chatlog.loc[i, 'conversation_end_time'], "%Y/%m/%d %H:%M:%S")
+        end_time = datetime.strptime(user.chatlog.loc[i,'end_time'], "%Y/%m/%d %H:%M:%S")
+        col_question_left, col_question_right = st.columns(2)
+        with col_question_left:
+            st.markdown(f"**:ok_woman: {i+1}/{len(user.chatlog['questions'])}**")
+        with col_question_right:
+            st.markdown(f"**:stopwatch: {end_time-start_time} = {conversation_end_time-start_time} + {end_time-conversation_end_time}**")
         with st.container(border=True):
-            st.markdown("**对话记录**")
-            st.session_state.messages = eval(st.session_state.user.chatlog.loc[i, 'messages'])
+            st.markdown(f"**对话记录**")
+            st.markdown(f"**:repeat: {user.chatlog.loc[i, 'inquiry_count']}**")
+            total_inquiry_count += user.chatlog.loc[i, 'inquiry_count']
+            st.session_state.messages = eval(user.chatlog.loc[i, 'messages'])
             show_chat()
         for q in question:
             total_questions_count += 1
             st.markdown(f"**Q{total_questions_count}: {q['question']}**")
-            st.markdown(f"正确答案: :green[{q['correct_answer']}]")
+            st.markdown(f"答案选项: 🔹{' 🔹'.join(q['answer_list'])}")
+            st.markdown(f"正确答案: :white_check_mark:**{q['correct_answer']}**")
             if q['correct_answer'] == q['user_answer']:
                 score += 1
-                st.markdown(f"你的回答: :green[{q['user_answer']}]")
+                st.markdown(f"用户回答: :white_check_mark:**{q['user_answer']}**")
             else:
-                st.markdown(f"你的回答: :red[{q['user_answer']}]")
-        start_time = datetime.datetime.strptime(st.session_state.user.chatlog.loc[i,'start_time'], "%d/%m/%Y %H:%M:%S")
-        end_time = datetime.datetime.strptime(st.session_state.user.chatlog.loc[i,'end_time'], "%d/%m/%Y %H:%M:%S")
-        st.markdown(f'**耗时: {end_time-start_time}**')
-        st.markdown(f'**询问次数: {st.session_state.user.chatlog.loc[i, 'inquiry_count']}**')
+                st.markdown(f"用户回答: :x:**:red[{q['user_answer']}]**")
     st.divider()
-    st.subheader(f":heart: 准确率: {round(score/total_questions_count*100)}%")
+    question_score = round(score/total_questions_count*100)
+    inquiry_score = (total_inquiry_count-normal_inquiry_count)*2
+    st.subheader(f"**:heart: {question_score - inquiry_score} = {question_score} - {inquiry_score}**")
     
 def show_admin():
     with open('users.pkl', 'rb') as file:
         users = pickle.load(file)
     
-    st.session_state.user = st.selectbox('users', users, format_func=lambda x: str(f"{x.name} {x.grade} {x.major}"),)
-    show_result()
+    user = st.selectbox('users', users, format_func=lambda x: str(f"{x.name} - {x.grade}级 - {x.major}专业"),)
+    show_result(user)
 
 ############################################
 match st.session_state.page:
@@ -210,4 +229,4 @@ match st.session_state.page:
     case "explain":
         show_question()
     case "result":
-        show_result()
+        show_result(st.session_state.user)
