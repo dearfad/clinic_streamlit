@@ -4,7 +4,6 @@ import pandas as pd
 import pickle
 import os
 from datetime import datetime
-from typing import List, Dict
 from xingchen import (
     Configuration,
     ApiClient,

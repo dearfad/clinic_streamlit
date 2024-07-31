@@ -24,31 +24,46 @@ if "page" not in st.session_state:
 
 
 def show_login():
-    name = st.text_input("姓名", "无名", key="name")
-    grade = st.selectbox("年级", (range(2016, 2030, 1)), key="grade")
-    major = st.selectbox("专业", ("临床医学", "放射", "口腔", "其他"))
-    chapter = st.selectbox(
-        "章节",
-        ("breast",),
-        format_func=lambda x: CHAPTER[x],
-    )
-    st.info(
-        "作为一名乳腺外科医生，请用正常语气与门诊患者沟通，问诊完毕后请输入 **我问完了**，并回答患者提出的相关问题。",
-        icon="ℹ️",
-    )
-    if st.button("我明白了", use_container_width=True):
-        if st.session_state.name == ADMIN:
-            st.session_state.page = "admin"
-        else:
-            st.session_state.user = User(name, grade, major)
-            st.session_state.user.load_questions(chapter)
-            st.session_state.page = "inquiry"
-        st.rerun()
+    role = st.selectbox("**类别**", ('游客', '学生', '教师', '管理员'))
+    match role:
+        case "游客":
+            st.info("请用正常语气与随机一名患者沟通", icon=":material/counter_1:")
+            st.info("问诊完毕后请输入 **我问完了**", icon=":material/counter_2:")
+            st.info("回答患者提出的相关问题", icon=":material/counter_3:")
+            st.info("作为一名**游客**，您的过程不被记录", icon=":material/counter_4:")
+            if st.button('开始', use_container_width=True):
+                pass
+        case '学生':
+            pass
+        case '教师':
+            pass
+        case '管理员':
+            pass
+    # name = st.text_input("姓名", "无名", key="name")
+    # grade = st.selectbox("年级", (range(2016, 2030, 1)), key="grade")
+    # major = st.selectbox("专业", ("临床医学", "放射", "口腔", "其他"))
+    # chapter = st.selectbox(
+    #     "章节",
+    #     ("breast",),
+    #     format_func=lambda x: CHAPTER[x],
+    # )
+    # st.info(
+    #     "作为一名乳腺外科医生，请用正常语气与门诊患者沟通，问诊完毕后请输入 **我问完了**，并回答患者提出的相关问题。",
+    #     icon="ℹ️",
+    # )
+    # if st.button("我明白了", use_container_width=True):
+    #     if st.session_state.name == ADMIN:
+    #         st.session_state.page = "admin"
+    #     else:
+    #         st.session_state.user = User(name, grade, major)
+    #         st.session_state.user.load_questions(chapter)
+    #         st.session_state.page = "inquiry"
+    #     st.rerun()
 
-################## DEBUG ONLY #######################################  
-    if st.button('ADMIN', use_container_width=True):
-        st.session_state.page = 'admin'
-        st.rerun()
+################## DEBUG ONLY #######################################
+    # if st.button('ADMIN', use_container_width=True):
+    #     st.session_state.page = 'admin'
+    #     st.rerun()
 
 
 ######### END OF INIT AND LOGIN PAGE #############################
@@ -70,7 +85,6 @@ def show_chat():
                 st.markdown(f"**{message['content']}**")
 
 ##################################################################
-
 
 
 ##################################################################
@@ -113,7 +127,8 @@ def show_inquiries():
         else:
             st.session_state.user.chatlog.loc[st.session_state.case_index,
                                               'conversation_end_time'] = datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-            st.session_state.messages.append({"role": "user", "content": prompt})
+            st.session_state.messages.append(
+                {"role": "user", "content": prompt})
             st.session_state.user.chatlog.loc[st.session_state.case_index,
                                               'messages'] = str(st.session_state.messages)
             st.session_state.page = "explain"
@@ -132,10 +147,11 @@ def show_question():
         key = "a" + str(index)
         answer = st.radio(question["question"],
                           question["answer_list"], key=key)
-    
+
     if st.button('再问一下', use_container_width=True):
         st.session_state.page = 'inquiry'
-        st.session_state.user.chatlog.loc[st.session_state.case_index, 'inquiry_count'] += 1
+        st.session_state.user.chatlog.loc[st.session_state.case_index,
+                                          'inquiry_count'] += 1
         st.rerun()
 
     if st.button("提交答案", use_container_width=True):
@@ -156,10 +172,7 @@ def show_question():
         st.rerun()
 
 
-
-
-
-def show_result(user:User) -> None:
+def show_result(user: User) -> None:
 
     with st.container(border=True):
         col_name, col_grade, col_major = st.columns(3)
@@ -170,11 +183,13 @@ def show_result(user:User) -> None:
         with col_major:
             st.markdown(f"专业: {user.major}")
 
-        user_start_time = datetime.strptime(user.chatlog.loc[0,'start_time'], "%Y/%m/%d %H:%M:%S")
-        user_end_time = datetime.strptime(user.chatlog.loc[len(user.chatlog['questions'])-1,'end_time'], "%Y/%m/%d %H:%M:%S")
+        user_start_time = datetime.strptime(
+            user.chatlog.loc[0, 'start_time'], "%Y/%m/%d %H:%M:%S")
+        user_end_time = datetime.strptime(user.chatlog.loc[len(
+            user.chatlog['questions'])-1, 'end_time'], "%Y/%m/%d %H:%M:%S")
         st.markdown(f":date: {user.chatlog.loc[0,'start_time']}")
         st.markdown(f":stopwatch: {user_end_time-user_start_time}")
-        
+
     score = 0
     total_questions_count = 0
     normal_inquiry_count = len(user.chatlog['questions'])
@@ -182,14 +197,19 @@ def show_result(user:User) -> None:
 
     for i, question in enumerate(user.chatlog['questions']):
         st.divider()
-        start_time = datetime.strptime(user.chatlog.loc[i,'start_time'], "%Y/%m/%d %H:%M:%S")
-        conversation_end_time = datetime.strptime(user.chatlog.loc[i, 'conversation_end_time'], "%Y/%m/%d %H:%M:%S")
-        end_time = datetime.strptime(user.chatlog.loc[i,'end_time'], "%Y/%m/%d %H:%M:%S")
+        start_time = datetime.strptime(
+            user.chatlog.loc[i, 'start_time'], "%Y/%m/%d %H:%M:%S")
+        conversation_end_time = datetime.strptime(
+            user.chatlog.loc[i, 'conversation_end_time'], "%Y/%m/%d %H:%M:%S")
+        end_time = datetime.strptime(
+            user.chatlog.loc[i, 'end_time'], "%Y/%m/%d %H:%M:%S")
         col_question_left, col_question_right = st.columns(2)
         with col_question_left:
-            st.markdown(f"**:ok_woman: {i+1}/{len(user.chatlog['questions'])}**")
+            st.markdown(
+                f"**:ok_woman: {i+1}/{len(user.chatlog['questions'])}**")
         with col_question_right:
-            st.markdown(f"**:stopwatch: {end_time-start_time} = {conversation_end_time-start_time} + {end_time-conversation_end_time}**")
+            st.markdown(
+                f"**:stopwatch: {end_time-start_time} = {conversation_end_time-start_time} + {end_time-conversation_end_time}**")
         with st.container(border=True):
             st.markdown(f"**对话记录**")
             st.markdown(f"**:repeat: {user.chatlog.loc[i, 'inquiry_count']}**")
@@ -209,14 +229,18 @@ def show_result(user:User) -> None:
     st.divider()
     question_score = round(score/total_questions_count*100)
     inquiry_score = (total_inquiry_count-normal_inquiry_count)*2
-    st.subheader(f"**:heart: {question_score - inquiry_score} = {question_score} - {inquiry_score}**")
-    
+    st.subheader(
+        f"**:heart: {question_score - inquiry_score} = {question_score} - {inquiry_score}**")
+
+
 def show_admin():
     with open('users.pkl', 'rb') as file:
         users = pickle.load(file)
-    
-    user = st.selectbox('users', users, format_func=lambda x: str(f"{x.name} - {x.grade}级 - {x.major}专业"),)
+
+    user = st.selectbox('users', users, format_func=lambda x: str(
+        f"{x.name} - {x.grade}级 - {x.major}专业"),)
     show_result(user)
+
 
 ############################################
 match st.session_state.page:
