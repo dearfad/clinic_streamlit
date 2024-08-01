@@ -1,7 +1,6 @@
 import streamlit as st
 from datetime import datetime
-import time
-from utils import chat, PAGE_STYLE, ADMIN, CHAPTER, User, save_data
+from utils import chat, PAGE_STYLE, ADMIN, CHAPTER, INIT_CONVERSATION, User, save_data
 from faker import Faker
 import pickle
 
@@ -18,19 +17,23 @@ st.caption("吉林大学中日联谊医院乳腺外科")
 
 ########## INIT AND LOGIN PAGE #############################
 if "page" not in st.session_state:
-    st.session_state.faker = Faker("zh_CN")
     st.session_state.page = "login"
+    st.session_state.faker = Faker("zh_CN")
     st.session_state.case_index = 0
+    st.session_state.refresh = 0
 
+if "messages" not in st.session_state:
+    st.session_state.messages = INIT_CONVERSATION
 
 def show_login():
     role = st.selectbox("**类别**", ('游客', '学生', '教师', '管理员'))
     match role:
         case "游客":
-            st.info("请用正常语气与随机一名患者沟通", icon=":material/counter_1:")
+            st.info("请用**正常语气**与随机一名患者沟通", icon=":material/counter_1:")
             st.info("问诊完毕后请输入 **我问完了**", icon=":material/counter_2:")
-            st.info("回答患者提出的相关问题", icon=":material/counter_3:")
-            st.info("作为一名**游客**，您的过程不被记录", icon=":material/counter_4:")
+            st.info("回答患者提出的**相关问题**", icon=":material/counter_3:")
+            st.info("**重新开始**请按 **F5** 或 :material/refresh: 页面", icon=":material/counter_4:")
+            st.info("作为一名**游客**，您的过程不被统计", icon=":material/counter_5:")
             if st.button('开始', use_container_width=True):
                 pass
         case '学生':
@@ -38,7 +41,13 @@ def show_login():
         case '教师':
             pass
         case '管理员':
-            pass
+            password = st.text_input("**密码**")
+            if st.button('登录', use_container_width=True):
+                if password == ADMIN:
+                    st.session_state.page = 'admin'
+                    st.rerun()
+                else:
+                    st.warning(":material/key: **密码错误**，请咨询**管理员**相关信息")
     # name = st.text_input("姓名", "无名", key="name")
     # grade = st.selectbox("年级", (range(2016, 2030, 1)), key="grade")
     # major = st.selectbox("专业", ("临床医学", "放射", "口腔", "其他"))
@@ -60,19 +69,12 @@ def show_login():
     #         st.session_state.page = "inquiry"
     #     st.rerun()
 
-################## DEBUG ONLY #######################################
-    # if st.button('ADMIN', use_container_width=True):
-    #     st.session_state.page = 'admin'
-    #     st.rerun()
+
 
 
 ######### END OF INIT AND LOGIN PAGE #############################
 
-if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {"role": "user", "content": "你好"},
-        {"role": "assistant", "content": "大夫，你好"},
-    ]
+
 
 
 def show_chat():
@@ -229,15 +231,16 @@ def show_result(user: User) -> None:
     st.divider()
     question_score = round(score/total_questions_count*100)
     inquiry_score = (total_inquiry_count-normal_inquiry_count)*2
-    st.subheader(
-        f"**:heart: {question_score - inquiry_score} = {question_score} - {inquiry_score}**")
+    st.markdown(f"**问题得分: {score} :material/pen_size_2: {total_questions_count} :material/close:100 :material/equal: {question_score}**")
+    st.markdown(f"**问诊扣分: ( {total_inquiry_count} - {normal_inquiry_count} ) :material/close:2 :material/equal: {inquiry_score}**")
+    st.markdown(f"**最后得分: :small_orange_diamond: :red[{question_score - inquiry_score}] :small_orange_diamond:**")
 
 
 def show_admin():
     with open('users.pkl', 'rb') as file:
         users = pickle.load(file)
 
-    user = st.selectbox('users', users, format_func=lambda x: str(
+    user = st.selectbox('**用户**', users, format_func=lambda x: str(
         f"{x.name} - {x.grade}级 - {x.major}专业"),)
     show_result(user)
 

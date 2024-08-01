@@ -34,6 +34,11 @@ PAGE_STYLE = """<style>
         }
     </style>"""
 
+INIT_CONVERSATION = [
+        {"role": "user", "content": "你好"},
+        {"role": "assistant", "content": "大夫，你好"},
+    ]
+
 ADMIN = "DEARFAD"
 
 CHAPTER = {
@@ -125,8 +130,7 @@ def chat(role_server, character_id, messages):
             return baichuan.chat(messages)
 
 
-def save_data():
-   
+def save_data():   
     if not os.path.exists('users.pkl'):
         users = []
         users.append(st.session_state.user)
