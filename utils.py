@@ -35,9 +35,9 @@ PAGE_STYLE = """<style>
     </style>"""
 
 INIT_CONVERSATION = [
-        {"role": "user", "content": "你好"},
-        {"role": "assistant", "content": "大夫，你好"},
-    ]
+    {"role": "user", "content": "你好"},
+    {"role": "assistant", "content": "大夫，你好"},
+]
 
 ADMIN = "DEARFAD"
 
@@ -46,6 +46,8 @@ CHAPTER = {
 }
 
 ############### READ DATA  ###################################
+
+
 @st.cache_data
 def read_cases(path):
     return pd.read_json(path, orient="records")
@@ -53,19 +55,24 @@ def read_cases(path):
 
 def get_qa(chapter, num, seq):
     data = read_cases(f"cases/{chapter}.json")
-    if num=='all' and seq=='random':
+    if num == 'all' and seq == 'random':
         return data.sample(frac=1, ignore_index=True)
 
 
+CHATLOG_COLUMNS = ['id', 'server', 'name', 'questions',
+                   'start_time', 'conversation_end_time', 'end_time', 'messages', 'inquiry_count']
+
+
 class User:
-    def __init__(self, name, grade, major):
+    def __init__(self, role, chapter, name, grade, major):
+        self.role = role
+        self.chapter = chapter
         self.name = name
         self.grade = grade
         self.major = major
-        self.starttime = datetime.now()
-        self.endtime = ''
-    def load_questions(self, chapter='breast', num='all', seq='random'):
-        self.chapter = chapter
+        self.chatlog = pd.DataFrame(columns=CHATLOG_COLUMNS)
+
+    def load_patients(self, num='all', seq='random'):
         self.chatlog = get_qa(chapter, num, seq)
         self.chatlog['start_time'] = ''
         self.chatlog['conversation_end_time'] = ''
@@ -86,7 +93,6 @@ class XingChen:
             self.user_id = str(random.randint(1, 1000))
             self.character_id = character_id
 
-
     def chat(self, messages):
         chat_param = ChatReqParams(
             bot_profile=CharacterKey(character_id=self.character_id),
@@ -101,11 +107,11 @@ class XingChen:
                 return f"( 似乎自己在思索什么，嘴里反复说着数字 ~ {response['code']} ~ )"
         except:
             return f"( 脑子坏掉了，等会再问我吧 ~ )"
-    
+
     def detail(self):
         self.character = self.character_api.character_details(
-                character_id=self.character_id
-            )
+            character_id=self.character_id
+        )
         self.character_name = self.character.data.name
         self.character_avatar_url = "http:" + self.character.data.avatar.file_url
 
@@ -130,7 +136,7 @@ def chat(role_server, character_id, messages):
             return baichuan.chat(messages)
 
 
-def save_data():   
+def save_data():
     if not os.path.exists('users.pkl'):
         users = []
         users.append(st.session_state.user)

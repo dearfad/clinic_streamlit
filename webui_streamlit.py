@@ -20,24 +20,47 @@ if "page" not in st.session_state:
     st.session_state.page = "login"
     st.session_state.faker = Faker("zh_CN")
     st.session_state.case_index = 0
-    st.session_state.refresh = 0
 
 if "messages" not in st.session_state:
     st.session_state.messages = INIT_CONVERSATION
+
 
 def show_login():
     role = st.selectbox("**类别**", ('游客', '学生', '教师', '管理员'))
     match role:
         case "游客":
+            chapter = st.selectbox(
+                "**章节**",
+                ("breast",),
+                format_func=lambda x: CHAPTER[x],
+            )
             st.info("请用**正常语气**与随机一名患者沟通", icon=":material/counter_1:")
             st.info("问诊完毕后请输入 **我问完了**", icon=":material/counter_2:")
             st.info("回答患者提出的**相关问题**", icon=":material/counter_3:")
-            st.info("**重新开始**请按 **F5** 或 :material/refresh: 页面", icon=":material/counter_4:")
+            st.info("**重新开始**请按 **F5** 或 :material/refresh: 页面",
+                    icon=":material/counter_4:")
             st.info("作为一名**游客**，您的过程不被统计", icon=":material/counter_5:")
             if st.button('开始', use_container_width=True):
-                pass
+                st.session_state.user = User(
+                    role=role, chapter=chapter, name='游客', grade='', major='')
+                # st.session_state.user.load_patients(chapter)
+                st.session_state.page = 'inquiry'
+                st.rerun()
         case '学生':
-            pass
+            chapter = st.selectbox(
+                "**章节**",
+                ("breast",),
+                format_func=lambda x: CHAPTER[x],
+            )
+            name = st.text_input("**姓名**", "学生")
+            grade = st.selectbox("**年级**", (range(2016, 2030, 1)))
+            major = st.selectbox("**专业**", ("临床医学", "放射", "口腔", "其他"))
+
+            if st.button('开始', use_container_width=True):
+                st.session_state.user = User(role, chapter, name, grade, major)
+                st.session_state.user.load_patients(chapter)
+                st.session_state.page = "inquiry"
+                st.rerun()
         case '教师':
             pass
         case '管理员':
@@ -48,18 +71,7 @@ def show_login():
                     st.rerun()
                 else:
                     st.warning(":material/key: **密码错误**，请咨询**管理员**相关信息")
-    # name = st.text_input("姓名", "无名", key="name")
-    # grade = st.selectbox("年级", (range(2016, 2030, 1)), key="grade")
-    # major = st.selectbox("专业", ("临床医学", "放射", "口腔", "其他"))
-    # chapter = st.selectbox(
-    #     "章节",
-    #     ("breast",),
-    #     format_func=lambda x: CHAPTER[x],
-    # )
-    # st.info(
-    #     "作为一名乳腺外科医生，请用正常语气与门诊患者沟通，问诊完毕后请输入 **我问完了**，并回答患者提出的相关问题。",
-    #     icon="ℹ️",
-    # )
+
     # if st.button("我明白了", use_container_width=True):
     #     if st.session_state.name == ADMIN:
     #         st.session_state.page = "admin"
@@ -70,11 +82,7 @@ def show_login():
     #     st.rerun()
 
 
-
-
 ######### END OF INIT AND LOGIN PAGE #############################
-
-
 
 
 def show_chat():
@@ -92,6 +100,7 @@ def show_chat():
 ##################################################################
 
 def show_inquiries():
+    st.write(st.session_state.user.chatlog)
     st.session_state.character_id = st.session_state.user.chatlog.loc[
         st.session_state.case_index, "id"
     ]
@@ -189,7 +198,7 @@ def show_result(user: User) -> None:
             user.chatlog.loc[0, 'start_time'], "%Y/%m/%d %H:%M:%S")
         user_end_time = datetime.strptime(user.chatlog.loc[len(
             user.chatlog['questions'])-1, 'end_time'], "%Y/%m/%d %H:%M:%S")
-        st.markdown(f":date: {user.chatlog.loc[0,'start_time']}")
+        st.markdown(f":date: {user.chatlog.loc[0, 'start_time']}")
         st.markdown(f":stopwatch: {user_end_time-user_start_time}")
 
     score = 0
@@ -231,9 +240,12 @@ def show_result(user: User) -> None:
     st.divider()
     question_score = round(score/total_questions_count*100)
     inquiry_score = (total_inquiry_count-normal_inquiry_count)*2
-    st.markdown(f"**问题得分: {score} :material/pen_size_2: {total_questions_count} :material/close:100 :material/equal: {question_score}**")
-    st.markdown(f"**问诊扣分: ( {total_inquiry_count} - {normal_inquiry_count} ) :material/close:2 :material/equal: {inquiry_score}**")
-    st.markdown(f"**最后得分: :small_orange_diamond: :red[{question_score - inquiry_score}] :small_orange_diamond:**")
+    st.markdown(f"**问题得分: {score} :material/pen_size_2: {
+                total_questions_count} :material/close:100 :material/equal: {question_score}**")
+    st.markdown(f"**复问扣分: ( {total_inquiry_count} - {
+                normal_inquiry_count} ) :material/close:2 :material/equal: {inquiry_score}**")
+    st.markdown(f"**最后得分: :small_orange_diamond: :red[{
+                question_score - inquiry_score}] :small_orange_diamond:**")
 
 
 def show_admin():
