@@ -3,7 +3,6 @@ import random
 import pandas as pd
 import pickle
 import os
-from datetime import datetime
 from xingchen import (
     Configuration,
     ApiClient,
@@ -34,15 +33,11 @@ PAGE_STYLE = """<style>
         }
     </style>"""
 
-INIT_CONVERSATION = [
-    {"role": "user", "content": "你好"},
-    {"role": "assistant", "content": "大夫，你好"},
-]
 
 ADMIN = "DEARFAD"
 
 CHAPTER = {
-    'breast': '乳房疾病',
+    "breast": "乳房疾病",
 }
 
 ############### READ DATA  ###################################
@@ -53,16 +48,6 @@ def read_cases(path):
     return pd.read_json(path, orient="records")
 
 
-def get_qa(chapter, num, seq):
-    data = read_cases(f"cases/{chapter}.json")
-    if num == 'all' and seq == 'random':
-        return data.sample(frac=1, ignore_index=True)
-
-
-CHATLOG_COLUMNS = ['id', 'server', 'name', 'questions',
-                   'start_time', 'conversation_end_time', 'end_time', 'messages', 'inquiry_count']
-
-
 class User:
     def __init__(self, role, chapter, name, grade, major):
         self.role = role
@@ -70,15 +55,24 @@ class User:
         self.name = name
         self.grade = grade
         self.major = major
-        self.chatlog = pd.DataFrame(columns=CHATLOG_COLUMNS)
+        self.index = 0
+        self.chatlog: pd.DataFrame
 
-    def load_patients(self, num='all', seq='random'):
-        self.chatlog = get_qa(chapter, num, seq)
-        self.chatlog['start_time'] = ''
-        self.chatlog['conversation_end_time'] = ''
-        self.chatlog['end_time'] = ''
-        self.chatlog['messages'] = ''
-        self.chatlog['inquiry_count'] = 1
+    def create_chatlog(self, num="all", seq="random"):
+        data = read_cases(f"cases/{self.chapter}.json")
+        match self.role:
+            case "游客":
+                data = data.sample(n=1, ignore_index=True)
+            case "学生":
+                pass
+                # if num == 'all' and seq == 'random':
+                #     data =  data.sample(frac=1, ignore_index=True)
+        self.chatlog = pd.DataFrame(data)
+        self.chatlog["start_time"] = ""
+        self.chatlog["conversation_end_time"] = ""
+        self.chatlog["end_time"] = ""
+        self.chatlog["messages"] = ""
+        self.chatlog["inquiry_count"] = 1
 
 
 #############################################################
@@ -101,12 +95,14 @@ class XingChen:
         )
         try:
             response = self.chat_api.chat(chat_param).to_dict()
-            if response['success']:
+            if response["success"]:
                 return response["data"]["choices"][0]["messages"][0]["content"]
             else:
-                return f"( 似乎自己在思索什么，嘴里反复说着数字 ~ {response['code']} ~ )"
-        except:
-            return f"( 脑子坏掉了，等会再问我吧 ~ )"
+                return (
+                    f"( 似乎自己在思索什么，嘴里反复说着数字 ~ {response['code']} ~ )"
+                )
+        except Exception as exception:
+            return f"( 脑子坏掉了，等会再问我吧 ~ 原因是: {exception})"
 
     def detail(self):
         self.character = self.character_api.character_details(
@@ -137,14 +133,14 @@ def chat(role_server, character_id, messages):
 
 
 def save_data():
-    if not os.path.exists('users.pkl'):
+    if not os.path.exists("users.pkl"):
         users = []
         users.append(st.session_state.user)
-        with open('users.pkl', 'wb') as file:
+        with open("users.pkl", "wb") as file:
             pickle.dump(users, file)
     else:
-        with open('users.pkl', 'rb') as file:
+        with open("users.pkl", "rb") as file:
             users = pickle.load(file)
         users.append(st.session_state.user)
-        with open('users.pkl', 'wb') as file:
+        with open("users.pkl", "wb") as file:
             pickle.dump(users, file)

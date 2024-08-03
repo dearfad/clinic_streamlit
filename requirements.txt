@@ -6,4 +6,3 @@ xingchen
 
 # DATA
 pandas
-faker
