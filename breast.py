@@ -1,91 +1,75 @@
 import streamlit as st
 from datetime import datetime
-from utils import chat, PAGE_STYLE, ADMIN, CHAPTER, User, save_data
+from utils import chat, set_page_header, User, save_data
 import pickle
 
-########## PAGE SETTING #############################
-st.set_page_config(
-    page_title="虚拟门诊",
-    page_icon="👩",
-    layout="centered",
-)
-st.html(PAGE_STYLE)
-st.subheader("👩 虚拟门诊", divider="gray")
-st.caption("吉林大学中日联谊医院乳腺外科")
-####################################################
+set_page_header()
 
-########## INIT AND LOGIN PAGE #############################
-if "page" not in st.session_state:
-    st.session_state.page = "login"
-
-if "messages" not in st.session_state:
-    st.session_state.messages = [
-        {"role": "user", "content": "你好"},
-        {"role": "assistant", "content": "大夫，你好"},
-    ]
+# if "messages" not in st.session_state:
+#     st.session_state.messages = [
+#         {"role": "user", "content": "你好"},
+#         {"role": "assistant", "content": "大夫，你好"},
+#     ]
 
 
-def show_login():
-    role = st.selectbox("**类别**", ("游客", "学生", "教师", "管理员"))
-    match role:
-        case "游客":
-            chapter = st.selectbox(
-                "**章节**",
-                ("breast",),
-                format_func=lambda x: CHAPTER[x],
-            )
-            st.info("请用**正常语气**与随机一名患者沟通", icon=":material/counter_1:")
-            st.info("问诊完毕后请输入 **我问完了**", icon=":material/counter_2:")
-            st.info("回答患者提出的**相关问题**", icon=":material/counter_3:")
-            st.info(
-                "**重新开始**请按 **F5** 或 :material/refresh: 页面",
-                icon=":material/counter_4:",
-            )
-            st.info("作为一名**游客**，您的过程不被统计", icon=":material/counter_5:")
-            if st.button("开始", use_container_width=True):
-                st.session_state.user = User(
-                    role=role, chapter=chapter, name="游客", grade="", major=""
-                )
-                st.session_state.user.create_chatlog()
-                st.session_state.page = "inquiry"
-                st.rerun()
-        case "学生":
-            chapter = st.selectbox(
-                "**章节**",
-                ("breast",),
-                format_func=lambda x: CHAPTER[x],
-            )
-            name = st.text_input("**姓名**", "学生")
-            grade = st.selectbox("**年级**", (range(2016, 2030, 1)))
-            major = st.selectbox("**专业**", ("临床医学", "放射", "口腔", "其他"))
+role = st.selectbox("**类别**", ("游客", "学生", "教师", "管理员"))
 
-            if st.button("开始", use_container_width=True):
-                st.session_state.user = User(role, chapter, name, grade, major)
-                st.session_state.user.create_chatlog(chapter)
-                st.session_state.page = "inquiry"
-                st.rerun()
-        case "教师":
-            pass
-        case "管理员":
-            password = st.text_input("**密码**")
-            if st.button("登录", use_container_width=True):
-                if password == ADMIN:
-                    st.session_state.page = "admin"
-                    st.rerun()
-                else:
-                    st.warning(":material/key: **密码错误**，请咨询**管理员**相关信息")
+match role:
+    case "游客":
+        pass
+        # chapter = st.selectbox(
+        #     "**章节**",
+        #     ("breast",),
+        #     format_func=lambda x: CHAPTER[x],
+        # )
+        # st.info("请用**正常语气**与随机一名患者沟通", icon=":material/counter_1:")
+        # st.info("问诊完毕后请输入 **我问完了**", icon=":material/counter_2:")
+        # st.info("回答患者提出的**相关问题**", icon=":material/counter_3:")
+        # st.info(
+        #     "**重新开始**请按 **F5** 或 :material/refresh: 页面",
+        #     icon=":material/counter_4:",
+        # )
+        # st.info("作为一名**游客**，您的过程不被统计", icon=":material/counter_5:")
+        # if st.button("开始", use_container_width=True):
+        #     st.session_state.user = User(
+        #         role=role, chapter=chapter, name="游客", grade="", major="", mode=""
+        #     )
+        #     st.session_state.user.create_chatlog()
+        #     st.session_state.page = "inquiry"
+        #     st.rerun()
+    case "学生":
+        pass
+        # chapter = st.selectbox(
+        #     "**章节**",
+        #     ("breast",),
+        #     format_func=lambda x: CHAPTER[x],
+        # )
+        # name = st.text_input("**姓名**", "学生")
+        # grade = st.selectbox("**年级**", (range(2016, 2030, 1)))
+        # major = st.selectbox("**专业**", ("临床医学", "放射", "口腔", "其他"))
+        # mode = st.selectbox("模式", ("课堂练习", "自学测试", "出科考试"))
 
-    # if st.button("我明白了", use_container_width=True):
-    #     if st.session_state.name == ADMIN:
-    #         st.session_state.page = "admin"
-    #     else:
-    #         st.session_state.user = User(name, grade, major)
-    #         st.session_state.user.load_questions(chapter)
-    #         st.session_state.page = "inquiry"
-    #     st.rerun()
+        # if st.button("开始", use_container_width=True):
+        #     st.session_state.user = User(role, chapter, name, grade, major, mode)
+        #     st.session_state.user.create_chatlog()
+        #     st.session_state.page = "inquiry"
 
+        #     st.rerun()
+    case "教师":
+        password = st.text_input("**密码**")
+        if st.button("登录", use_container_width=True):
+            if password == st.secrets['teacher_key']:
+                st.switch_page("pages/teacher.py")
+            else:
+                st.warning(":material/key: **密码错误**，请咨询**管理员**相关信息")
 
-######### END OF INIT AND LOGIN PAGE #############################
+    case "管理员":
+        password = st.text_input("**密码**")
+        if st.button("登录", use_container_width=True):
+            if password == st.secrets['admin_key']:
+                st.switch_page("pages/admin.py")
+            else:
+                st.warning(":material/key: **密码错误**，请咨询**管理员**相关信息")
 
 
 def show_chat():
@@ -101,8 +85,11 @@ def show_chat():
 def show_inquiries():
     user = st.session_state.user
     character_id = user.chatlog.loc[user.index, "id"]
-    st.markdown(f"**编号: {user.index +
+    st.markdown(f"**就诊编号: {user.index +
                 1} / {len(user.chatlog)}**")
+    st.markdown(f"**:date: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}**")
+    st.markdown(":page_facing_up: **谈话记录**")
+
     # col_left, col_center, col_right = st.columns([1, 3, 1])
     # with col_center:
     #     st.caption(
@@ -148,16 +135,19 @@ def show_inquiries():
 
 def show_question():
     user = st.session_state.user
-    st.markdown(f"**编号: {user.index +
+    st.markdown(f"**就诊编号: {user.index +
                 1} / {len(user.chatlog)}**")
     with st.container(border=True):
-        st.markdown("**对话记录**")
+        st.markdown(":page_facing_up: **对话记录**")
         show_chat()
 
     case_question = user.chatlog.loc[user.index, "questions"]
     for index, question in enumerate(case_question):
         key = "a" + str(index)
-        st.radio(question["question"], question["answer_list"], key=key)
+
+        st.radio(
+            f"**Q{index+1}: {question['question']}**", question["answer_list"], key=key
+        )
 
     if st.button("再问一下", use_container_width=True):
         st.session_state.page = "inquiry"
@@ -181,11 +171,6 @@ def show_question():
             st.session_state.page = "inquiry"
             del st.session_state.messages
         st.rerun()
-
-
-def reset():
-    for key in st.session_state.keys():
-        del st.session_state[key]
 
 
 def show_result():
@@ -263,15 +248,10 @@ def show_result():
         st.rerun()
 
 
-def user_select_option(x):
-    match x.role:
-        case "游客":
-            return str(f"{x.name} - {x.chatlog.loc[0, "start_time"]}")
-        case "学生":
-            return str(f"{x.name} - {x.grade}级 - {x.major}专业")
 
 
-def show_admin():
+
+def show_teacher():
     with open("users.pkl", "rb") as file:
         users = pickle.load(file)
 
@@ -284,14 +264,16 @@ def show_admin():
     show_result()
 
 
-match st.session_state.page:
-    case "login":
-        show_login()
-    case "admin":
-        show_admin()
-    case "inquiry":
-        show_inquiries()
-    case "explain":
-        show_question()
-    case "result":
-        show_result()
+# match st.session_state.page:
+#     case "login":
+#         show_login()
+#     case 'teacher':
+#         show_teacher()
+#     case "admin":
+#         st.switch_page("pages/admin.py")
+#     case "inquiry":
+#         show_inquiries()
+#     case "explain":
+#         show_question()
+#     case "result":
+#         show_result()
