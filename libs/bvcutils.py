@@ -152,17 +152,22 @@ def chat(role_server, character_id, messages):
 
 
 def save_data():
-    if not os.path.exists("users.pkl"):
+    if not os.path.exists("data/users.pkl"):
         users = []
         users.append(st.session_state.user)
-        with open("users.pkl", "wb") as file:
+        with open("data/users.pkl", "wb") as file:
             pickle.dump(users, file)
     else:
-        with open("users.pkl", "rb") as file:
+        with open("data/users.pkl", "rb") as file:
             users = pickle.load(file)
         users.append(st.session_state.user)
-        with open("users.pkl", "wb") as file:
+        with open("data/users.pkl", "wb") as file:
             pickle.dump(users, file)
+
+def load_data():
+    with open("data/users.pkl", "rb") as file:
+        users = pickle.load(file)
+    return users
 
 def user_info_formatter(user):
     match user.role:

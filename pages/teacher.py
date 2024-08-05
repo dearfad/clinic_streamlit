@@ -1,24 +1,25 @@
 import streamlit as st
 import pickle
-from utils import set_page_header, user_info_formatter
+from libs.bvcutils import set_page_header, user_info_formatter, load_data
 
-set_page_header()
 
-chapter = st.selectbox("**章节**",("乳房疾病",))
+# set_page_header()
 
-mode = st.selectbox("**模式**", ("记录浏览", "理论授课", "教学研究"))
+# chapter = st.selectbox("**章节**",("乳房疾病",))
 
-with open("users.pkl", "rb") as file:
-    users = pickle.load(file)
+# mode = st.selectbox("**模式**", ("记录浏览", "理论授课", "教学研究"))
 
-st.selectbox(
-        "**用户**",
-        users,
-        format_func=lambda x: user_info_formatter(x),
-        key="user",
-    )
+users = load_data()
+st.write('ok')
 
-# show_result()
+# st.selectbox(
+#         "**用户**",
+#         users,
+#         format_func=lambda x: user_info_formatter(x),
+#         key="user",
+#     )
 
-if st.button("返回首页", use_container_width=True):
-    st.switch_page("breast.py")
+# # show_result()
+
+# if st.button("返回首页", use_container_width=True):
+#     st.switch_page("breast.py")
