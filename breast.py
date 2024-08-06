@@ -1,11 +1,12 @@
 import streamlit as st
-from libs.bvcpage import set_page_header
+
 from libs.bvcclass import User
+from libs.bvcpage import set_page_header
 from libs.bvcutils import reset_key
 
 set_page_header()
 
-if 'user' in st.session_state:
+if "user" in st.session_state:
     reset_key()
     st.rerun()
 
@@ -15,7 +16,9 @@ chapter = "乳房疾病"
 
 match role:
     case "游客":
-        st.info("请用 **正常语气** 与 **随机一名患者** 沟通", icon=":material/counter_1:")
+        st.info(
+            "请用 **正常语气** 与 **随机一名患者** 沟通", icon=":material/counter_1:"
+        )
         st.info("问诊完毕后请输入 **我问完了**", icon=":material/counter_2:")
         st.info("回答患者提出的 **相关问题**", icon=":material/counter_3:")
         st.info("作为一名 **游客**，您的过程 **不被统计**", icon=":material/counter_4:")
@@ -31,11 +34,22 @@ match role:
         grade = st.selectbox("**年级**", (range(2016, 2030, 1)))
         major = st.selectbox("**专业**", ("临床医学", "放射", "口腔", "其他"))
         mode = st.selectbox("模式", ("课堂学习", "自学测试", "出科考试"))
-        st.info("请用 **正常语气** 与 **数名患者** 沟通", icon=":material/counter_1:")
-        st.info("问诊完毕后请输入 **我问完了**", icon=":material/counter_2:")
-        st.info("回答患者提出的 **相关问题**", icon=":material/counter_3:")
-        st.info("请认真 **填写信息** 及 **选择模式**", icon=":material/counter_4:")
-        st.info("作为一名 **学生**，您的过程将 **被统计**", icon=":material/counter_5:")
+
+        match mode:
+            case _:
+                st.info(
+                    "请用 **正常语气** 与 **数名患者** 沟通",
+                    icon=":material/counter_1:",
+                )
+                st.info("问诊完毕后请输入 **我问完了**", icon=":material/counter_2:")
+                st.info("回答患者提出的 **相关问题**", icon=":material/counter_3:")
+                st.info(
+                    "请认真 **填写信息** 及 **选择模式**", icon=":material/counter_4:"
+                )
+                st.info(
+                    "作为一名 **学生**，您的过程将 **被统计**",
+                    icon=":material/counter_5:",
+                )
 
         if st.button("**开始**", use_container_width=True):
             st.session_state.user = User(role, chapter, name, grade, major, mode)
@@ -44,7 +58,9 @@ match role:
 
     case "教师":
         password = st.text_input("**密码**")
-        st.info("作为一名 **教师**，可以 **浏览分析** 数据", icon=":material/counter_1:")
+        st.info(
+            "作为一名 **教师**，可以 **浏览分析** 数据", icon=":material/counter_1:"
+        )
         if st.button("**登录**", use_container_width=True):
             if password == st.secrets["teacher_key"]:
                 st.switch_page("pages/teacher.py")
@@ -53,7 +69,9 @@ match role:
 
     case "管理员":
         password = st.text_input("**密码**")
-        st.info("作为一名 **管理员**，可以进行 **项目设置**", icon=":material/counter_1:")
+        st.info(
+            "作为一名 **管理员**，可以进行 **项目设置**", icon=":material/counter_1:"
+        )
         if st.button("**登录**", use_container_width=True):
             if password == st.secrets["admin_key"]:
                 st.switch_page("pages/admin.py")

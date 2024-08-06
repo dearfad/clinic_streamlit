@@ -11,6 +11,7 @@ st.markdown(f"**就诊编号: {user.index+1} / {len(user.chatlog)}**")
 
 with st.container(border=True):
     st.markdown(":page_facing_up: **对话记录**")
+    st.markdown(f"**:repeat: {user.chatlog.loc[user.index, 'inquiry_count']}**")
     show_chat(st.session_state.messages)
 
 case_question = user.chatlog.loc[user.index, "questions"]
@@ -38,4 +39,5 @@ if st.button("提交答案", use_container_width=True):
         st.switch_page("pages/result.py")
     else:
         del st.session_state.messages
+        del st.session_state.patient
         st.switch_page("pages/inquiry.py")

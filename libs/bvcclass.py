@@ -1,6 +1,12 @@
 import random
+
 import pandas as pd
+import streamlit as st
+from faker import Faker
+import requests
+
 from libs.bvcutils import read_cases
+
 
 class User:
     def __init__(self, role, chapter, name, grade, major, mode):
@@ -30,3 +36,9 @@ class User:
         self.chatlog["end_time"] = ""
         self.chatlog["messages"] = ""
         self.chatlog["inquiry_count"] = 1
+
+class Patient:
+    def __init__(self):
+        faker = Faker('zh_CN')
+        self.profile = faker.profile(sex="F")
+        self.photo = requests.get("https://cdn.seovx.com/?mom=302").url
