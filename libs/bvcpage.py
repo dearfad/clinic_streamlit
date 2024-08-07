@@ -33,7 +33,6 @@ def set_page_header():
     st.html(PAGE_STYLE)
     st.subheader("👩 虚拟门诊", divider="gray")
     st.caption("吉林大学中日联谊医院乳腺外科")
-    st.write(st.session_state)
 
 def show_chat(messages):
     for message in messages:
