@@ -12,7 +12,7 @@ from xingchen import (
 
 class XingChen:
     configuration = Configuration(host="https://nlp.aliyuncs.com")
-    configuration.access_token = "lm-bw72h4Q9oFOyuE47ncPxbg=="
+    configuration.access_token = st.secrets['xingchen_token']
 
     def __init__(self, character_id):
         with ApiClient(self.configuration) as api_client:

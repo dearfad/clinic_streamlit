@@ -12,6 +12,9 @@ def set_page_header():
         header{
             visibility: hidden;
         }
+        audio{
+            display: none;
+        }
         .block-container{
             padding-top: 1rem;
             padding-bottom: 1rem;

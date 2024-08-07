@@ -5,6 +5,7 @@ import streamlit as st
 from libs.bvcchat import chat
 from libs.bvcclass import Patient
 from libs.bvcpage import set_page_header, show_chat
+from libs.bvctts import tts
 
 set_page_header()
 
@@ -44,6 +45,7 @@ if prompt := st.chat_input(""):
         with st.chat_message("医"):
             st.write(prompt)
             st.session_state.messages.append({"role": "user", "content": prompt})
+            st.audio(tts(text=prompt, model='sambert-zhishuo-v1'), autoplay=True) # TTS
         with st.chat_message("患"):
             response = chat(
                 role_server="xingchen",
@@ -52,6 +54,7 @@ if prompt := st.chat_input(""):
             )
             st.markdown(f"**{response}**")
             st.session_state.messages.append({"role": "assistant", "content": response})
+            st.audio(tts(text=response, model='sambert-zhina-v1'), autoplay=True) # TTS
     else:
         user.chatlog.loc[user.index, "conversation_end_time"] = datetime.now().strftime(
             "%Y-%m-%d %H:%M:%S"
