@@ -11,7 +11,7 @@ from libs.bvcutils import read_cases
 class User:
     def __init__(self, role, chapter, name, grade, major, mode):
         self.role = role
-        self.chapter = chapter # 乳房疾病
+        self.chapter = chapter  # 乳房疾病
         self.name = name
         self.grade = grade
         self.major = major
@@ -37,8 +37,10 @@ class User:
         self.chatlog["messages"] = ""
         self.chatlog["inquiry_count"] = 1
 
+
 class Patient:
     def __init__(self):
-        faker = Faker('zh_CN')
+        faker = Faker("zh_CN")
         self.profile = faker.profile(sex="F")
-        self.photo = requests.get("https://cdn.seovx.com/?mom=302").url
+        response = requests.get("https://cdn.seovx.com/?mom=302", allow_redirects=False)
+        self.photo = "https:" + response.headers.get("Location")

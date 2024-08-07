@@ -33,7 +33,7 @@ match role:
         name = st.text_input("**姓名**", "学生")
         grade = st.selectbox("**年级**", (range(2016, 2030, 1)))
         major = st.selectbox("**专业**", ("临床医学", "放射", "口腔", "其他"))
-        mode = st.selectbox("模式", ("课堂学习", "自学测试", "出科考试"))
+        mode = st.selectbox("**模式**", ("课堂学习", "自学测试", "出科考试"))
 
         match mode:
             case _:

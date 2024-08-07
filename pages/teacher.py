@@ -15,7 +15,6 @@ match mode:
                 "**用户**",
                 users,
                 format_func=lambda x: user_info_formatter(x),
-                key="user",
             )
 
         show_result(user)
