@@ -1,6 +1,7 @@
 import streamlit as st
 from datetime import datetime
 
+
 def set_page_header():
     st.set_page_config(
         page_title="虚拟门诊",
@@ -37,6 +38,7 @@ def set_page_header():
     st.subheader("👩 虚拟门诊", divider="gray")
     st.caption("吉林大学中日联谊医院乳腺外科")
 
+
 def show_chat(messages):
     for message in messages:
         if message["role"] == "user":
@@ -45,6 +47,7 @@ def show_chat(messages):
         if message["role"] == "assistant":
             with st.chat_message("患"):
                 st.markdown(f"**{message['content']}**")
+
 
 def show_result(user):
     with st.container(border=True):
@@ -91,7 +94,7 @@ def show_result(user):
         with st.container(border=True):
             st.markdown("**对话记录**")
             st.markdown(f"**:repeat: {user.chatlog.loc[i, 'inquiry_count']}**")
-            total_inquiry_count += user.chatlog.loc[i, "inquiry_count"]            
+            total_inquiry_count += user.chatlog.loc[i, "inquiry_count"]
             show_chat(eval(user.chatlog.loc[i, "messages"]))
         for q in question:
             total_questions_count += 1

@@ -9,6 +9,12 @@ from libs.bvctts import tts
 
 set_page_header()
 
+settings_expander = st.expander("**设置**", icon=":material/settings:")
+
+with settings_expander:
+    voice = st.toggle("**语音输出**", value=False)
+    st.session_state.voice = True if voice else False
+
 if "messages" not in st.session_state:
     st.session_state.messages = [
         {"role": "user", "content": "你好"},
@@ -40,12 +46,12 @@ if user.chatlog.loc[user.index, "start_time"] == "":
     user.chatlog.loc[user.index, "start_time"] = datetime.now().strftime(
         "%Y-%m-%d %H:%M:%S"
     )
+
 if prompt := st.chat_input(""):
     if prompt != "我问完了":
         with st.chat_message("医"):
             st.write(prompt)
             st.session_state.messages.append({"role": "user", "content": prompt})
-            st.audio(tts(text=prompt, model='sambert-zhishuo-v1'), autoplay=True) # TTS
         with st.chat_message("患"):
             response = chat(
                 role_server="xingchen",
@@ -54,7 +60,10 @@ if prompt := st.chat_input(""):
             )
             st.markdown(f"**{response}**")
             st.session_state.messages.append({"role": "assistant", "content": response})
-            st.audio(tts(text=response, model='sambert-zhina-v1'), autoplay=True) # TTS
+            if st.session_state.voice:
+                settings_expander.audio(
+                    tts(text=response, model=st.session_state.patient.voice), autoplay=True
+                )  # TTS
     else:
         user.chatlog.loc[user.index, "conversation_end_time"] = datetime.now().strftime(
             "%Y-%m-%d %H:%M:%S"
@@ -62,3 +71,4 @@ if prompt := st.chat_input(""):
         st.session_state.messages.append({"role": "user", "content": prompt})
         user.chatlog.loc[user.index, "messages"] = str(st.session_state.messages)
         st.switch_page("pages/question.py")
+
