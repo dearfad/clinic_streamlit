@@ -1,0 +1,13 @@
+# UI
+streamlit
+
+# XINGCHEN
+xingchen
+
+# DASHSCOPE
+dashscope
+
+# DATA
+pandas
+
+faker
