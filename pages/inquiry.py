@@ -12,8 +12,15 @@ set_page_header()
 settings_expander = st.expander("**设置**", icon=":material/settings:")
 
 with settings_expander:
-    voice = st.toggle("**语音输出**", value=False)
-    st.session_state.voice = True if voice else False
+    col_left, col_right = st.columns(2)
+    with col_left:
+        if 'voice' not in st.session_state:
+            st.session_state.voice = False
+        voice = st.toggle("**语音输出**", value=st.session_state.voice)
+        st.session_state.voice = True if voice else False
+    with col_right:
+        if st.button("返回首页"):
+            st.switch_page("breast.py")
 
 if "messages" not in st.session_state:
     st.session_state.messages = [

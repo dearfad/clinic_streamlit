@@ -9,8 +9,7 @@ user = st.session_state.user
 
 st.markdown(f"**就诊编号: {user.index+1} / {len(user.chatlog)}**")
 
-with st.container(border=True):
-    st.markdown(":page_facing_up: **对话记录**")
+with st.expander(label=":page_facing_up: **对话记录**"):
     st.markdown(f"**:repeat: {user.chatlog.loc[user.index, 'inquiry_count']}**")
     show_chat(st.session_state.messages)
 
