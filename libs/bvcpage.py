@@ -16,6 +16,11 @@ def set_page_header():
         audio{
             display: none;
         }
+        img{
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 5px;
+        }
         .block-container{
             padding-top: 1rem;
             padding-bottom: 1rem;

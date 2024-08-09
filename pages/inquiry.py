@@ -36,15 +36,16 @@ patient = st.session_state.patient
 character_id = user.chatlog.loc[user.index, "id"]
 st.markdown(f"**就诊编号: {user.index+1} / {len(user.chatlog)}**")
 
-with st.container(border=True):
-    col_left, col_right = st.columns([2, 3])
+with st.container(border=False):
+    col_left, col_right = st.columns([3, 3])
     with col_left:
         st.image(patient.photo, use_column_width=True)
     with col_right:
-        st.markdown(f"姓名: **{patient.profile['name']}**")
-        st.markdown(f"地址: **{patient.profile['address']}**")
-        st.markdown(f"单位: **{patient.profile['company']}**")
-        st.markdown(f"职位: **{patient.profile['job']}**")
+        with st.container(border=True):
+            st.markdown(f"姓名: **{patient.profile['name']}**")
+            st.markdown(f"地址: **{patient.profile['address']}**")
+            st.markdown(f"单位: **{patient.profile['company']}**")
+            st.markdown(f"职位: **{patient.profile['job']}**")
 
 st.markdown(":page_facing_up: **谈话记录**")
 show_chat(st.session_state.messages)
