@@ -14,7 +14,7 @@ settings_expander = st.expander("**设置**", icon=":material/settings:")
 with settings_expander:
     col_left, col_right = st.columns(2)
     with col_left:
-        if 'voice' not in st.session_state:
+        if "voice" not in st.session_state:
             st.session_state.voice = False
         voice = st.toggle("**语音输出**", value=st.session_state.voice)
         st.session_state.voice = True if voice else False
@@ -70,7 +70,8 @@ if prompt := st.chat_input(""):
             st.session_state.messages.append({"role": "assistant", "content": response})
             if st.session_state.voice:
                 settings_expander.audio(
-                    tts(text=response, model=st.session_state.patient.voice), autoplay=True
+                    tts(text=response, model=st.session_state.patient.voice),
+                    autoplay=True,
                 )  # TTS
     else:
         user.chatlog.loc[user.index, "conversation_end_time"] = datetime.now().strftime(
@@ -79,4 +80,3 @@ if prompt := st.chat_input(""):
         st.session_state.messages.append({"role": "user", "content": prompt})
         user.chatlog.loc[user.index, "messages"] = str(st.session_state.messages)
         st.switch_page("pages/question.py")
-

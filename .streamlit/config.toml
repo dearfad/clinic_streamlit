@@ -5,4 +5,5 @@ showSidebarNavigation = false
 enableStaticServing = true
 
 [runner]
+fastReruns = true
 enforceSerializableSessionState = true
