@@ -7,7 +7,5 @@ xingchen
 # DASHSCOPE
 dashscope
 
-# DATA
-pandas
-
+# FAKEPATIENT
 faker

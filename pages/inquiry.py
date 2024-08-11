@@ -6,6 +6,7 @@ from libs.bvcchat import chat
 from libs.bvcclass import Patient
 from libs.bvcpage import set_page_header, show_chat
 from libs.bvctts import tts
+from libs.bvcutils import fix_img_tts
 
 set_page_header()
 
@@ -70,7 +71,7 @@ if prompt := st.chat_input(""):
             st.session_state.messages.append({"role": "assistant", "content": response})
             if st.session_state.voice:
                 settings_expander.audio(
-                    tts(text=response, model=st.session_state.patient.voice),
+                    tts(text=fix_img_tts(response), model=st.session_state.patient.voice),
                     autoplay=True,
                 )  # TTS
     else:

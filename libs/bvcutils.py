@@ -1,7 +1,5 @@
 import streamlit as st
-import random
 import pandas as pd
-
 import pickle
 import os
 
@@ -51,3 +49,6 @@ def user_info_formatter(user):
             return str(
                 f"{user.name} - {user.chatlog.loc[0, "start_time"]} - {user.grade}级 - {user.major}专业"
             )
+
+def fix_img_tts(response):    
+    return response.split('![]')[0].strip()
