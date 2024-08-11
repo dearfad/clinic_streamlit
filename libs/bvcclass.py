@@ -19,7 +19,7 @@ class User:
         self.chatlog: pd.DataFrame
 
     def create_chatlog(self):
-        data = read_cases("cases/breast.json")
+        data = read_cases("cases/breast_case.json")
         match self.role:
             case "游客":
                 data = data.sample(n=1, ignore_index=True)

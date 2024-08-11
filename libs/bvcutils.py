@@ -16,7 +16,8 @@ def read_cases(path):
 
 def reset_session_state():
     for key in st.session_state.keys():
-        del st.session_state[key]
+        if key != "voice":
+            del st.session_state[key]
 
 
 def save_data():
@@ -50,5 +51,6 @@ def user_info_formatter(user):
                 f"{user.name} - {user.chatlog.loc[0, "start_time"]} - {user.grade}级 - {user.major}专业"
             )
 
-def fix_img_tts(response):    
-    return response.split('![]')[0].strip()
+
+def fix_img_tts(response):
+    return response.split("![]")[0].strip()
