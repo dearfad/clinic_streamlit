@@ -41,8 +41,8 @@ class Patient:
     def __init__(self):
         faker = Faker("zh_CN")
         self.profile = faker.profile(sex="F")
-        response = requests.get("https://cdn.seovx.com/?mom=302", allow_redirects=False)
-        self.photo = "https:" + response.headers.get("Location")
+        # response = requests.get("https://cdn.seovx.com/?mom=302", allow_redirects=False)
+        # self.photo = "https:" + response.headers.get("Location")
         self.voice = random.choice(
             [
                 "sambert-zhiwei-v1",

@@ -40,7 +40,9 @@ st.markdown(f"**就诊编号: {user.index+1} / {len(user.chatlog)}**")
 with st.container(border=False):
     col_left, col_right = st.columns([3, 3])
     with col_left:
-        st.image(patient.photo, use_column_width=True)
+        # st.image(patient.photo, use_column_width=True)
+        # st.image("app/static/cat.jpg", use_column_width=True)
+        st.markdown("![](app/static/cat.jpg)")
     with col_right:
         with st.container(border=True):
             st.markdown(f"姓名: **{patient.profile['name']}**")
