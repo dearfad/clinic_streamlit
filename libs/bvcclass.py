@@ -1,10 +1,7 @@
 import random
-
 import pandas as pd
 from faker import Faker
-import requests
-
-from libs.bvcutils import read_cases
+from libs.bvcutils import read_cases, get_random_photo
 
 
 class User:
@@ -41,8 +38,7 @@ class Patient:
     def __init__(self):
         faker = Faker("zh_CN")
         self.profile = faker.profile(sex="F")
-        # response = requests.get("https://cdn.seovx.com/?mom=302", allow_redirects=False)
-        self.photo = "https://api.multiavatar.com/" + self.profile['name'] + ".png"
+        self.photo = get_random_photo(seed=self.profile["name"])
         self.voice = random.choice(
             [
                 "sambert-zhiwei-v1",

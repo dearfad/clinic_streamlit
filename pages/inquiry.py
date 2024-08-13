@@ -38,7 +38,7 @@ character_id = user.chatlog.loc[user.index, "id"]
 st.markdown(f"**就诊编号: {user.index+1} / {len(user.chatlog)}**")
 
 with st.container(border=False):
-    col_left, col_right = st.columns([3, 3])
+    col_left, col_right = st.columns([1, 3])
     with col_left:
         st.image(patient.photo, use_column_width=True)
     with col_right:

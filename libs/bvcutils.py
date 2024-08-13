@@ -14,6 +14,11 @@ def read_cases(path):
     return pd.read_json(path, orient="records")
 
 
+@st.cache_data
+def read_info(path):
+    return pd.read_json(path, orient="record")
+
+
 def reset_session_state():
     for key in st.session_state.keys():
         if key != "voice":
@@ -54,3 +59,9 @@ def user_info_formatter(user):
 
 def fix_img_tts(response):
     return response.split("![]")[0].strip()
+
+
+def get_random_photo(seed=""):
+    # response = requests.get("https://cdn.seovx.com/?mom=302", allow_redirects=False)
+    url = "https://api.multiavatar.com/" + seed + ".png"
+    return url

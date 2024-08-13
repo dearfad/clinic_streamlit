@@ -16,7 +16,6 @@ match mode:
                 users,
                 format_func=lambda x: user_info_formatter(x),
             )
-
         show_result(user)
     case _:
         pass

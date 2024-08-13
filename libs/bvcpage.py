@@ -1,5 +1,6 @@
 import streamlit as st
 from datetime import datetime
+from libs.bvcutils import read_info
 
 
 def set_page_header():
@@ -17,7 +18,7 @@ def set_page_header():
             display: none;
         }
         img{
-            border-radius: 8px;
+            border-radius: 50%;
             border: 1px solid #ddd;
             padding: 5px;
         }
@@ -52,6 +53,14 @@ def show_chat(messages):
         if message["role"] == "assistant":
             with st.chat_message("患"):
                 st.markdown(f"**{message['content']}**")
+
+
+def show_patient_info(character_id):
+    info_df = read_info("cases/breast_info.json").set_index('id')
+    info = info_df.loc[character_id, 'info']
+    for key, value in info.items():
+        st.markdown(f"**{key}：** {value}")
+    
 
 
 def show_result(user):
@@ -96,6 +105,11 @@ def show_result(user):
             st.markdown(
                 f"**:stopwatch: {end_time-start_time} = {conversation_end_time-start_time} + {end_time-conversation_end_time}**"
             )
+        
+        with st.container(border=True):
+            character_id = user.chatlog.loc[i, "id"]
+            show_patient_info(character_id)
+
         with st.container(border=True):
             st.markdown("**对话记录**")
             st.markdown(f"**:repeat: {user.chatlog.loc[i, 'inquiry_count']}**")
@@ -122,3 +136,4 @@ def show_result(user):
                 normal_inquiry_count} ) :material/close:2 :material/equal: {inquiry_score}**")
     st.markdown(f"**最后得分: :small_orange_diamond: :red[{
                 question_score - inquiry_score}] :small_orange_diamond:**")
+
