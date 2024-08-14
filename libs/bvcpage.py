@@ -58,6 +58,7 @@ def show_chat(messages):
 def show_patient_info(character_id):
     info_df = read_info("cases/breast_info.json").set_index('id')
     info = info_df.loc[character_id, 'info']
+    st.markdown(':book: **患者信息**')
     for key, value in info.items():
         st.markdown(f"**{key}：** {value}")
     
@@ -111,7 +112,7 @@ def show_result(user):
             show_patient_info(character_id)
 
         with st.container(border=True):
-            st.markdown("**对话记录**")
+            st.markdown(":clipboard: **对话记录**")
             st.markdown(f"**:repeat: {user.chatlog.loc[i, 'inquiry_count']}**")
             total_inquiry_count += user.chatlog.loc[i, "inquiry_count"]
             show_chat(eval(user.chatlog.loc[i, "messages"]))
