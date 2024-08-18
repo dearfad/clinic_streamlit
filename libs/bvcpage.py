@@ -137,3 +137,22 @@ def show_result(user):
     st.markdown(f"**最后得分: :small_orange_diamond: :red[{
                 question_score - inquiry_score}] :small_orange_diamond:**")
 
+
+def show_character_info(character: dict):
+    with st.container(border=False):
+        col_left, col_right = st.columns([1, 3])
+        with col_left:
+            avatar_url = "http:" + character['avatar']['fileUrl']
+            st.image(avatar_url, use_column_width=True)
+        with col_right:
+            with st.container(border=True):
+                st.markdown(f"姓名: **{character['name']}**")
+                st.markdown(f"建立: **{str(character['gmtCreate']).split(' ')[0]}**")
+                st.markdown(f"更新: **{str(character['gmtModified']).split(' ')[0]}**")
+                st.text_area(label="基本信息", height=500, value=character['basicInformation'])
+
+# st.text_input('name', value=characters.loc[index, 'name'])
+
+# st.text_area('basicInformation', height=500, value=characters.loc[index, 'basicInformation'])
+
+# st.text_input("traits", value=characters.loc[index, 'traits'])

@@ -34,7 +34,6 @@ if "patient" not in st.session_state:
 
 user = st.session_state.user
 
-st.write(user.id)
 
 patient = st.session_state.patient
 character_id = user.chatlog.loc[user.index, "id"]
@@ -74,7 +73,9 @@ if prompt := st.chat_input(""):
             st.session_state.messages.append({"role": "assistant", "content": response})
             if st.session_state.voice:
                 settings_expander.audio(
-                    tts(text=fix_img_tts(response), model=st.session_state.patient.voice),
+                    tts(
+                        text=fix_img_tts(response), model=st.session_state.patient.voice
+                    ),
                     autoplay=True,
                 )  # TTS
     else:
