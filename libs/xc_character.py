@@ -29,13 +29,13 @@ def init_client():
 # st.write(result)
 
 # 角色查询
-# api = init_client()
-# body = CharacterQueryDTO(
-# 	where=CharacterQueryWhere(
-# 		scope="my" # "my", "public", "pro_configured"
-# 	),
-# 	pageNum=1,
-# 	pageSize=20,
-# )
-# result = api.search(character_query_dto=body).data.to_dict()
-# st.write(result)
+api = init_client()
+body = CharacterQueryDTO(
+	where=CharacterQueryWhere(
+		scope="my" # "my", "public", "pro_configured"
+	),
+	pageNum=1,
+	pageSize=20,
+)
+result = api.search(character_query_dto=body).data.to_dict()
+st.write(result)

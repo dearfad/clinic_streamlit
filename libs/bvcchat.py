@@ -1,6 +1,7 @@
 import streamlit as st
 import uuid
 import pandas as pd
+from xingchen.models.character_advanced_config import CharacterAdvancedConfig
 from xingchen import (
     Configuration,
     ApiClient,
@@ -8,6 +9,7 @@ from xingchen import (
     CharacterApiSub,
     CharacterQueryDTO,
     CharacterQueryWhere,
+    CharacterUpdateDTO,
     ChatReqParams,
     CharacterKey,
     UserProfile,
@@ -40,11 +42,8 @@ class XingChen:
             return f"( 脑子坏掉了，等会再问我吧 ~ 原因是: {exception})"
 
     def detail(self, character_id):
-        self.character = self.character_api.character_details(
-            character_id=character_id
-        )
-        self.character_name = self.character.data.name
-        self.character_avatar_url = "http:" + self.character.data.avatar.file_url
+        detail = self.character_api.character_details(character_id=character_id).to_dict()
+        return detail
 
     def characters(self) -> pd.DataFrame:
         body = CharacterQueryDTO(
@@ -55,6 +54,24 @@ class XingChen:
         	pageSize=100,
         )
         return pd.DataFrame(self.character_api.search(character_query_dto=body).data.to_dict()['list'])
+
+    def update(self, character):
+        # body = CharacterUpdateDTO(
+        #     name = character['name'],
+        #     avatar = character['avatar'],
+        #     basicInformation = basicInformation,
+        #     openingLine = character['openingLine'],
+        #     traits = character['traits'],
+        #     chat_example = character['chatExample'],
+        #     type = character['type'],
+        #     advanced_config = character['advancedConfig'],
+        #     characterId = character['characterId'],
+        #     version = character['version'],
+        # )
+        body = CharacterUpdateDTO.from_dict(character)
+        st.write(body)
+        return True
+        # return self.character_api.update(character_update_dto=body).to_dict()['success']
 
 def BaiChuan():
     def __init__(self):

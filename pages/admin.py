@@ -4,23 +4,15 @@ from libs.bvcchat import XingChen
 
 set_page_header()
 
-st.session_state.editable = False
-
-def character_info_formatter(x, characters):
-    return characters.loc[x, 'name']
-
 st.markdown(":material/admin_panel_settings: **管理员**")
 
 characters = XingChen().characters()
-characters = characters.set_index("characterId")
 
-st.write(characters)
+characterId = st.selectbox('选择：', options=characters['characterId'], format_func=lambda x: characters.loc[characters['characterId']==x, 'name'].values[0])
 
-index = st.selectbox('选择：', options=characters.index, format_func=lambda x: character_info_formatter(x, characters),)
+character = characters.loc[characters['characterId']==characterId].to_dict(orient='records')[0]
 
-show_character_info(characters.loc[index].to_dict())
-
-
+show_character_info(character)
 
 if st.button("返回首页", use_container_width=True):
     st.switch_page("breast.py")

@@ -1,6 +1,7 @@
 import streamlit as st
 from datetime import datetime
 from libs.bvcutils import read_info
+from libs.bvcchat import XingChen
 
 
 def set_page_header():
@@ -36,13 +37,14 @@ def set_page_header():
             padding-top: 0rem;
             padding-bottom: 0rem;
             padding-left: 0rem;
-            padding-right: 0rem;
+            padding-right: 0rem;        
         }
     </style>
     """
     st.html(PAGE_STYLE)
     st.subheader("👩 虚拟门诊", divider="gray")
     st.caption("吉林大学中日联谊医院乳腺外科")
+
 
 def show_chat(messages):
     for message in messages:
@@ -55,12 +57,11 @@ def show_chat(messages):
 
 
 def show_patient_info(character_id):
-    info_df = read_info("cases/breast_info.json").set_index('id')
-    info = info_df.loc[character_id, 'info']
-    st.markdown(':book: **患者信息**')
+    info_df = read_info("cases/breast_info.json").set_index("id")
+    info = info_df.loc[character_id, "info"]
+    st.markdown(":book: **患者信息**")
     for key, value in info.items():
         st.markdown(f"**{key}：** {value}")
-    
 
 
 def show_result(user):
@@ -105,7 +106,7 @@ def show_result(user):
             st.markdown(
                 f"**:stopwatch: {end_time-start_time} = {conversation_end_time-start_time} + {end_time-conversation_end_time}**"
             )
-        
+
         with st.container(border=True):
             character_id = user.chatlog.loc[i, "id"]
             show_patient_info(character_id)
@@ -138,21 +139,30 @@ def show_result(user):
                 question_score - inquiry_score}] :small_orange_diamond:**")
 
 
-def show_character_info(character: dict):
+def show_character_info(character):
     with st.container(border=False):
         col_left, col_right = st.columns([1, 3])
-        with col_left:
-            avatar_url = "http:" + character['avatar']['fileUrl']
-            st.image(avatar_url, use_column_width=True)
         with col_right:
             with st.container(border=True):
                 st.markdown(f"姓名: **{character['name']}**")
                 st.markdown(f"建立: **{str(character['gmtCreate']).split(' ')[0]}**")
                 st.markdown(f"更新: **{str(character['gmtModified']).split(' ')[0]}**")
-                st.text_area(label="基本信息", height=500, value=character['basicInformation'])
+                basicinfo = st.text_area(
+                    label="**基本信息**",
+                    height=500,
+                    value=character["basicInformation"],
+                )
+        with col_left:
+            avatar_url = "http:" + character["avatar"]["fileUrl"]
+            st.image(avatar_url, caption=character["name"], use_column_width=True)
 
-# st.text_input('name', value=characters.loc[index, 'name'])
-
-# st.text_area('basicInformation', height=500, value=characters.loc[index, 'basicInformation'])
-
-# st.text_input("traits", value=characters.loc[index, 'traits'])
+            if st.button("**刷新**", use_container_width=True):
+                st.rerun()
+            if st.button("**更新**", use_container_width=True):
+                character['basicInformation'] = basicinfo
+                xingchen = XingChen()
+                result = xingchen.update(character)
+                if result:
+                    st.markdown("**:green[成功...]**")
+                else:
+                    st.markdown("**:red[失败...]**")
