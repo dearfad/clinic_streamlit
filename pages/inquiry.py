@@ -33,6 +33,9 @@ if "patient" not in st.session_state:
     st.session_state.patient = Patient()
 
 user = st.session_state.user
+
+st.write(user.id)
+
 patient = st.session_state.patient
 character_id = user.chatlog.loc[user.index, "id"]
 st.markdown(f"**就诊编号: {user.index+1} / {len(user.chatlog)}**")

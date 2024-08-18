@@ -44,7 +44,6 @@ def set_page_header():
     st.subheader("👩 虚拟门诊", divider="gray")
     st.caption("吉林大学中日联谊医院乳腺外科")
 
-
 def show_chat(messages):
     for message in messages:
         if message["role"] == "user":
