@@ -1,7 +1,7 @@
 import streamlit as st
 from datetime import datetime
 from libs.bvcutils import read_info
-from libs.bvcchat import XingChen
+from libs.models import XingChen
 
 
 def set_page_header():

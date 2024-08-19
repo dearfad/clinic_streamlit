@@ -6,4 +6,4 @@ enableStaticServing = true
 
 [runner]
 fastReruns = true
-enforceSerializableSessionState = true
+enforceSerializableSessionState = false

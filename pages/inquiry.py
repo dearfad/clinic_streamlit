@@ -2,7 +2,7 @@ from datetime import datetime
 
 import streamlit as st
 
-from libs.bvcchat import chat
+from libs.models import chat
 from libs.bvcclass import Patient
 from libs.bvcpage import set_page_header, show_chat
 from libs.bvctts import tts
