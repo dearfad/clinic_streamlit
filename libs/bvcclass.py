@@ -1,6 +1,7 @@
 import random
 import pandas as pd
 from faker import Faker
+import uuid
 from libs.bvcutils import read_cases, get_random_photo
 
 
@@ -14,6 +15,7 @@ class User:
         self.mode = mode
         self.index = 0
         self.chatlog: pd.DataFrame
+        self.user_id = str(uuid.uuid4())
 
     def create_chatlog(self):
         data = read_cases("cases/breast_case.json")

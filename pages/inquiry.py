@@ -65,9 +65,9 @@ if prompt := st.chat_input(""):
             st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("患"):
             response = chat(
-                role_server="xingchen",
+                model_name="xingchen",
                 character_id=character_id,
-                messages=st.session_state.messages,
+                message=prompt,
             )
             st.markdown(f"**{response}**")
             st.session_state.messages.append({"role": "assistant", "content": response})

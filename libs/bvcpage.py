@@ -1,7 +1,7 @@
 import streamlit as st
 from datetime import datetime
 from libs.bvcutils import read_info
-from libs.models import XingChen
+from libs.servers.tongyi import XingChen
 
 
 def set_page_header():
@@ -159,7 +159,7 @@ def show_character_info(character):
             if st.button("**刷新**", use_container_width=True):
                 st.rerun()
             if st.button("**更新**", use_container_width=True):
-                character['basicInformation'] = basicinfo
+                character["basicInformation"] = basicinfo
                 xingchen = XingChen()
                 result = xingchen.update(character)
                 if result:
