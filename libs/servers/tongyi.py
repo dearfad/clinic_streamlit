@@ -39,7 +39,6 @@ class XingChen:
         )
         try:            
             response = self.chat_api.chat(chat_param).to_dict()
-            st.write(response)
             if response["success"]:
                 return response["data"]["choices"][0]["messages"][0]["content"]
             else:
@@ -91,13 +90,13 @@ class XingChen:
         result = self.chat_message_api.reset_chat_history(request=body)
         return result.data
     
-xingchen = XingChen(api_key="lm-bw72h4Q9oFOyuE47ncPxbg==")
+# xingchen = XingChen(api_key="lm-bw72h4Q9oFOyuE47ncPxbg==")
 
 # r = xingchen.chat(character_id="37d0bb98a0194eefbecdba794fb1b42c", message="那里不舒服？", seed=12345, user_id="123456789")
 # st.write(r)
 
-h = xingchen.get_chat_histories(character_id="37d0bb98a0194eefbecdba794fb1b42c",user_id="1234567890")
-st.write(h)
+# h = xingchen.get_chat_histories(character_id="37d0bb98a0194eefbecdba794fb1b42c",user_id="1234567890")
+# st.write(h)
 
 # x = xingchen.reset_chat_history(character_id="37d0bb98a0194eefbecdba794fb1b42c",user_id="123456789")
 # st.write(x)

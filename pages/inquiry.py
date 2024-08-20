@@ -10,6 +10,7 @@ from libs.bvcutils import fix_img_tts
 
 set_page_header()
 
+st.write(st.session_state.user.chatlog)
 settings_expander = st.expander("**设置**", icon=":material/settings:")
 
 with settings_expander:
@@ -37,6 +38,7 @@ user = st.session_state.user
 
 patient = st.session_state.patient
 character_id = user.chatlog.loc[user.index, "id"]
+model_name = user.chatlog.loc[user.index, "server"]
 st.markdown(f"**就诊编号: {user.index+1} / {len(user.chatlog)}**")
 
 with st.container(border=False):
@@ -65,9 +67,9 @@ if prompt := st.chat_input(""):
             st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("患"):
             response = chat(
-                model_name="xingchen",
+                model_name=model_name,
                 character_id=character_id,
-                message=prompt,
+                messages=st.session_state.messages,
             )
             st.markdown(f"**{response}**")
             st.session_state.messages.append({"role": "assistant", "content": response})
