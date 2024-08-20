@@ -71,7 +71,7 @@ class XingChen:
         result = self.character_api.search(character_query_dto=body)
         return result.data.to_dict()["list"]
 
-    def get_chat_histories(self, character_id, user_id, session_id) -> list:
+    def get_chat_histories(self, character_id, user_id) -> list:
         body = ChatHistoryQueryDTO(
             # where=ChatHistoryQueryWhere(
             #     characterId=character_id, bizUserId=user_id, sessionId=session_id
@@ -96,7 +96,7 @@ xingchen = XingChen(api_key="lm-bw72h4Q9oFOyuE47ncPxbg==")
 # r = xingchen.chat(character_id="37d0bb98a0194eefbecdba794fb1b42c", message="那里不舒服？", seed=12345, user_id="123456789")
 # st.write(r)
 
-h = xingchen.get_chat_histories(character_id="37d0bb98a0194eefbecdba794fb1b42c",user_id="1234567890", session_id="a020595ed022479bbad269ad69594382")
+h = xingchen.get_chat_histories(character_id="37d0bb98a0194eefbecdba794fb1b42c",user_id="1234567890")
 st.write(h)
 
 # x = xingchen.reset_chat_history(character_id="37d0bb98a0194eefbecdba794fb1b42c",user_id="123456789")
