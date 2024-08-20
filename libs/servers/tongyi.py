@@ -17,7 +17,7 @@ from xingchen import (
     ModelParameters,
     UserProfile,
 )
-
+import streamlit as st
 
 class XingChen:
     def __init__(self, api_key):
@@ -37,8 +37,9 @@ class XingChen:
             context=ChatContext(use_chat_history=True),
             user_profile=UserProfile(user_id=user_id),
         )
-        try:
+        try:            
             response = self.chat_api.chat(chat_param).to_dict()
+            st.write(response)
             if response["success"]:
                 return response["data"]["choices"][0]["messages"][0]["content"]
             else:
@@ -76,8 +77,8 @@ class XingChen:
                 characterId=character_id, bizUserId=user_id, sessionId=session_id
             ),
             orderBy=["gmtCreate asc"],
-            pageNum=1,
-            pageSize=100,
+            pageNum=10,
+            # pageSize=10,
         )
         result = self.chat_message_api.chat_histories(chat_history_query_dto=body)
         return result.data.to_dict()
@@ -86,3 +87,14 @@ class XingChen:
         body = ResetChatHistoryRequest(characterId=character_id, userId=user_id)
         result = self.chat_message_api.reset_chat_history(request=body)
         return result.data
+    
+xingchen = XingChen(api_key="lm-bw72h4Q9oFOyuE47ncPxbg==")
+
+# r = xingchen.chat(character_id="37d0bb98a0194eefbecdba794fb1b42c", message="那里不舒服？", seed=12345, user_id="123456789")
+# st.write(r)
+
+h = xingchen.get_chat_histories(character_id="37d0bb98a0194eefbecdba794fb1b42c",user_id="123456789", session_id="a020595ed022479bbad269ad69594382")
+st.write(h)
+
+# x = xingchen.reset_chat_history(character_id="37d0bb98a0194eefbecdba794fb1b42c",user_id="123456789")
+# st.write(x)
