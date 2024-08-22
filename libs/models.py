@@ -1,15 +1,26 @@
 import streamlit as st
 import random
-
-from libs.servers.tongyi import XingChen
-from libs.servers.baichuan import BaiChuan
+import importlib
 
 user = st.session_state.user
 
-def chat(model_name, character_id, messages):
+
+MODEL_NAME_CLASS_DICT = {
+    "xingchen": 'XingChen',
+    "baichuan": "BaiChuan",
+}
+
+def get_model(server_name: str, model_name: str, api_key: str):
+    server = importlib.import_module(f"libs.servers.{server_name}")
+    ModelClass = getattr(server, MODEL_NAME_CLASS_DICT[model_name])
+    model = ModelClass(api_key=api_key)
+    return model
+
+def chat(server_name, model_name, character_id, messages):
+    api_key = random.choice(st.secrets[model_name])
+    model = get_model(server_name, model_name, api_key)
     match model_name:
         case "xingchen":
-            api_key = random.choice(st.secrets["xingchen_api_keys"])
             model = XingChen(api_key)
             message = messages[-1]['content']
             response = model.chat(
@@ -21,3 +32,6 @@ def chat(model_name, character_id, messages):
             model = BaiChuan(api_key)
             response = model.chat(character_id, messages)
             return response
+
+
+

@@ -1,5 +1,5 @@
 import streamlit as st
-from libs.bvcclass import User
+from libs.bvcuser import User
 from libs.bvcpage import set_page_header
 from libs.bvcutils import reset_session_state
 
