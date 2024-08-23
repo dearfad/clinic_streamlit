@@ -2,8 +2,10 @@ import random
 import uuid
 from dataclasses import dataclass, field
 from enum import Enum
+
 import pandas as pd
 import requests
+import streamlit as st
 from faker import Faker
 
 VOICES = [
@@ -75,8 +77,13 @@ def get_random_voice() -> str:
     #         random.shuffle(question["answer_list"])
 
 
+@st.cache_data
+def read_file(path):
+    return pd.read_json(path, orient="records")
+
+
 def load_questions(server, model, id):
-    questions = pd.read_json("data/questions.json", orient="records")
+    questions = read_file(path="data/questions.json")
     return questions.query(f"server == '{server}' & model == '{model}' & id == '{id}'")[
         "questions"
     ].tolist()[0]
@@ -90,7 +97,7 @@ class Doctor:
     name: str = None
     grade: str = None
     major: str = None
-    logs: list = field(default_factory=load_questions)
+    logs: list = field(default_factory=list)
 
 
 @dataclass
@@ -115,7 +122,5 @@ class FakeProfile:
     photo: str = field(default_factory=get_random_photo)
     voice: str = field(default_factory=get_random_voice)
 
-
-patient = Patient("tongyi", "xingchen", "37d0bb98a0194eefbecdba794fb1b42c")
-print(patient)
-# print(patient.questions)
+class Patients:
+    

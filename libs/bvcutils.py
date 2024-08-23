@@ -10,7 +10,7 @@ CHAPTER = {
 
 
 @st.cache_data
-def read_cases(path):
+def read_file(path):
     return pd.read_json(path, orient="records")
 
 
