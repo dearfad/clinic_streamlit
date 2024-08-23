@@ -1,31 +1,92 @@
-from dataclasses import dataclass
-# import random
-# import pandas as pd
-# from faker import Faker
-# import uuid
-# from libs.bvcutils import read_cases, get_random_photo
+from dataclasses import dataclass, field
+from enum import Enum
+import uuid
+from faker import Faker
+
+import random
+import requests
+
+
+
+VOICES = [
+    "sambert-zhiwei-v1",
+    "sambert-zhijia-v1",
+    "sambert-zhiqi-v1",
+    "sambert-zhiqian-v1",
+    "sambert-zhiru-v1",
+    "sambert-zhimiao-emo-v1",
+    "sambert-zhifei-v1",
+    "sambert-zhigui-v1",
+    "sambert-zhijing-v1",
+    "sambert-zhilun-v1",
+    "sambert-zhimao-v1",
+    "sambert-zhina-v1",
+    "sambert-zhistella-v1",
+    "sambert-zhiting-v1",
+    "sambert-zhixiao-v1",
+    "sambert-zhiya-v1",
+    "sambert-zhiying-v1",
+    "sambert-zhiyuan-v1",
+    "sambert-zhiyue-v1",
+]
+
+class Role(Enum):
+    VISITOR = "游客"
+    STUDENT = "学生"
+    TEACHER = "教师"
+    ADMIN = "管理员"
+
+    def __str__(self):
+        return self.value
+
+def generate_uuid() -> str:
+    return str(uuid.uuid4())
+
+
+def generate_fake_profile():
+    return Faker("zh_CN").profile(sex="F")
+
+
+def get_random_photo() -> str:
+    response = requests.get("https://cdn.seovx.com/?mom=302", allow_redirects=False)
+    print(response.status_code)
+    if response.status_code == 302:
+        return "https:" + response.headers.get("Location")
+    else:
+        return "https://api.multiavatar.com/" + str(uuid.uuid4()) + ".png"
+
+def get_random_voice() -> str:
+    return random.choice(VOICES)
 
 
 @dataclass
-class User:
-    id: str | None = None
-    name: str | None = None
+class Doctor:
+    role: Role = Role.VISITOR
+    mode: str = None
+    id: str = field(default_factory=generate_uuid)
+    name: str = None
+    grade: str = None
+    major: str = None
+    logs: list = field(default_factory=list)
 
 
-user = User(name='test')
-print(user)
+@dataclass
+class Patient:
+    server: str
+    model: str
+    id: str
+    profile: dict = field(default_factory=generate_fake_profile)
+    photo: str = field(default_factory=get_random_photo)
+    voice: str = field(default_factory=get_random_voice)
 
-# class User:
-#     def __init__(self, role, chapter, name, grade, major, mode):
-#         self.role = role
-#         self.chapter = chapter  # 乳房疾病
-#         self.name = name
-#         self.grade = grade
-#         self.major = major
-#         self.mode = mode
-#         self.index = 0
-#         self.chatlog: pd.DataFrame
-#         self.user_id = str(uuid.uuid4())
+patient = Patient(server='test', model='test', id='test')
+print(patient)
+
+# import pandas as pd
+
+
+
+# from libs.bvcutils import read_cases, get_random_photo
 
 #     def create_chatlog(self):
 #         data = read_cases("cases/breast_case.json")
@@ -44,33 +105,3 @@ print(user)
 #         self.chatlog["end_time"] = ""
 #         self.chatlog["messages"] = ""
 #         self.chatlog["inquiry_count"] = 1
-# class Character:
-#     def __init__(self):
-#         self.server: str
-#         self.model: str
-#         self.id: str
-#         self.profile = Faker("zh_CN").profile(sex="F")
-#         self.photo = get_random_photo(seed=self.profile["name"])
-#         self.voice = random.choice(
-#             [
-#                 "sambert-zhiwei-v1",
-#                 "sambert-zhijia-v1",
-#                 "sambert-zhiqi-v1",
-#                 "sambert-zhiqian-v1",
-#                 "sambert-zhiru-v1",
-#                 "sambert-zhimiao-emo-v1",
-#                 "sambert-zhifei-v1",
-#                 "sambert-zhigui-v1",
-#                 "sambert-zhijing-v1",
-#                 "sambert-zhilun-v1",
-#                 "sambert-zhimao-v1",
-#                 "sambert-zhina-v1",
-#                 "sambert-zhistella-v1",
-#                 "sambert-zhiting-v1",
-#                 "sambert-zhixiao-v1",
-#                 "sambert-zhiya-v1",
-#                 "sambert-zhiying-v1",
-#                 "sambert-zhiyuan-v1",
-#                 "sambert-zhiyue-v1",
-#             ]
-#         )

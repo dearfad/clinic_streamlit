@@ -61,7 +61,3 @@ def fix_img_tts(response):
     return response.split("![]")[0].strip()
 
 
-def get_random_photo(seed=""):
-    # response = requests.get("https://cdn.seovx.com/?mom=302", allow_redirects=False)
-    url = "https://api.multiavatar.com/" + seed + ".png"
-    return url

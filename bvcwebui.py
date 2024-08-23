@@ -1,5 +1,5 @@
 import streamlit as st
-from libs.bvcuser import User
+from libs.bvcuser import Doctor
 from libs.bvcpage import set_page_header
 from libs.bvcutils import reset_session_state
 
@@ -30,7 +30,7 @@ match role:
         st.info("作为一名 **游客**，您的过程 **不被统计**", icon=":material/counter_4:")
 
         if st.button("**开始**", use_container_width=True):
-            st.session_state.user = User(
+            st.session_state.user = Doctor(
                 role=role, chapter=chapter, name="游客", grade="", major="", mode=""
             )
 
@@ -68,7 +68,7 @@ match role:
                 )
 
         if st.button("**开始**", use_container_width=True):
-            st.session_state.user = User(role, chapter, name, grade, major, mode)
+            st.session_state.user = Doctor(role, chapter, name, grade, major, mode)
 
             st.session_state.user.create_chatlog()
 

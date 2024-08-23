@@ -3,7 +3,7 @@ from datetime import datetime
 import streamlit as st
 
 from libs.models import chat
-from libs.bvcuser import Character
+from libs.bvcuser import Patient
 from libs.bvcpage import set_page_header, show_chat
 from libs.bvctts import tts
 from libs.bvcutils import fix_img_tts
@@ -31,7 +31,7 @@ if "messages" not in st.session_state:
     ]
 
 if "patient" not in st.session_state:
-    st.session_state.patient = Character()
+    st.session_state.patient = Patient()
 
 user = st.session_state.user
 
