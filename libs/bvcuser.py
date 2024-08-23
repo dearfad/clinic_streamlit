@@ -1,12 +1,10 @@
+import random
+import uuid
 from dataclasses import dataclass, field
 from enum import Enum
-import uuid
-from faker import Faker
-
-import random
+import pandas as pd
 import requests
-
-
+from faker import Faker
 
 VOICES = [
     "sambert-zhiwei-v1",
@@ -30,6 +28,8 @@ VOICES = [
     "sambert-zhiyue-v1",
 ]
 
+
+
 class Role(Enum):
     VISITOR = "游客"
     STUDENT = "学生"
@@ -38,6 +38,7 @@ class Role(Enum):
 
     def __str__(self):
         return self.value
+
 
 def generate_uuid() -> str:
     return str(uuid.uuid4())
@@ -48,16 +49,36 @@ def generate_fake_profile():
 
 
 def get_random_photo() -> str:
-    response = requests.get("https://cdn.seovx.com/?mom=302", allow_redirects=False)
-    print(response.status_code)
+    imagehost = random.choice(
+        [
+            "https://cdn.seovx.com/?mom=302",
+            "https://cdn.seovx.com/d/?mom=302",
+            "https://cdn.seovx.com/ha/?mom=302",
+        ]
+    )
+    response = requests.get(imagehost, allow_redirects=False)
     if response.status_code == 302:
         return "https:" + response.headers.get("Location")
     else:
         return "https://api.multiavatar.com/" + str(uuid.uuid4()) + ".png"
 
+
 def get_random_voice() -> str:
     return random.choice(VOICES)
 
+
+    # match self.role:
+    #     case "游客":
+    #         data = data.sample(n=1, ignore_index=True)
+    #     case "学生":
+    #         data = data.sample(frac=1, ignore_index=True)
+    # for questions in data["questions"]:
+    #     for question in questions:
+    #         random.shuffle(question["answer_list"])
+
+def load_questions():
+    questions = pd.read_json('data/questions.json', orient="records")
+    return questions
 
 @dataclass
 class Doctor:
@@ -67,7 +88,7 @@ class Doctor:
     name: str = None
     grade: str = None
     major: str = None
-    logs: list = field(default_factory=list)
+    logs: list = field(default_factory=load_questions)
 
 
 @dataclass
@@ -75,33 +96,21 @@ class Patient:
     server: str
     model: str
     id: str
+    messages: list = field(default_factory=list)
+    begin_time: str = None
+    chat_duration_time: str = None
+    end_time: str = None
+    inquiry_count: int = 1
+    questions: list = field(default_factory=load_questions)
+
+
+@dataclass
+class FakeProfile:
     profile: dict = field(default_factory=generate_fake_profile)
     photo: str = field(default_factory=get_random_photo)
     voice: str = field(default_factory=get_random_voice)
 
-patient = Patient(server='test', model='test', id='test')
+
+patient = Patient("tongyi", "xingchen", "12345")
 print(patient)
-
-# import pandas as pd
-
-
-
-# from libs.bvcutils import read_cases, get_random_photo
-
-#     def create_chatlog(self):
-#         data = read_cases("cases/breast_case.json")
-#         match self.role:
-#             case "游客":
-#                 data = data.sample(n=1, ignore_index=True)
-#             case "学生":
-#                 data = data.sample(frac=1, ignore_index=True)
-#         for questions in data["questions"]:
-#             for question in questions:
-#                 random.shuffle(question["answer_list"])
-
-#         self.chatlog = pd.DataFrame(data)
-#         self.chatlog["start_time"] = ""
-#         self.chatlog["conversation_end_time"] = ""
-#         self.chatlog["end_time"] = ""
-#         self.chatlog["messages"] = ""
-#         self.chatlog["inquiry_count"] = 1
+# print(patient.questions)

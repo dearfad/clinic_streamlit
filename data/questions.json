@@ -1,13 +1,13 @@
 [
     {
+        "server": "tongyi",
+        "model": "xingchen",
         "id": "37d0bb98a0194eefbecdba794fb1b42c",
-        "server": "xingchen",
-        "name": "王淑芬",
         "questions": [
             {
                 "question": "初步诊断是什么？",
                 "correct_answer": "乳腺炎",
-                "answer_list": [
+                "answers": [
                     "乳腺炎",
                     "乳腺腺瘤",
                     "乳腺癌",
@@ -17,7 +17,7 @@
             {
                 "question": "此病的原因是什么？",
                 "correct_answer": "细菌感染",
-                "answer_list": [
+                "answers": [
                     "细菌感染",
                     "遗传因素",
                     "外伤导致",
@@ -27,7 +27,7 @@
             {
                 "question": "治疗方法正确的是？",
                 "correct_answer": "手术治疗",
-                "answer_list": [
+                "answers": [
                     "手术治疗",
                     "抗菌药物",
                     "定期复查",
@@ -37,14 +37,14 @@
         ]
     },
     {
+        "server": "tongyi",
+        "model": "xingchen",
         "id": "5b90fa5b76f0425aab4413efd9d3c257",
-        "server": "xingchen",
-        "name": "赵淑芹",
         "questions": [
             {
                 "question": "该病的诊断是什么？",
                 "correct_answer": "乳腺纤维腺瘤",
-                "answer_list": [
+                "answers": [
                     "乳腺纤维腺瘤",
                     "乳腺增生",
                     "副乳腺",
@@ -54,7 +54,7 @@
             {
                 "question": "下一步该怎么治疗？",
                 "correct_answer": "手术",
-                "answer_list": [
+                "answers": [
                     "手术",
                     "药物治疗",
                     "局部按摩",
@@ -64,7 +64,7 @@
             {
                 "question": "高发的年龄段是什么？",
                 "correct_answer": "20-25岁",
-                "answer_list": [
+                "answers": [
                     "20-25岁",
                     "15-20岁",
                     "10-15岁",
@@ -75,13 +75,13 @@
     },
     {
         "id": "de2f24bd946e4c3fa80047d6877f557b",
-        "server": "xingchen",
-        "name": "刘亚芬",
+        "server": "tongyi",
+        "model": "xingchen",
         "questions": [
             {
                 "question": "大夫这是什么病啊？",
                 "correct_answer": "乳腺增生",
-                "answer_list": [
+                "answers": [
                     "乳腺增生",
                     "乳腺腺瘤",
                     "乳腺癌",
@@ -91,7 +91,7 @@
             {
                 "question": "这个病会死人么？",
                 "correct_answer": "不会",
-                "answer_list": [
+                "answers": [
                     "不会",
                     "会的",
                     "不知道"
@@ -100,7 +100,7 @@
             {
                 "question": "下一步该怎么治疗啊？",
                 "correct_answer": "药物治疗",
-                "answer_list": [
+                "answers": [
                     "药物治疗",
                     "手术治疗",
                     "乳房切除",
@@ -110,14 +110,14 @@
         ]
     },
     {
-        "id": "30973",
         "server": "baichuan",
-        "name": "王淑芬",
+        "model": "npc",
+        "id": "30973",
         "questions": [
             {
                 "question": "初步诊断是什么？",
                 "correct_answer": "乳腺炎",
-                "answer_list": [
+                "answers": [
                     "乳腺炎",
                     "乳腺腺瘤",
                     "乳腺癌",
@@ -127,7 +127,7 @@
             {
                 "question": "此病的原因是什么？",
                 "correct_answer": "细菌感染",
-                "answer_list": [
+                "answers": [
                     "细菌感染",
                     "遗传因素",
                     "外伤导致",
@@ -137,7 +137,7 @@
             {
                 "question": "治疗方法正确的是？",
                 "correct_answer": "手术治疗",
-                "answer_list": [
+                "answers": [
                     "手术治疗",
                     "抗菌药物",
                     "定期复查",
