@@ -1,3 +1,5 @@
+import random
+
 from xingchen import (
     ApiClient,
     CharacterApiSub,
@@ -7,17 +9,17 @@ from xingchen import (
     CharacterUpdateDTO,
     ChatApiSub,
     ChatContext,
-    ChatReqParams,
-    ChatMessageApiSub,
     ChatHistoryQueryDTO,
     ChatHistoryQueryWhere,
-    ResetChatHistoryRequest,
+    ChatMessageApiSub,
+    ChatReqParams,
     Configuration,
     Message,
     ModelParameters,
+    ResetChatHistoryRequest,
     UserProfile,
 )
-import streamlit as st
+
 
 class XingChen:
     def __init__(self, api_key):
@@ -32,12 +34,14 @@ class XingChen:
     def chat(self, character_id, message, seed, user_id) -> str:
         chat_param = ChatReqParams(
             bot_profile=CharacterKey(character_id=character_id),
-            model_parameters=ModelParameters(seed=seed, incrementalOutput=False),
+            model_parameters=ModelParameters(
+                seed=random.getrandbits(32), incrementalOutput=False
+            ),
             messages=[Message(role="user", content=message)],
             context=ChatContext(use_chat_history=True),
             user_profile=UserProfile(user_id=user_id),
         )
-        try:            
+        try:
             response = self.chat_api.chat(chat_param).to_dict()
             if response["success"]:
                 return response["data"]["choices"][0]["messages"][0]["content"]
@@ -72,15 +76,10 @@ class XingChen:
 
     def get_chat_histories(self, character_id, user_id) -> list:
         body = ChatHistoryQueryDTO(
-            # where=ChatHistoryQueryWhere(
-            #     characterId=character_id, bizUserId=user_id, sessionId=session_id
-            # ),
-            where=ChatHistoryQueryWhere(
-                characterId=character_id, bizUserId=user_id
-            ),
+            where=ChatHistoryQueryWhere(characterId=character_id, bizUserId=user_id),
             orderBy=["gmtCreate desc"],
             pageNum=1,
-            # pageSize=10,
+            pageSize=10,
         )
         result = self.chat_message_api.chat_histories(chat_history_query_dto=body)
         return result.data.to_dict()
@@ -89,14 +88,3 @@ class XingChen:
         body = ResetChatHistoryRequest(characterId=character_id, userId=user_id)
         result = self.chat_message_api.reset_chat_history(request=body)
         return result.data
-    
-# xingchen = XingChen(api_key="lm-bw72h4Q9oFOyuE47ncPxbg==")
-
-# r = xingchen.chat(character_id="37d0bb98a0194eefbecdba794fb1b42c", message="那里不舒服？", seed=12345, user_id="123456789")
-# st.write(r)
-
-# h = xingchen.get_chat_histories(character_id="37d0bb98a0194eefbecdba794fb1b42c",user_id="1234567890")
-# st.write(h)
-
-# x = xingchen.reset_chat_history(character_id="37d0bb98a0194eefbecdba794fb1b42c",user_id="123456789")
-# st.write(x)

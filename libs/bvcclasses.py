@@ -67,26 +67,33 @@ def get_random_photo() -> str:
 def get_random_voice() -> str:
     return random.choice(VOICES)
 
-    # match self.role:
-    #     case "游客":
-    #         data = data.sample(n=1, ignore_index=True)
-    #     case "学生":
-    #         data = data.sample(frac=1, ignore_index=True)
-    # for questions in data["questions"]:
-    #     for question in questions:
-    #         random.shuffle(question["answer_list"])
-
 
 @st.cache_data
 def read_file(path):
     return pd.read_json(path, orient="records")
 
 
-def load_questions(server, model, id):
-    questions = read_file(path="data/questions.json")
-    return questions.query(f"server == '{server}' & model == '{model}' & id == '{id}'")[
-        "questions"
-    ].tolist()[0]
+def load_questions(server, model, id) -> dict:
+    questions_df = read_file(path="data/questions.json")
+    questions = questions_df.query(
+        f"server == '{server}' & model == '{model}' & id == '{id}'"
+    )["questions"].tolist()[0]
+    for question in questions:
+        random.shuffle(question["answers"])
+    return questions
+
+
+def assign_patients(role, mode) -> list:
+    patients_df = read_file(path="data/questions.json")
+    match role:
+        case _:
+            patients_list = patients_df.sample(n=2, ignore_index=True)[
+                ["server", "model", "id"]
+            ].to_dict(orient="records")
+    patients = []
+    for patient in patients_list:
+        patients.append(Patient(patient["server"], patient["model"], patient["id"]))
+    return patients
 
 
 @dataclass
@@ -97,7 +104,10 @@ class Doctor:
     name: str = None
     grade: str = None
     major: str = None
-    logs: list = field(default_factory=list)
+    patients: list = field(default_factory=list)
+
+    def __post_init__(self):
+        self.patients = assign_patients(self.role, self.mode)
 
 
 @dataclass
@@ -121,6 +131,3 @@ class FakeProfile:
     profile: dict = field(default_factory=generate_fake_profile)
     photo: str = field(default_factory=get_random_photo)
     voice: str = field(default_factory=get_random_voice)
-
-class Patients:
-    

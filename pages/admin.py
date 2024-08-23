@@ -1,6 +1,6 @@
 import streamlit as st
 from libs.bvcpage import set_page_header, show_character_info
-from libs.models import XingChen
+from libs.bvcmodels import XingChen
 
 set_page_header()
 

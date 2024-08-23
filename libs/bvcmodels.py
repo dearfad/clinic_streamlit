@@ -1,0 +1,26 @@
+import importlib
+import random
+
+import streamlit as st
+
+from libs.bvcclasses import Doctor, Patient
+
+
+MODEL_CLASS = {
+    "xingchen": "XingChen",
+    "baichuan": "BaiChuan",
+}
+
+
+def get_model(server_name: str, model_name: str, api_key: str):
+    server = importlib.import_module(f"libs.servers.{server_name}")
+    ModelClass = getattr(server, MODEL_CLASS[model_name])
+    model = ModelClass(api_key=api_key)
+    return model
+
+
+def chat(doctor: Doctor, patient: Patient, messages):
+    api_key = random.choice(st.secrets[patient.model])
+    model = get_model(patient.server, patient.model, api_key)
+    response = model.chat(patient.id, messages, user_id=doctor.id)
+    return response
