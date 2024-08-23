@@ -29,7 +29,6 @@ VOICES = [
 ]
 
 
-
 class Role(Enum):
     VISITOR = "游客"
     STUDENT = "学生"
@@ -66,7 +65,6 @@ def get_random_photo() -> str:
 def get_random_voice() -> str:
     return random.choice(VOICES)
 
-
     # match self.role:
     #     case "游客":
     #         data = data.sample(n=1, ignore_index=True)
@@ -76,9 +74,13 @@ def get_random_voice() -> str:
     #     for question in questions:
     #         random.shuffle(question["answer_list"])
 
-def load_questions():
-    questions = pd.read_json('data/questions.json', orient="records")
-    return questions
+
+def load_questions(server, model, id):
+    questions = pd.read_json("data/questions.json", orient="records")
+    return questions.query(f"server == '{server}' & model == '{model}' & id == '{id}'")[
+        "questions"
+    ].tolist()[0]
+
 
 @dataclass
 class Doctor:
@@ -101,7 +103,10 @@ class Patient:
     chat_duration_time: str = None
     end_time: str = None
     inquiry_count: int = 1
-    questions: list = field(default_factory=load_questions)
+    questions: list = field(default_factory=list)
+
+    def __post_init__(self):
+        self.questions = load_questions(self.server, self.model, self.id)
 
 
 @dataclass
@@ -111,6 +116,6 @@ class FakeProfile:
     voice: str = field(default_factory=get_random_voice)
 
 
-patient = Patient("tongyi", "xingchen", "12345")
+patient = Patient("tongyi", "xingchen", "37d0bb98a0194eefbecdba794fb1b42c")
 print(patient)
 # print(patient.questions)
