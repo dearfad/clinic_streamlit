@@ -3,9 +3,9 @@ from libs.bvcpage import set_page_header, show_result
 
 set_page_header()
 
-user = st.session_state.user
+doctor = st.session_state.doctor
 
-show_result(user)
+show_result(doctor)
 
 if st.button("返回首页", use_container_width=True):
-    st.switch_page("breast.py")
+    st.switch_page("bvc.py")

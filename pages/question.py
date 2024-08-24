@@ -1,42 +1,37 @@
 import streamlit as st
 from datetime import datetime
 from libs.bvcpage import set_page_header, show_chat
-from libs.bvcutils import save_data
+# from libs.bvcutils import save_data
 
 set_page_header()
+if "doctor" not in st.session_state:
+    st.switch_page("bvc.py")
+id = st.session_state.id
+doctor = st.session_state.doctor
+patient = doctor.patients[id]
 
-user = st.session_state.user
-
-st.markdown(f"**就诊编号: {user.index+1} / {len(user.chatlog)}**")
+st.markdown(f"**就诊编号: {id+1} / {len(doctor.patients)}**")
 
 with st.expander(label=":page_facing_up: **对话记录**"):
-    st.markdown(f"**:repeat: {user.chatlog.loc[user.index, 'inquiry_count']}**")
-    show_chat(st.session_state.messages)
+    st.markdown(f"**:repeat: {patient.inquiry_count}**")
+    show_chat(patient.messages)
 
-case_question = user.chatlog.loc[user.index, "questions"]
-
-for index, question in enumerate(case_question):
+for index, question in enumerate(patient.questions):
     key = "a" + str(index)
-    st.radio(
-        f"**Q{index+1}: {question['question']}**", question["answer_list"], key=key
-    )
+    st.radio(f"**Q{index+1}: {question['question']}**", question["answers"], key=key)
 
 if st.button("再问一下", use_container_width=True):
-    user.chatlog.loc[user.index, "inquiry_count"] += 1
-    st.switch_page('pages/inquiry.py')
+    patient.inquiry_count += 1
+    st.switch_page("pages/inquiry.py")
 
 if st.button("提交答案", use_container_width=True):
-    user.chatlog.loc[user.index, "end_time"] = datetime.now().strftime(
-        "%Y-%m-%d %H:%M:%S"
-    )
-    for a in range(len(case_question)):
+    patient.end_time = datetime.now()
+    for a in range(len(patient.questions)):
         k = "a" + str(a)
-        case_question[a]["user_answer"] = st.session_state[k]
-    user.index += 1
-    if user.index == len(user.chatlog):
-        save_data()
+        patient.questions[a]["answer"] = st.session_state[k]
+    st.session_state.id += 1
+    if st.session_state.id == len(doctor.patients):
+        # save_data()
         st.switch_page("pages/result.py")
     else:
-        del st.session_state.messages
-        del st.session_state.patient
         st.switch_page("pages/inquiry.py")

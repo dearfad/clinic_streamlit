@@ -7,6 +7,7 @@ import pandas as pd
 import requests
 import streamlit as st
 from faker import Faker
+from datetime import datetime, timedelta
 
 VOICES = [
     "sambert-zhiwei-v1",
@@ -87,7 +88,7 @@ def assign_patients(role, mode) -> list:
     patients_df = read_file(path="data/patients.json")
     match role:
         case _:
-            patients_list = patients_df.sample(n=1, ignore_index=True)[
+            patients_list = patients_df.sample(n=2, ignore_index=True)[
                 ["server", "model", "id"]
             ].to_dict(orient="records")
     patients = []
@@ -116,9 +117,9 @@ class Patient:
     model: str
     id: str
     messages: list = field(default_factory=list)
-    begin_time: str = None
-    chat_duration_time: str = None
-    end_time: str = None
+    begin_time: datetime = None
+    chat_duration_time: timedelta = timedelta(seconds=0)
+    end_time: datetime = None
     inquiry_count: int = 1
     questions: list = field(default_factory=list)
 

@@ -1,12 +1,14 @@
 import streamlit as st
 from libs.bvcclasses import Role, Doctor
 from libs.bvcpage import set_page_header
+from libs.bvcutils import reset_session_state
 
-# from libs.bvcutils import reset_session_state
 set_page_header()
-# if "user" in st.session_state:
-#     reset_session_state()
-#     st.rerun()
+
+if "user" in st.session_state:
+    reset_session_state()
+    st.rerun()
+
 role = st.selectbox("**类别**", Role)
 match role:
     case Role.VISITOR:
