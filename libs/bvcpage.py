@@ -19,9 +19,10 @@ def set_page_header():
             display: none;
         }
         img{
-            border-radius: 50%;
+            border-radius: 8px;
             border: 1px solid #ddd;
             padding: 5px;
+            width: 100%;
         }
         .block-container{
             padding-top: 1rem;

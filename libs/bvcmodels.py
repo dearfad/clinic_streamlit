@@ -19,8 +19,8 @@ def get_model(server_name: str, model_name: str, api_key: str):
     return model
 
 
-def chat(doctor: Doctor, patient: Patient, messages):
+def chat(doctor: Doctor, patient: Patient):
     api_key = random.choice(st.secrets[patient.model])
     model = get_model(patient.server, patient.model, api_key)
-    response = model.chat(patient.id, messages, user_id=doctor.id)
+    response = model.chat(patient.id, patient.messages, user_id=doctor.id)
     return response

@@ -31,13 +31,13 @@ class XingChen:
             self.character_api = CharacterApiSub(api_client)
             self.chat_message_api = ChatMessageApiSub(api_client)
 
-    def chat(self, character_id, message, seed, user_id) -> str:
+    def chat(self, character_id, message, user_id) -> str:
         chat_param = ChatReqParams(
             bot_profile=CharacterKey(character_id=character_id),
             model_parameters=ModelParameters(
                 seed=random.getrandbits(32), incrementalOutput=False
             ),
-            messages=[Message(role="user", content=message)],
+            messages=[Message(role="user", content=message[-1]['content'])],
             context=ChatContext(use_chat_history=True),
             user_profile=UserProfile(user_id=user_id),
         )

@@ -74,7 +74,7 @@ def read_file(path):
 
 
 def load_questions(server, model, id) -> dict:
-    questions_df = read_file(path="data/questions.json")
+    questions_df = read_file(path="data/patients.json")
     questions = questions_df.query(
         f"server == '{server}' & model == '{model}' & id == '{id}'"
     )["questions"].tolist()[0]
@@ -84,10 +84,10 @@ def load_questions(server, model, id) -> dict:
 
 
 def assign_patients(role, mode) -> list:
-    patients_df = read_file(path="data/questions.json")
+    patients_df = read_file(path="data/patients.json")
     match role:
         case _:
-            patients_list = patients_df.sample(n=2, ignore_index=True)[
+            patients_list = patients_df.sample(n=1, ignore_index=True)[
                 ["server", "model", "id"]
             ].to_dict(orient="records")
     patients = []
