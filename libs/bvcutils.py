@@ -26,18 +26,16 @@ def reset_session_state():
 
 
 def save_data():
-    if not os.path.exists("data/users.pkl"):
-        users = [st.session_state.user]
-
+    if not os.path.exists("data/doctors.pkl"):
+        doctors = [st.session_state.doctor]
         with open("data/users.pkl", "wb") as file:
-            pickle.dump(users, file)
+            pickle.dump(doctors, file)
     else:
-        with open("data/users.pkl", "rb") as file:
-            users = pickle.load(file)
-        users.append(st.session_state.user)
-
-        with open("data/users.pkl", "wb") as file:
-            pickle.dump(users, file)
+        with open("data/doctors.pkl", "rb") as file:
+            doctors = pickle.load(file)
+        doctors.append(st.session_state.doctor)
+        with open("data/doctors.pkl", "wb") as file:
+            pickle.dump(doctors, file)
 
 
 def load_data():

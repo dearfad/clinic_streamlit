@@ -1,5 +1,7 @@
 import streamlit as st
-from libs.bvcutils import read_info
+
+from libs.bvcclasses import Role
+from libs.bvcutils import read_info, reset_session_state
 from libs.servers.tongyi import XingChen
 
 
@@ -44,6 +46,59 @@ def set_page_header():
     st.html(PAGE_STYLE)
     st.subheader("👩 虚拟门诊", divider="gray")
     st.caption("吉林大学中日联谊医院乳腺外科")
+
+def show_setting_page():
+    col_left, col_right = st.columns(2)
+    with col_left:
+        if st.button("返回首页"):
+            reset_session_state()
+            st.switch_page("bvc.py")
+    with col_right:
+        if "voice" not in st.session_state:
+            st.session_state.voice = False
+        setting_popover = st.popover(":material/settings:**设置**")
+        with setting_popover:
+            voice = st.toggle("**语音输出**", value=st.session_state.voice)
+            st.session_state.voice = True if voice else False
+    if "doctor" not in st.session_state:
+        st.warning("**用户信息丢失，请点击返回首页**")
+        st.stop()
+
+def show_role_info(role):
+    match role:
+        case Role.VISITOR:
+            st.info(
+                "请用 **正常语气** 与 **随机一名患者** 沟通",
+                icon=":material/counter_1:",
+            )
+            st.info("问诊完毕后请输入 **我问完了**", icon=":material/counter_2:")
+            st.info("回答患者提出的 **相关问题**", icon=":material/counter_3:")
+            st.info(
+                "作为一名 **游客**，您的过程 **不被统计**", icon=":material/counter_4:"
+            )
+
+        case Role.STUDENT:
+            st.info(
+                "请用 **正常语气** 与 **数名患者** 沟通",
+                icon=":material/counter_1:",
+            )
+            st.info("问诊完毕后请输入 **我问完了**", icon=":material/counter_2:")
+            st.info("回答患者提出的 **相关问题**", icon=":material/counter_3:")
+            st.info("请认真 **填写信息** 及 **选择模式**", icon=":material/counter_4:")
+            st.info(
+                "作为一名 **学生**，您的过程将 **被统计**",
+                icon=":material/counter_5:",
+            )
+
+        case Role.TEACHER:
+            st.info(
+                "作为一名 **教师**，可以 **浏览分析** 数据", icon=":material/counter_1:"
+            )
+        case Role.ADMIN:
+            st.info(
+                "作为一名 **管理员**，可以进行 **项目设置**",
+                icon=":material/counter_1:",
+            )
 
 
 def show_chat(messages):

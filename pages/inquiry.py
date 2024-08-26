@@ -4,40 +4,35 @@ import streamlit as st
 
 from libs.bvcclasses import FakeProfile
 from libs.bvcmodels import chat
-from libs.bvcpage import set_page_header, show_chat
+from libs.bvcpage import set_page_header, show_chat, show_setting_page
 from libs.bvctts import tts
-from libs.bvcutils import fix_img_tts, reset_session_state
+from libs.bvcutils import fix_img_tts
 
 set_page_header()
 
-if "doctor" not in st.session_state:
-    st.switch_page('bvc.py')
+show_setting_page()
 
-doctor = st.session_state.doctor
+voice_placeholder = st.container(height=1, border=False)
 
+# 就诊患者顺序
 if "id" not in st.session_state:
     st.session_state.id = 0
-id = st.session_state.id
-
 if "fakeprofile" not in st.session_state:
     st.session_state.fakeprofile = FakeProfile()
-fakeprofile = st.session_state.fakeprofile
 
+# 设置进入页面时间
+if "current_begin_time" not in st.session_state:
+    st.session_state.current_begin_time = datetime.now()
+
+# 缩写，请勿赋值
+id = st.session_state.id
+doctor = st.session_state.doctor
+fakeprofile = st.session_state.fakeprofile
 patient = doctor.patients[id]
 
-
-col_left, col_right = st.columns(2)
-with col_left:
-    if st.button("返回首页"):
-        reset_session_state()
-        st.switch_page("bvc.py")
-with col_right:
-    if "voice" not in st.session_state:
-        st.session_state.voice = False
-    setting_popover = st.popover(":material/settings:**设置**")
-    with setting_popover:
-        voice = st.toggle("**语音输出**", value=st.session_state.voice)
-        st.session_state.voice = True if voice else False
+# # 如果再次询问，不重新记录开始时间
+if patient.begin_time is None:
+    patient.begin_time = datetime.now()
 
 if patient.messages == []:
     patient.messages = [
@@ -60,17 +55,7 @@ with st.container(border=False):
             st.markdown(f"职位: **{fakeprofile.profile['job']}**")
 
 st.markdown(":page_facing_up: **谈话记录**")
-
-st.write(patient.chat_duration_time)
-
 show_chat(patient.messages)
-
-# # 如果再次询问，不重新记录开始时间
-if patient.begin_time is None:
-    patient.begin_time = datetime.now()
-
-if "current_begin_time" not in st.session_state:
-    st.session_state.current_begin_time = datetime.now()
 
 if prompt := st.chat_input(""):
     if prompt != "我问完了":
@@ -84,11 +69,14 @@ if prompt := st.chat_input(""):
             )
             st.markdown(f"**{response}**")
             patient.messages.append({"role": "assistant", "content": response})
+
+            # TTS
             if st.session_state.voice:
-                setting_popover.audio(
+                voice_placeholder.audio(
                     tts(text=fix_img_tts(response), model=fakeprofile.voice),
                     autoplay=True,
-                )  # TTS
+                )  
+
     else:
         patient.chat_duration_time += (
             datetime.now() - st.session_state.current_begin_time

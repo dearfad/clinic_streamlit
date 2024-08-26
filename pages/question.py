@@ -1,11 +1,11 @@
 import streamlit as st
 from datetime import datetime
-from libs.bvcpage import set_page_header, show_chat
-# from libs.bvcutils import save_data
+from libs.bvcpage import set_page_header, show_setting_page, show_chat
+from libs.bvcutils import save_data
 
 set_page_header()
-if "doctor" not in st.session_state:
-    st.switch_page("bvc.py")
+show_setting_page()
+
 id = st.session_state.id
 doctor = st.session_state.doctor
 patient = doctor.patients[id]
@@ -31,7 +31,8 @@ if st.button("提交答案", use_container_width=True):
         patient.questions[a]["answer"] = st.session_state[k]
     st.session_state.id += 1
     if st.session_state.id == len(doctor.patients):
-        # save_data()
+        save_data()
         st.switch_page("pages/result.py")
     else:
+        del st.session_state.fakeprofile
         st.switch_page("pages/inquiry.py")
