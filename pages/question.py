@@ -31,6 +31,7 @@ if st.button("提交答案", use_container_width=True):
         patient.questions[a]["answer"] = st.session_state[k]
     st.session_state.id += 1
     if st.session_state.id == len(doctor.patients):
+        st.write(doctor)
         save_data()
         st.switch_page("pages/result.py")
     else:

@@ -88,7 +88,7 @@ def assign_patients(role, mode) -> list:
     patients_df = read_file(path="data/patients.json")
     match role:
         case _:
-            patients_list = patients_df.sample(n=2, ignore_index=True)[
+            patients_list = patients_df.sample(n=1, ignore_index=True)[
                 ["server", "model", "id"]
             ].to_dict(orient="records")
     patients = []

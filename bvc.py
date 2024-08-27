@@ -27,7 +27,7 @@ match role:
             "**专业**", ("临床医学 5+3 一体化", "临床医学 5 年制", "放射医学", "其他")
         )
         if st.button("**开始**", use_container_width=True):
-            st.session_state.user = Doctor(role, mode, name, grade, major)
+            st.session_state.doctor = Doctor(role=role, mode=mode, name=name, grade=grade, major=major)
             st.switch_page("pages/inquiry.py")
 
     case Role.TEACHER:

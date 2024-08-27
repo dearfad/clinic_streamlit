@@ -1,6 +1,24 @@
-# 大语言模型
+# 研究报告
+
+## 大语言模型
+
 通义星辰
-> https://xingchen.aliyun.com/xingchen/
+> <https://xingchen.aliyun.com/xingchen/>
 
 百川NPC
-> https://npc.baichuan-ai.com/index
+> <https://npc.baichuan-ai.com/index>
+>
+
+## 患者信息编写
+
+> 根据病历书写要求设定患者信息
+
+- **姓名** 设定姓名方便识别患者信息
+- **性别** 必备
+- **年龄** 必备
+- **主诉**
+- **现病史**
+- **生育史**
+- **查体**
+- **专科情况**
+- **辅助检查**

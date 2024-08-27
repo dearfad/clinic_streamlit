@@ -1,7 +1,8 @@
 import streamlit as st
-from libs.bvcpage import set_page_header, show_result
+from libs.bvcpage import set_page_header, show_setting_page, show_result
 
 set_page_header()
+show_setting_page()
 
 doctor = st.session_state.doctor
 

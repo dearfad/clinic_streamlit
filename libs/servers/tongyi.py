@@ -1,5 +1,6 @@
 import random
 
+import dashscope
 from xingchen import (
     ApiClient,
     CharacterApiSub,
@@ -20,6 +21,46 @@ from xingchen import (
     UserProfile,
 )
 
+from libs.bvcutils import read_file
+
+SYSTEM_PROMPT = """
+    【对话场景】
+        你是一名乳房疾病的患者，你正在乳腺外科门诊诊室中与医生进行谈话。在接下来的对话中，请你遵循以下要求 。1、不要回答跟问题无关的事情；2、请拒绝回答用户提出的非疾病问题；3、不要回答对疾病对诊断和治疗的其他相关信息。4、不能说出你的姓名。
+
+    【语言风格】
+        请在对话中表现出焦急、疼痛、惜字如金。用口语化的方式简短回答。
+"""
+
+QWEN = "baichuan2-7b-chat-v1"
+
+
+def get_patient_info(patient):
+    info_df = read_file("data/patients.json")
+    infos = info_df.query(
+        f"server == '{patient.server}' & model == '{patient.model}' & id == '{patient.id}'"
+    )["info"].tolist()[0]
+    info = ""
+    for key, value in infos.items():
+        info = info + f"{key}：{value}" + "\n"
+    return info
+
+
+class Qwen:
+    def __init__(self, api_key):
+        dashscope.api_key = api_key
+
+    def chat(self, doctor, patient):
+        info = get_patient_info(patient)
+        content = info + SYSTEM_PROMPT
+        system_prompt = [{"role": "system", "content": content}]
+        response = dashscope.Generation.call(
+            model=QWEN,
+            messages=system_prompt + patient.messages,
+            result_format="message",
+        )
+        return response.output.choices[0]["message"]["content"]
+        # return response
+
 
 class XingChen:
     def __init__(self, api_key):
@@ -31,15 +72,15 @@ class XingChen:
             self.character_api = CharacterApiSub(api_client)
             self.chat_message_api = ChatMessageApiSub(api_client)
 
-    def chat(self, character_id, message, user_id) -> str:
+    def chat(self, doctor, patient) -> str:
         chat_param = ChatReqParams(
-            bot_profile=CharacterKey(character_id=character_id),
+            bot_profile=CharacterKey(character_id=patient.id),
             model_parameters=ModelParameters(
                 seed=random.getrandbits(32), incrementalOutput=False
             ),
-            messages=[Message(role="user", content=message[-1]['content'])],
+            messages=[Message(role="user", content=patient.messages[-1]["content"])],
             context=ChatContext(use_chat_history=True),
-            user_profile=UserProfile(user_id=user_id),
+            user_profile=UserProfile(user_id=doctor.id),
         )
         try:
             response = self.chat_api.chat(chat_param).to_dict()
@@ -52,10 +93,10 @@ class XingChen:
         except Exception as exception:
             return f"( 脑子坏掉了，等会再问我吧 ~ 原因是: {exception})"
 
-    def character_create():
+    def character_create(self, patient):
         pass
 
-    def character_delete(self, character_id):
+    def character_delete(self, patient):
         pass
 
     def character_update(self, character) -> bool:
@@ -63,8 +104,8 @@ class XingChen:
         result = self.character_api.update(character_update_dto=body)
         return result.to_dict()["data"]
 
-    def character_details(self, character_id) -> dict:
-        detail = self.character_api.character_details(character_id=character_id)
+    def character_details(self, patient) -> dict:
+        detail = self.character_api.character_details(character_id=patient.id)
         return detail.data.to_dict()
 
     def character_search(self, scope="my") -> list:
@@ -74,9 +115,9 @@ class XingChen:
         result = self.character_api.search(character_query_dto=body)
         return result.data.to_dict()["list"]
 
-    def get_chat_histories(self, character_id, user_id) -> list:
+    def get_chat_histories(self, doctor, patient) -> list:
         body = ChatHistoryQueryDTO(
-            where=ChatHistoryQueryWhere(characterId=character_id, bizUserId=user_id),
+            where=ChatHistoryQueryWhere(characterId=patient.id, bizUserId=doctor.id),
             orderBy=["gmtCreate desc"],
             pageNum=1,
             pageSize=10,
@@ -84,7 +125,7 @@ class XingChen:
         result = self.chat_message_api.chat_histories(chat_history_query_dto=body)
         return result.data.to_dict()
 
-    def reset_chat_history(self, character_id, user_id) -> bool:
-        body = ResetChatHistoryRequest(characterId=character_id, userId=user_id)
+    def reset_chat_history(self, doctor, patient) -> bool:
+        body = ResetChatHistoryRequest(characterId=patient.id, userId=doctor.id)
         result = self.chat_message_api.reset_chat_history(request=body)
         return result.data

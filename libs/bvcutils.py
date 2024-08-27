@@ -14,11 +14,6 @@ def read_file(path):
     return pd.read_json(path, orient="records")
 
 
-@st.cache_data
-def read_info(path):
-    return pd.read_json(path, orient="record")
-
-
 def reset_session_state():
     for key in st.session_state.keys():
         if key != "voice":
@@ -28,7 +23,7 @@ def reset_session_state():
 def save_data():
     if not os.path.exists("data/doctors.pkl"):
         doctors = [st.session_state.doctor]
-        with open("data/users.pkl", "wb") as file:
+        with open("data/doctors.pkl", "wb") as file:
             pickle.dump(doctors, file)
     else:
         with open("data/doctors.pkl", "rb") as file:
@@ -39,9 +34,9 @@ def save_data():
 
 
 def load_data():
-    with open("data/users.pkl", "rb") as file:
-        users = pickle.load(file)
-    return users
+    with open("data/doctors.pkl", "rb") as file:
+        doctors = pickle.load(file)
+    return doctors
 
 
 def user_info_formatter(user):

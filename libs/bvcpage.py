@@ -1,7 +1,7 @@
 import streamlit as st
 
 from libs.bvcclasses import Role
-from libs.bvcutils import read_info, reset_session_state
+from libs.bvcutils import read_file, reset_session_state
 from libs.servers.tongyi import XingChen
 
 
@@ -48,7 +48,7 @@ def set_page_header():
     st.caption("吉林大学中日联谊医院乳腺外科")
 
 def show_setting_page():
-    col_left, col_right = st.columns(2)
+    col_left, col_center, col_right = st.columns(3)
     with col_left:
         if st.button("返回首页"):
             reset_session_state()
@@ -111,31 +111,38 @@ def show_chat(messages):
                 st.markdown(f"**{message['content']}**")
 
 
-def show_patient_info(character_id):
-    info_df = read_info("cases/breast_info.json").set_index("id")
-    info = info_df.loc[character_id, "info"]
+def show_patient_info(patient):
+    info_df = read_file("data/patients.json")
+    info = info_df.query(
+        f"server == '{patient.server}' & model == '{patient.model}' & id == '{patient.id}'"
+    )["info"].tolist()[0]
     st.markdown(":book: **患者信息**")
     for key, value in info.items():
         st.markdown(f"**{key}：** {value}")
 
 
 def show_result(doctor):
-    # with st.container(border=True):
-    # col_name, col_grade, col_major = st.columns(3)
-    # with col_name:
-    #     st.markdown(f"**姓名: {user.name}**")
-    # with col_grade:
-    #     st.markdown(f"年级: {user.grade}")
-    # with col_major:
-    #     st.markdown(f"专业: {user.major}")
+    with st.container(border=True):
+        if doctor.role == Role.STUDENT:
+                col_name, col_grade, col_major = st.columns(3)
+                with col_name:
+                    st.markdown(f"**姓名:** {doctor.name}")
+                with col_grade:
+                    st.markdown(f"**年级**: {doctor.grade}")
+                with col_major:
+                    st.markdown(f"**专业**: {doctor.major}")
+        col_begin, col_end, col_duration = st.columns(3)
+        with col_begin:
+            st.markdown(f":material/line_start_circle: {doctor.patients[0].begin_time.strftime("%Y-%m-%d %H:%M:%S")}")
+        with col_end:
+            st.markdown(f":material/line_end_circle: {doctor.patients[-1].end_time.strftime("%Y-%m-%d %H:%M:%S")}")    
+        with col_duration:
+            st.markdown(f":stopwatch: {(doctor.patients[-1].end_time-doctor.patients[0].begin_time).seconds} 秒")
 
-    # st.markdown(f":date: {patient.begin_time']}")
-    # st.markdown(f":stopwatch: {user_end_time-user_start_time}")
-
-    # score = 0
-    # total_questions_count = 0
-    # normal_inquiry_count = len(user.chatlog["questions"])
-    # total_inquiry_count = 0
+    total_inquiry_count = 0
+    total_questions_count = 0
+    score = 0
+    normal_inquiry_count = len(doctor.patients)
 
     for i, patient in enumerate(doctor.patients):
         st.divider()
@@ -146,39 +153,38 @@ def show_result(doctor):
             st.markdown(f"**{patient.begin_time.strftime("%Y-%m-%d %H:%M:%S")}**")
         with col_question_right:
             st.markdown(
-                f"**:stopwatch: {(patient.end_time - patient.begin_time).seconds}秒 🗣️ {(patient.chat_duration_time).seconds}秒**"
+                f"**:stopwatch: {(patient.end_time - patient.begin_time).seconds} 秒 🗣️ {(patient.chat_duration_time).seconds} 秒**"
             )
 
-    #     with st.container(border=True):
-    #         character_id = user.chatlog.loc[i, "id"]
-    #         show_patient_info(character_id)
+        with st.container(border=True):
+            show_patient_info(patient)
 
-    #     with st.container(border=True):
-    #         st.markdown(":clipboard: **对话记录**")
-    #         st.markdown(f"**:repeat: {user.chatlog.loc[i, 'inquiry_count']}**")
-    #         total_inquiry_count += user.chatlog.loc[i, "inquiry_count"]
-    #         show_chat(eval(user.chatlog.loc[i, "messages"]))
-    #     for q in question:
-    #         total_questions_count += 1
-    #         st.markdown(f"**Q{total_questions_count}: {q['question']}**")
-    #         st.markdown(f"答案选项: 🔹{' 🔹'.join(q['answer_list'])}")
-    #         st.markdown(f"正确答案: :white_check_mark:**{q['correct_answer']}**")
-    #         if q["correct_answer"] == q["user_answer"]:
-    #             score += 1
-    #             st.markdown(f"用户回答: :white_check_mark:**{q['user_answer']}**")
-    #         else:
-    #             st.markdown(f"用户回答: :x:**:red[{q['user_answer']}]**")
+        with st.container(border=True):
+            st.markdown(":clipboard: **对话记录**")
+            st.markdown(f"**:repeat: {patient.inquiry_count}**")
+            total_inquiry_count += patient.inquiry_count
+            show_chat(patient.messages)
+        for question in patient.questions:
+            total_questions_count += 1
+            st.markdown(f"**Q{total_questions_count}: {question['question']}**")
+            st.markdown(f"答案选项: 🔹{' 🔹'.join(question['answers'])}")
+            st.markdown(f"正确答案: :white_check_mark:**{question['correct_answer']}**")
+            if question["correct_answer"] == question["answer"]:
+                st.markdown(f"用户回答: :white_check_mark:**{question['answer']}**")
+                score += 1
+            else:
+                st.markdown(f"用户回答: :x:**:red[{question['answer']}]**")
 
-    # st.divider()
+    st.divider()
 
-    # question_score = round(score / total_questions_count * 100)
-    # inquiry_score = (total_inquiry_count - normal_inquiry_count) * 2
-    # st.markdown(f"**问题得分: {score} :material/pen_size_2: {
-    #             total_questions_count} :material/close:100 :material/equal: {question_score}**")
-    # st.markdown(f"**复问扣分: ( {total_inquiry_count} - {
-    #             normal_inquiry_count} ) :material/close:2 :material/equal: {inquiry_score}**")
-    # st.markdown(f"**最后得分: :small_orange_diamond: :red[{
-    #             question_score - inquiry_score}] :small_orange_diamond:**")
+    question_score = round(score / total_questions_count * 100)
+    inquiry_score = (total_inquiry_count - normal_inquiry_count) * 2
+    st.markdown(f"**问题得分: {score} :material/pen_size_2: {
+                total_questions_count} :material/close:100 :material/equal: {question_score}**")
+    st.markdown(f"**复问扣分: ( {total_inquiry_count} - {
+                normal_inquiry_count} ) :material/close:2 :material/equal: {inquiry_score}**")
+    st.markdown(f"**最后得分: :small_orange_diamond: :red[{
+                question_score - inquiry_score}] :small_orange_diamond:**")
 
 
 def show_character_info(character):
