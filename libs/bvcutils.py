@@ -53,4 +53,12 @@ def user_info_formatter(user):
 def fix_img_tts(response):
     return response.split("![]")[0].strip()
 
-
+def get_patient_info(patient):
+    info_df = read_file("data/patients.json")
+    infos = info_df.query(
+        f"server == '{patient.server}' & model == '{patient.model}' & id == '{patient.id}'"
+    )["info"].tolist()[0]
+    info = ""
+    for key, value in infos.items():
+        info = info + f"{key}：{value}" + "\n"
+    return info

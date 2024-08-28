@@ -21,7 +21,7 @@ from xingchen import (
     UserProfile,
 )
 
-from libs.bvcutils import read_file
+from libs.bvcutils import get_patient_info
 
 SYSTEM_PROMPT = """
     【对话场景】
@@ -34,15 +34,7 @@ SYSTEM_PROMPT = """
 QWEN = "baichuan2-7b-chat-v1"
 
 
-def get_patient_info(patient):
-    info_df = read_file("data/patients.json")
-    infos = info_df.query(
-        f"server == '{patient.server}' & model == '{patient.model}' & id == '{patient.id}'"
-    )["info"].tolist()[0]
-    info = ""
-    for key, value in infos.items():
-        info = info + f"{key}：{value}" + "\n"
-    return info
+
 
 
 class Qwen:
@@ -58,8 +50,7 @@ class Qwen:
             messages=system_prompt + patient.messages,
             result_format="message",
         )
-        return response.output.choices[0]["message"]["content"]
-        # return response
+        return str(response.output.choices[0]["message"]["content"])
 
 
 class XingChen:

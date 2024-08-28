@@ -10,6 +10,7 @@ MODEL_CLASS = {
     "xingchen": "XingChen",
     "baichuan": "BaiChuan",
     "qwen": "Qwen",
+    'glm': 'ZhiPu',
 }
 
 

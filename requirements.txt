@@ -7,5 +7,8 @@ xingchen
 # DASHSCOPE
 dashscope
 
+# ZHIPUAI
+zhipuai
+
 # FAKEPATIENT
 faker
