@@ -2,7 +2,7 @@
 showSidebarNavigation = false
 
 [server]
-enableStaticServing = false
+enableStaticServing = true
 
 [runner]
 fastReruns = true
