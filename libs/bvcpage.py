@@ -108,7 +108,8 @@ def show_chat(messages):
                 st.write(message["content"])
         if message["role"] == "assistant":
             with st.chat_message("患"):
-                st.markdown(f"**{message['content']}**")
+                print(message['content'])
+                st.markdown(message['content'])
 
 
 def show_patient_info(patient):
