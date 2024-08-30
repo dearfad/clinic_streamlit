@@ -104,11 +104,10 @@ def show_role_info(role):
 def show_chat(messages):
     for message in messages:
         if message["role"] == "user":
-            with st.chat_message("医"):
-                st.write(message["content"])
+            with st.chat_message("医生"):
+                st.markdown(message["content"])
         if message["role"] == "assistant":
-            with st.chat_message("患"):
-                print(message['content'])
+            with st.chat_message("患者"):
                 st.markdown(message['content'])
 
 

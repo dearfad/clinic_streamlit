@@ -1,0 +1,31 @@
+[
+    {
+        "platform": "阿里云百炼",
+        "series": [
+            {
+                "通义千问-开源": [
+                    {
+                        "name": "通义千问1.5-开源版-0.5B",
+                        "model": "qwen1.5-0.5b-chat"
+                    },
+                    {
+                        "name": "通义千问1.5-开源版-1.8B",
+                        "model": "qwen1.5-1.8b-chat"
+                    }
+                ],
+                "百川大语言模型": [
+                    {
+                        "name": "Baichuan2-Turbo",
+                        "model": "baichuan2-turbo"
+                    }
+                ],
+                "月之暗面大语言模型": [
+                    {
+                        "name": "Moonshot-v1-8k",
+                        "model": "moonshot-v1-8k"
+                    }
+                ]
+            }
+        ]
+    }
+]

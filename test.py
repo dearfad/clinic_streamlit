@@ -1,9 +1,9 @@
+from pandas import json_normalize
 import streamlit as st
+import pandas as pd
 
-st.session_state.id = {'name':"wang", 'id':1}
+models = pd.read_json("data/models.json", )
 
-id = st.session_state.id
+data = json_normalize(models['series'], meta=[["model"]])
 
-id = 1
-
-st.write(st.session_state.id)
+st.write(data)

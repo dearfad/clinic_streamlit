@@ -1,35 +1,15 @@
 import random
-import uuid
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta
 from enum import Enum
 
-import pandas as pd
-import requests
-import streamlit as st
-from faker import Faker
-from datetime import datetime, timedelta
-
-VOICES = [
-    "sambert-zhiwei-v1",
-    "sambert-zhijia-v1",
-    "sambert-zhiqi-v1",
-    "sambert-zhiqian-v1",
-    "sambert-zhiru-v1",
-    "sambert-zhimiao-emo-v1",
-    "sambert-zhifei-v1",
-    "sambert-zhigui-v1",
-    "sambert-zhijing-v1",
-    "sambert-zhilun-v1",
-    "sambert-zhimao-v1",
-    "sambert-zhina-v1",
-    "sambert-zhistella-v1",
-    "sambert-zhiting-v1",
-    "sambert-zhixiao-v1",
-    "sambert-zhiya-v1",
-    "sambert-zhiying-v1",
-    "sambert-zhiyuan-v1",
-    "sambert-zhiyue-v1",
-]
+from libs.bvcutils import (
+    generate_fake_profile,
+    generate_uuid,
+    get_random_photo,
+    get_random_voice,
+    read_file,
+)
 
 
 class Role(Enum):
@@ -40,39 +20,6 @@ class Role(Enum):
 
     def __str__(self):
         return self.value
-
-
-def generate_uuid() -> str:
-    return str(uuid.uuid4())
-
-
-def generate_fake_profile():
-    return Faker("zh_CN").profile(sex="F")
-
-
-def get_random_photo() -> str:
-    imagehost = random.choice(
-        [
-            "https://cdn.seovx.com/?mom=302",
-            "https://cdn.seovx.com/d/?mom=302",
-            "https://cdn.seovx.com/ha/?mom=302",
-        ]
-    )
-    response = requests.get(imagehost, allow_redirects=False)
-    if response.status_code == 302:
-        return "https:" + response.headers.get("Location")
-    else:
-        return "https://api.multiavatar.com/" + str(uuid.uuid4()) + ".png"
-
-
-def get_random_voice() -> str:
-    return random.choice(VOICES)
-
-
-@st.cache_data
-def read_file(path):
-    return pd.read_json(path, orient="records")
-
 
 def load_questions(server, model, id) -> dict:
     questions_df = read_file(path="data/patients.json")
@@ -113,9 +60,10 @@ class Doctor:
 
 @dataclass
 class Patient:
-    server: str
+    platform: str
+    series: str
+    name: str
     model: str
-    id: str
     messages: list = field(default_factory=list)
     begin_time: datetime = None
     chat_duration_time: timedelta = timedelta(seconds=0)
