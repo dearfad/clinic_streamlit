@@ -3,17 +3,28 @@ import pickle
 import random
 import uuid
 
+
 import pandas as pd
 import requests
 import streamlit as st
 from faker import Faker
-
+import json
 from libs.bvcconst import VOICES
 
 
 @st.cache_data
-def read_file(path):
-    return pd.read_json(path, orient="records")
+def read_patients():
+    return pd.read_json('data/patients.json', orient="records")
+
+@st.cache_data
+def read_models():
+    with open('data/models.json', 'r', encoding='utf-8') as file:
+        return json.load(file)
+
+def get_models():
+    models_json = read_models()
+    model_df = pd.json_normalize(models_json, ['info','models'], ['platform', 'api',['info','series']])
+    return model_df.rename(columns={'info.series':'series'})[['platform','series','name','model','api']]
 
 
 def reset_session_state(exclude=["voice"]):
@@ -57,12 +68,8 @@ def fix_img_tts(response):
 
 
 def get_patient_info(patient):
-    info_df = read_file("data/patients.json")
-    infos = info_df.query(
-        f"server == '{patient.server}' & model == '{patient.model}' & id == '{patient.id}'"
-    )["info"].tolist()[0]
     info = ""
-    for key, value in infos.items():
+    for key, value in patient.info.items():
         info = info + f"{key}：{value}" + "\n"
     return info
 

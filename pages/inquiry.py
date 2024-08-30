@@ -43,8 +43,8 @@ with st.container(border=False):
     col_left, col_right = st.columns([2, 3])
     with col_left:
         st.image(fakeprofile.photo, use_column_width=True)
-        model_dict = {"xingchen": "星辰", "qwen": "千问", "glm": "智谱"}
-        st.caption(f"**🆔 :red-background[{model_dict[patient.model]}]**")
+        # model_dict = {"xingchen": "星辰", "qwen": "千问", "glm": "智谱"}
+        # st.caption(f"**🆔 :red-background[{model_dict[patient.model]}]**")
     with col_right:
         with st.container(border=True):
             st.markdown(f"姓名: **{fakeprofile.profile['name']}**")

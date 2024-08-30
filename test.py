@@ -1,9 +1,7 @@
-from pandas import json_normalize
 import streamlit as st
-import pandas as pd
 
-models = pd.read_json("data/models.json", )
+from libs.bvcclasses import Doctor, Patient, assign_patients, Role
 
-data = json_normalize(models['series'], meta=[["model"]])
+patients = assign_patients(Role.VISITOR, None)
 
-st.write(data)
+st.write(patients[0])

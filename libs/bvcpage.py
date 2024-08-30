@@ -1,7 +1,7 @@
 import streamlit as st
 
 from libs.bvcclasses import Role
-from libs.bvcutils import read_file, reset_session_state
+from libs.bvcutils import read_patients, reset_session_state
 from libs.servers.tongyi import XingChen
 
 
@@ -112,7 +112,7 @@ def show_chat(messages):
 
 
 def show_patient_info(patient):
-    info_df = read_file("data/patients.json")
+    info_df = read_patients("data/patients.json")
     info = info_df.query(
         f"server == '{patient.server}' & model == '{patient.model}' & id == '{patient.id}'"
     )["info"].tolist()[0]

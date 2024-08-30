@@ -8,9 +8,9 @@ from libs.bvcutils import (
     generate_uuid,
     get_random_photo,
     get_random_voice,
-    read_file,
+    read_patients,
 )
-
+from libs.bvcutils import get_models
 
 class Role(Enum):
     VISITOR = "游客"
@@ -21,28 +21,19 @@ class Role(Enum):
     def __str__(self):
         return self.value
 
-def load_questions(server, model, id) -> dict:
-    questions_df = read_file(path="data/patients.json")
-    questions = questions_df.query(
-        f"server == '{server}' & model == '{model}' & id == '{id}'"
-    )["questions"].tolist()[0]
-    for question in questions:
-        random.shuffle(question["answers"])
-    return questions
-
-
 def assign_patients(role, mode) -> list:
-    patients_df = read_file(path="data/patients.json")
+    patients_df = read_patients()
     match role:
         case _:
-            patients_list = patients_df.sample(n=1, ignore_index=True)[
-                ["server", "model", "id"]
-            ].to_dict(orient="records")
-    patients = []
-    for patient in patients_list:
-        patients.append(Patient(patient["server"], patient["model"], patient["id"]))
+            patients_list = patients_df.sample(n=1, ignore_index=True).to_dict(orient="records")
+    patients = [Patient(**set_model(), **patient) for patient in patients_list]
+    for patient in patients:
+        for question in patient.questions:
+            random.shuffle(question['answers'])
     return patients
 
+def set_model() -> dict:
+    return get_models().sample(n=1).to_dict(orient="records")[0]
 
 @dataclass
 class Doctor:
@@ -60,19 +51,18 @@ class Doctor:
 
 @dataclass
 class Patient:
-    platform: str
-    series: str
-    name: str
-    model: str
+    platform: str = None
+    series: str = None
+    name: str = None
+    model: str = None
+    api: str = None
     messages: list = field(default_factory=list)
     begin_time: datetime = None
     chat_duration_time: timedelta = timedelta(seconds=0)
     end_time: datetime = None
     inquiry_count: int = 1
+    info: dict = field(default_factory=dict)
     questions: list = field(default_factory=list)
-
-    def __post_init__(self):
-        self.questions = load_questions(self.server, self.model, self.id)
 
 
 @dataclass
