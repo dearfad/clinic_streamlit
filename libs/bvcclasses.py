@@ -55,6 +55,7 @@ class Patient:
     series: str = None
     name: str = None
     model: str = None
+    price: str = None
     api: str = None
     messages: list = field(default_factory=list)
     begin_time: datetime = None
@@ -62,6 +63,7 @@ class Patient:
     end_time: datetime = None
     inquiry_count: int = 1
     info: dict = field(default_factory=dict)
+    reports: dict = field(default_factory=dict)
     questions: list = field(default_factory=list)
 
 

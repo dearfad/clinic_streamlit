@@ -1,7 +1,6 @@
 import streamlit as st
+from libs.bvcutils import get_models
 
-from libs.bvcclasses import Doctor, Patient, assign_patients, Role
+models = get_models()
 
-patients = assign_patients(Role.VISITOR, None)
-
-st.write(patients[0])
+st.write(models)

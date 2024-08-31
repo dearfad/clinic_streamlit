@@ -7,7 +7,6 @@ from libs.bvcmodels import chat
 from libs.bvcpage import set_page_header, show_chat, show_setting_page
 from libs.bvctts import tts
 from libs.bvcutils import fix_img_tts
-from libs.bvcconst import CHAT_OPENING
 
 set_page_header()
 
@@ -26,25 +25,27 @@ if "current_begin_time" not in st.session_state:
     st.session_state.current_begin_time = datetime.now()
 
 # 缩写，请勿赋值
-seqid = st.session_state.seqid
 doctor = st.session_state.doctor
-fakeprofile = st.session_state.fakeprofile
+seqid = st.session_state.seqid
 patient = doctor.patients[seqid]
+fakeprofile = st.session_state.fakeprofile
 
 # # 如果再次询问，不重新记录开始时间
 if patient.begin_time is None:
     patient.begin_time = datetime.now()
 
 if patient.messages == []:
-    patient.messages = CHAT_OPENING
+    patient.messages = [
+    {"role": "user", "content": "你好"},
+    {"role": "assistant", "content": "大夫，你好"},
+]
 
 st.markdown(f"**就诊编号: {seqid+1} / {len(doctor.patients)}**")
 with st.container(border=False):
     col_left, col_right = st.columns([2, 3])
     with col_left:
         st.image(fakeprofile.photo, use_column_width=True)
-        # model_dict = {"xingchen": "星辰", "qwen": "千问", "glm": "智谱"}
-        # st.caption(f"**🆔 :red-background[{model_dict[patient.model]}]**")
+        st.caption(f"**🆔 :red-background[{patient.model}] :blue-background[{patient.price}]**")
     with col_right:
         with st.container(border=True):
             st.markdown(f"姓名: **{fakeprofile.profile['name']}**")
@@ -54,8 +55,8 @@ with st.container(border=False):
 
 st.markdown(":page_facing_up: **谈话记录**")
 
-
 show_chat(patient.messages)
+
 if prompt := st.chat_input(""):
     if prompt != "我问完了":
         with st.chat_message("医生"):

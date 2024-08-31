@@ -4,33 +4,83 @@
         "api": "dashscope",
         "info": [
             {
+                "series": "通义千问",
+                "models": [
+                    {
+                        "name": "通义千问-Turbo",
+                        "model": "qwen-turbo",
+                        "price": "计费",
+                        "use": false
+                    },
+                    {
+                        "name": "通义千问-Plus",
+                        "model": "qwen-plus",
+                        "price": "计费",
+                        "use": false
+                    },
+                    {
+                        "name": "通义千问-Max",
+                        "model": "qwen-max",
+                        "price": "计费",
+                        "use": false
+                    }
+                ]
+            },
+            {
                 "series": "通义千问-开源",
                 "models": [
                     {
                         "name": "通义千问1.5-开源版-0.5B",
-                        "model": "qwen1.5-0.5b-chat"
+                        "model": "qwen1.5-0.5b-chat",
+                        "price": "免费",
+                        "use": false
                     },
                     {
                         "name": "通义千问1.5-开源版-1.8B",
-                        "model": "qwen1.5-1.8b-chat"
+                        "model": "qwen1.5-1.8b-chat",
+                        "price": "免费",
+                        "use": false
+                    },
+                    {
+                        "name": "通义千问-开源版-1.8B",
+                        "model": "qwen-1.8b-chat",
+                        "price": "免费",
+                        "use": false
                     }
                 ]
-            },
+            }
+        ]
+    },
+    {
+        "platform": "智谱AI",
+        "api": "zhipuai",
+        "info": [
             {
-                "series": "百川大语言模型",
+                "series": "GLM",
                 "models": [
                     {
-                        "name": "Baichuan2-Turbo",
-                        "model": "baichuan2-turbo"
-                    }
-                ]
-            },
-            {
-                "series": "月之暗面大语言模型",
-                "models": [
+                        "name": "GLM-4-Flash",
+                        "model": "glm-4-flash",
+                        "price": "免费",
+                        "use": false
+                    },
                     {
-                        "name": "Moonshot-v1-8k",
-                        "model": "moonshot-v1-8k"
+                        "name": "GLM-4-Air",
+                        "model": "glm-4-air",
+                        "price": "收费",
+                        "use": false
+                    },
+                    {
+                        "name": "GLM-4-Plus",
+                        "model": "glm-4-plus",
+                        "price": "收费",
+                        "use": false
+                    },
+                    {
+                        "name": "CharGLM-3",
+                        "model": "charglm-3",
+                        "price": "收费",
+                        "use": true
                     }
                 ]
             }

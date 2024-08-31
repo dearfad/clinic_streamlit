@@ -2,7 +2,7 @@ import streamlit as st
 
 from libs.bvcclasses import Role
 from libs.bvcutils import read_patients, reset_session_state
-from libs.servers.tongyi import XingChen
+# from libs.servers.tongyi import XingChen
 
 
 def set_page_header():
@@ -187,30 +187,30 @@ def show_result(doctor):
                 question_score - inquiry_score}] :small_orange_diamond:**")
 
 
-def show_character_info(character):
-    with st.container(border=False):
-        col_left, col_right = st.columns([1, 3])
-        with col_right:
-            with st.container(border=True):
-                st.markdown(f"姓名: **{character['name']}**")
-                st.markdown(f"建立: **{str(character['gmtCreate']).split(' ')[0]}**")
-                st.markdown(f"更新: **{str(character['gmtModified']).split(' ')[0]}**")
-                basicinfo = st.text_area(
-                    label="**基本信息**",
-                    height=500,
-                    value=character["basicInformation"],
-                )
-        with col_left:
-            avatar_url = "http:" + character["avatar"]["fileUrl"]
-            st.image(avatar_url, caption=character["name"], use_column_width=True)
+# def show_character_info(character):
+#     with st.container(border=False):
+#         col_left, col_right = st.columns([1, 3])
+#         with col_right:
+#             with st.container(border=True):
+#                 st.markdown(f"姓名: **{character['name']}**")
+#                 st.markdown(f"建立: **{str(character['gmtCreate']).split(' ')[0]}**")
+#                 st.markdown(f"更新: **{str(character['gmtModified']).split(' ')[0]}**")
+#                 basicinfo = st.text_area(
+#                     label="**基本信息**",
+#                     height=500,
+#                     value=character["basicInformation"],
+#                 )
+#         with col_left:
+#             avatar_url = "http:" + character["avatar"]["fileUrl"]
+#             st.image(avatar_url, caption=character["name"], use_column_width=True)
 
-            if st.button("**刷新**", use_container_width=True):
-                st.rerun()
-            if st.button("**更新**", use_container_width=True):
-                character["basicInformation"] = basicinfo
-                xingchen = XingChen()
-                result = xingchen.update(character)
-                if result:
-                    st.markdown("**:green[成功...]**")
-                else:
-                    st.markdown("**:red[失败...]**")
+#             if st.button("**刷新**", use_container_width=True):
+#                 st.rerun()
+#             if st.button("**更新**", use_container_width=True):
+#                 character["basicInformation"] = basicinfo
+#                 xingchen = XingChen()
+#                 result = xingchen.update(character)
+#                 if result:
+#                     st.markdown("**:green[成功...]**")
+#                 else:
+#                     st.markdown("**:red[失败...]**")
