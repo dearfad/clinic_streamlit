@@ -12,6 +12,8 @@ MODEL_CLASS = {
     '通义星辰': "XingChen",
     '百川智能': 'BaiChuan',
     "火山引擎": 'ArkEngine',
+    'MiniMax': "MiniMax",
+    'MoonshotAI': 'MoonShot',
 }
 
 PLATFORM = {
@@ -20,6 +22,8 @@ PLATFORM = {
     '通义星辰': 'xingchen',
     '百川智能': 'baichuan',
     "火山引擎": 'arkengine',
+    "MiniMax": 'minimax',
+    'MoonshotAI': 'moonshot',
 }
 
 def get_model(patient):

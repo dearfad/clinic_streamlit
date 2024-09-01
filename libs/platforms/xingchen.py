@@ -86,7 +86,8 @@ class XingChen:
         return result.to_dict()["data"]
 
     def character_details(self, patient) -> dict:
-        detail = self.character_api.character_details(character_id=patient.id)
+        # detail = self.character_api.character_details(character_id=patient.id)
+        detail = self.character_api.character_details(character_id=patient)
         return detail.data.to_dict()
 
     def character_search(self, scope="my") -> list:

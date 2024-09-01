@@ -15,5 +15,8 @@ volcengine-python-sdk
 # ZHIPUAI
 zhipuai
 
+# minimax
+openai
+
 # FAKEPATIENT
 faker

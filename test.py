@@ -1,22 +1,19 @@
-import streamlit as st
-from libs.bvcutils import get_models
+from openpyxl import Workbook
+import json
 
-models = get_models()
+wb = Workbook()
+ws = wb.active
+ws.title = "my_data"
 
-st.write(models)
+with open("data/patients.json", "r", encoding="utf-8") as file:
+        data = json.load(file)
 
-TEST = """
-【你的人设】
-姓名：刘亚芬
-性别：女
-年龄：35岁
-主诉：双侧乳房疼痛1个月
-现病史：1个月前突然发现出现双侧乳房疼痛，月经前疼痛明显，月经后疼痛减轻，未予治疗。
-生育史：未婚，未育。
-查体：体温36.0度，心率80次/分，呼吸20次/分，血压120/80mmHg。神志清楚，发育、营养良好，心脏、肺部、腹部查体未见异常。
-专科情况：双侧乳房结节样改变,  有触痛，与周围分界不清，皮肤颜色正常
-辅助检查：抽血化验：血常规检查正常。超声检查：双侧乳腺腺体呈增生样改变，未见明显异常占位。
+d = data[0]['info']
 
-【对话场景】
-你是一名乳房疾病的患者，你正在乳腺外科门诊诊室中与医生进行谈话。在接下来的对话中，请你遵循以下要求 。1、不要回答跟问题无关的事情；2、请拒绝回答用户提出的非疾病问题；3、不要回答对疾病对诊断和治疗的其他相关信息。4、不能说出你的姓名。5、如果用户需要你提供检查报告或者结果，请发送对应的报告卡牌。
-"""
+column = 1
+for key, value in d.items():
+    ws.cell(row=1, column=column, value=key)
+    ws.cell(row=2, column=column, value=value)
+    column += 1
+
+wb.save('d.xlsx')

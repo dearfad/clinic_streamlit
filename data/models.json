@@ -149,7 +149,41 @@
                         "name": "Doubao-pro-4k",
                         "model": "doubao-pro-4k",
                         "price": "免费",
+                        "use": false
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "platform": "MiniMax",
+        "api": "minimax",
+        "info": [
+            {
+                "series": "ChatCompletion",
+                "models": [
+                    {
+                        "name": "ChatCompletion-v2",
+                        "model": "abab6.5s-chat",
+                        "price": "免费",
                         "use": true
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "platform": "MoonshotAI",
+        "api": "moonshot",
+        "info": [
+            {
+                "series": "moonshot-v1",
+                "models": [
+                    {
+                        "name": "moonshot-v1-8k",
+                        "model": "moonshot-v1-8k",
+                        "price": "付费",
+                        "use": false
                     }
                 ]
             }

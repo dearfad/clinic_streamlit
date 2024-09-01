@@ -9,7 +9,7 @@ import requests
 import streamlit as st
 from faker import Faker
 import json
-from libs.bvcconst import VOICES
+from libs.bvcconst import VOICES, SYSTEM_PROMPT
 
 
 @st.cache_data
@@ -106,3 +106,11 @@ def get_random_photo() -> str:
 
 def get_random_voice() -> str:
     return random.choice(VOICES)
+
+
+def build_system_prompt(patient):
+    info = get_patient_info(patient)
+    content = SYSTEM_PROMPT + info
+    system_prompt = [{"role": "system", "content": content}]
+    print(system_prompt[0]['content'])
+    return system_prompt
