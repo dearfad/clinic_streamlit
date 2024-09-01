@@ -52,6 +52,41 @@
         ]
     },
     {
+        "platform": "通义星辰",
+        "api": "xingchen",
+        "info": [
+            {
+                "series": "星辰",
+                "models": [
+                    {
+                        "name": "xingchen-lite",
+                        "model": "xingchen-lite",
+                        "price": "收费",
+                        "use": false
+                    },
+                    {
+                        "name": "xingchen-base",
+                        "model": "xingchen-base",
+                        "price": "收费",
+                        "use": false
+                    },
+                    {
+                        "name": "xingchen-plus",
+                        "model": "xingchen-plus",
+                        "price": "收费",
+                        "use": false
+                    },
+                    {
+                        "name": "xingchen-max",
+                        "model": "xingchen-max",
+                        "price": "收费",
+                        "use": false
+                    }
+                ]
+            }
+        ]
+    },
+    {
         "platform": "智谱AI",
         "api": "zhipuai",
         "info": [
@@ -80,6 +115,40 @@
                         "name": "CharGLM-3",
                         "model": "charglm-3",
                         "price": "收费",
+                        "use": false
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "platform": "百川智能",
+        "api": "baichuan",
+        "info": [
+            {
+                "series": "baichuan",
+                "models": [
+                    {
+                        "name": "Baichuan4",
+                        "model": "Baichuan4",
+                        "price": "付费",
+                        "use": false
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "platform": "火山引擎",
+        "api": "arkengine",
+        "info": [
+            {
+                "series": "火山方舟",
+                "models": [
+                    {
+                        "name": "Doubao-pro-4k",
+                        "model": "doubao-pro-4k",
+                        "price": "免费",
                         "use": true
                     }
                 ]

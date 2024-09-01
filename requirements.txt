@@ -7,6 +7,11 @@ xingchen
 # DASHSCOPE
 dashscope
 
+# 火山引擎
+# 1. 按下 Win+R ，输入 regedit 打开注册表编辑器。
+# 2. 设置 \HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem 路径下的变量 LongPathsEnabled 为 1 即可。
+volcengine-python-sdk
+
 # ZHIPUAI
 zhipuai
 

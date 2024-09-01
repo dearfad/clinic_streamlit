@@ -9,11 +9,17 @@ from libs.bvcclasses import Doctor, Patient
 MODEL_CLASS = {
     "阿里云百炼": "BaiLian",
     "智谱AI": "ZhiPu",
+    '通义星辰': "XingChen",
+    '百川智能': 'BaiChuan',
+    "火山引擎": 'ArkEngine',
 }
 
 PLATFORM = {
     '阿里云百炼': 'bailian',
     '智谱AI': 'zhipu',
+    '通义星辰': 'xingchen',
+    '百川智能': 'baichuan',
+    "火山引擎": 'arkengine',
 }
 
 def get_model(patient):
