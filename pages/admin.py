@@ -1,18 +1,18 @@
 import streamlit as st
 from libs.bvcpage import set_page_header
-# from libs.bvcmodels import XingChen
+from libs.bvcutils import read_models
 
 set_page_header()
 
-# st.markdown(":material/admin_panel_settings: **管理员**")
+st.markdown(":material/admin_panel_settings: **管理员**")
 
-# characters = XingChen().characters()
-
-# characterId = st.selectbox('选择：', options=characters['characterId'], format_func=lambda x: characters.loc[characters['characterId']==x, 'name'].values[0])
-
-# character = characters.loc[characters['characterId']==characterId].to_dict(orient='records')[0]
-
-# show_character_info(character)
-
+with st.expander("模型设定", icon="🚨"):
+    models = read_models()
+    modified_models = st.data_editor(models, num_rows="dynamic")
+    if st.button('保存', disabled=modified_models.equals(models), use_container_width=True, type="primary"):
+        modified_models.to_json('data/models.json', orient="records", indent=4, force_ascii=False)
+        read_models.clear()
+        st.rerun()
+        
 if st.button("返回首页", use_container_width=True):
     st.switch_page("bvc.py")

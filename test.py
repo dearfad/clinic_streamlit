@@ -1,19 +1,8 @@
-from openpyxl import Workbook
-import json
+import streamlit as st
+import pandas as pd
+from libs.bvcutils import read_models
 
-wb = Workbook()
-ws = wb.active
-ws.title = "my_data"
-
-with open("data/patients.json", "r", encoding="utf-8") as file:
-        data = json.load(file)
-
-d = data[0]['info']
-
-column = 1
-for key, value in d.items():
-    ws.cell(row=1, column=column, value=key)
-    ws.cell(row=2, column=column, value=value)
-    column += 1
-
-wb.save('d.xlsx')
+models = read_models()
+modified_models = st.data_editor(models)
+if st.button('保存'):
+    modified_models.to_json('m.json', orient="records", indent=4, force_ascii=False)

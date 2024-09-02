@@ -1,5 +1,7 @@
 # 大模型
 
+火山引擎 设置 \HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem 路径下的变量 LongPathsEnabled 为 1
+
 ## 脚色扮演效果
 
 - 失败：调用不成功

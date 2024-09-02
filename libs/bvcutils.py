@@ -8,7 +8,6 @@ import pandas as pd
 import requests
 import streamlit as st
 from faker import Faker
-import json
 from libs.bvcconst import VOICES, SYSTEM_PROMPT
 
 
@@ -19,19 +18,7 @@ def read_patients():
 
 @st.cache_data
 def read_models():
-    with open("data/models.json", "r", encoding="utf-8") as file:
-        return json.load(file)
-
-
-def get_models():
-    models_json = read_models()
-    models_df = pd.json_normalize(
-        models_json, ["info", "models"], ["platform", "api", ["info", "series"]]
-    )
-    models_all = models_df.rename(columns={"info.series": "series"})[
-        ["platform", "series", "name", "model", "price", "api", "use"]
-    ]
-    return models_all[models_all["use"]].reset_index(drop=True).drop('use', axis=1)
+    return pd.read_json("data/models.json", orient="records")
 
 
 def reset_session_state(exclude=["voice"]):

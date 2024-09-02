@@ -1,192 +1,79 @@
 [
     {
-        "platform": "阿里云百炼",
-        "api": "dashscope",
-        "info": [
-            {
-                "series": "通义千问",
-                "models": [
-                    {
-                        "name": "通义千问-Turbo",
-                        "model": "qwen-turbo",
-                        "price": "计费",
-                        "use": false
-                    },
-                    {
-                        "name": "通义千问-Plus",
-                        "model": "qwen-plus",
-                        "price": "计费",
-                        "use": false
-                    },
-                    {
-                        "name": "通义千问-Max",
-                        "model": "qwen-max",
-                        "price": "计费",
-                        "use": false
-                    }
-                ]
-            },
-            {
-                "series": "通义千问-开源",
-                "models": [
-                    {
-                        "name": "通义千问1.5-开源版-0.5B",
-                        "model": "qwen1.5-0.5b-chat",
-                        "price": "免费",
-                        "use": false
-                    },
-                    {
-                        "name": "通义千问1.5-开源版-1.8B",
-                        "model": "qwen1.5-1.8b-chat",
-                        "price": "免费",
-                        "use": false
-                    },
-                    {
-                        "name": "通义千问-开源版-1.8B",
-                        "model": "qwen-1.8b-chat",
-                        "price": "免费",
-                        "use": false
-                    }
-                ]
-            }
-        ]
+        "use":true,
+        "platform":"阿里云百炼",
+        "series":"通义千问",
+        "name":"通义千问-Turbo",
+        "model":"qwen-turbo",
+        "price":"计费",
+        "apikey":"bailian",
+        "module":"bailian",
+        "classname":"BaiLian"
     },
     {
-        "platform": "通义星辰",
-        "api": "xingchen",
-        "info": [
-            {
-                "series": "星辰",
-                "models": [
-                    {
-                        "name": "xingchen-lite",
-                        "model": "xingchen-lite",
-                        "price": "收费",
-                        "use": false
-                    },
-                    {
-                        "name": "xingchen-base",
-                        "model": "xingchen-base",
-                        "price": "收费",
-                        "use": false
-                    },
-                    {
-                        "name": "xingchen-plus",
-                        "model": "xingchen-plus",
-                        "price": "收费",
-                        "use": false
-                    },
-                    {
-                        "name": "xingchen-max",
-                        "model": "xingchen-max",
-                        "price": "收费",
-                        "use": false
-                    }
-                ]
-            }
-        ]
+        "use":false,
+        "platform":"通义星辰",
+        "series":"星辰",
+        "name":"xingchen-plus",
+        "model":"xingchen-plus",
+        "price":"收费",
+        "apikey":"xingchen",
+        "module":"xingchen",
+        "classname":"XingChen"
     },
     {
-        "platform": "智谱AI",
-        "api": "zhipuai",
-        "info": [
-            {
-                "series": "GLM",
-                "models": [
-                    {
-                        "name": "GLM-4-Flash",
-                        "model": "glm-4-flash",
-                        "price": "免费",
-                        "use": false
-                    },
-                    {
-                        "name": "GLM-4-Air",
-                        "model": "glm-4-air",
-                        "price": "收费",
-                        "use": false
-                    },
-                    {
-                        "name": "GLM-4-Plus",
-                        "model": "glm-4-plus",
-                        "price": "收费",
-                        "use": false
-                    },
-                    {
-                        "name": "CharGLM-3",
-                        "model": "charglm-3",
-                        "price": "收费",
-                        "use": false
-                    }
-                ]
-            }
-        ]
+        "use":false,
+        "platform":"智谱AI",
+        "series":"GLM",
+        "name":"GLM-4-Flash",
+        "model":"glm-4-flash",
+        "price":"免费",
+        "apikey":"zhipu",
+        "module":"zhipu",
+        "classname":"ZhiPu"
     },
     {
-        "platform": "百川智能",
-        "api": "baichuan",
-        "info": [
-            {
-                "series": "baichuan",
-                "models": [
-                    {
-                        "name": "Baichuan4",
-                        "model": "Baichuan4",
-                        "price": "付费",
-                        "use": false
-                    }
-                ]
-            }
-        ]
+        "use":true,
+        "platform":"百川智能",
+        "series":"baichuan",
+        "name":"Baichuan4",
+        "model":"Baichuan4",
+        "price":"付费",
+        "apikey":"baichuan",
+        "module":"baichuan",
+        "classname":"BaiChuan"
     },
     {
-        "platform": "火山引擎",
-        "api": "arkengine",
-        "info": [
-            {
-                "series": "火山方舟",
-                "models": [
-                    {
-                        "name": "Doubao-pro-4k",
-                        "model": "doubao-pro-4k",
-                        "price": "免费",
-                        "use": false
-                    }
-                ]
-            }
-        ]
+        "use":true,
+        "platform":"火山引擎",
+        "series":"火山方舟",
+        "name":"Doubao-pro-4k",
+        "model":"doubao-pro-4k",
+        "price":"免费",
+        "apikey":"arkengine",
+        "module":"arkengine",
+        "classname":"ArkEngine"
     },
     {
-        "platform": "MiniMax",
-        "api": "minimax",
-        "info": [
-            {
-                "series": "ChatCompletion",
-                "models": [
-                    {
-                        "name": "ChatCompletion-v2",
-                        "model": "abab6.5s-chat",
-                        "price": "免费",
-                        "use": true
-                    }
-                ]
-            }
-        ]
+        "use":true,
+        "platform":"MiniMax",
+        "series":"ChatCompletion",
+        "name":"ChatCompletion-v2",
+        "model":"abab6.5s-chat",
+        "price":"免费",
+        "apikey":"minimax",
+        "module":"minimax",
+        "classname":"MiniMax"
     },
     {
-        "platform": "MoonshotAI",
-        "api": "moonshot",
-        "info": [
-            {
-                "series": "moonshot-v1",
-                "models": [
-                    {
-                        "name": "moonshot-v1-8k",
-                        "model": "moonshot-v1-8k",
-                        "price": "付费",
-                        "use": false
-                    }
-                ]
-            }
-        ]
+        "use":true,
+        "platform":"MoonshotAI",
+        "series":"moonshot-v1",
+        "name":"moonshot-v1-8k",
+        "model":"moonshot-v1-8k",
+        "price":"付费",
+        "apikey":"moonshot",
+        "module":"moonshot",
+        "classname":"MoonShot"
     }
 ]

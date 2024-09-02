@@ -10,7 +10,7 @@ from libs.bvcutils import (
     get_random_voice,
     read_patients,
 )
-from libs.bvcutils import get_models
+from libs.bvcutils import read_models
 
 class Role(Enum):
     VISITOR = "游客"
@@ -33,7 +33,7 @@ def assign_patients(role, mode) -> list:
     return patients
 
 def set_model() -> dict:
-    return get_models().sample(n=1).to_dict(orient="records")[0]
+    return read_models().sample(n=1).to_dict(orient="records")[0]
 
 @dataclass
 class Doctor:
@@ -48,23 +48,31 @@ class Doctor:
     def __post_init__(self):
         self.patients = assign_patients(self.role, self.mode)
 
-
 @dataclass
-class Patient:
+class Model:
+    use: bool = None
     platform: str = None
     series: str = None
     name: str = None
     model: str = None
     price: str = None
-    api: str = None
+    apikey: str = None
+    module: str = None
+    classname: str = None
+
+
+@dataclass
+class Patient:
+    model: Model = None
     messages: list = field(default_factory=list)
-    begin_time: datetime = None
+    begin_time: datetime  = None
     chat_duration_time: timedelta = timedelta(seconds=0)
-    end_time: datetime = None
+    end_time: datetime  = None
     inquiry_count: int = 1
     info: dict = field(default_factory=dict)
     reports: dict = field(default_factory=dict)
     questions: list = field(default_factory=list)
+
 
 
 @dataclass

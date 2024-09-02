@@ -34,15 +34,15 @@ match role:
     case Role.TEACHER:
         password = st.text_input("**密码**", type="password")
         if st.button("**登录**", use_container_width=True):
-            if password == st.secrets["teacher"]:
-                st.switch_page("pages/teacher.py")
-            else:
-                st.warning(":material/key: **密码错误**，请咨询**管理员**相关信息")
+            # if password == st.secrets["teacher_key"]:
+            st.switch_page("pages/teacher.py")
+            # else:
+                # st.warning(":material/key: **密码错误**，请咨询**管理员**相关信息")
 
     case Role.ADMIN:
         password = st.text_input("**密码**", type="password")
         if st.button("**登录**", use_container_width=True):
-            if password == st.secrets["admin"]:
-                st.switch_page("pages/admin.py")
-            else:
-                st.warning(":material/key: **密码错误**，请咨询**管理员**相关信息")
+            # if password == st.secrets["admin_key"]:
+            st.switch_page("pages/admin.py")
+            # else:
+            #     st.warning(":material/key: **密码错误**，请咨询**管理员**相关信息")
