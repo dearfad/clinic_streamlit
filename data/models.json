@@ -75,5 +75,27 @@
         "apikey":"moonshot",
         "module":"moonshot",
         "classname":"MoonShot"
+    },
+    {
+        "use":true,
+        "platform":"百度智能云",
+        "series":"千帆大模型",
+        "name":"ERNIE-Speed-128K",
+        "model":"ERNIE-Speed-128K",
+        "price":"免费",
+        "apikey":"baidu",
+        "module":"baidu",
+        "classname":"QianFan"
+    },
+    {
+        "use":true,
+        "platform":"腾讯云",
+        "series":"混元大模型",
+        "name":"hunyuan-lite",
+        "model":"hunyuan-lite",
+        "price":"免费",
+        "apikey":"tencent",
+        "module":"tencent",
+        "classname":"HunYuan"
     }
 ]

@@ -18,3 +18,9 @@ openai
 
 # FAKEPATIENT
 faker
+
+# BAIDU
+qianfan
+
+# TENCENT
+tencentcloud-sdk-python
