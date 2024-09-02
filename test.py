@@ -1,8 +1,11 @@
-import streamlit as st
-import pandas as pd
-from libs.bvcutils import read_models
+# import streamlit as st
+import json
+from libs.bvcutils import read_prompt, write_prompt
 
-models = read_models()
-modified_models = st.data_editor(models)
-if st.button('保存'):
-    modified_models.to_json('m.json', orient="records", indent=4, force_ascii=False)
+init_prompt = read_prompt()
+print(init_prompt)
+
+init_prompt['info'] = 'pl'
+write_prompt(init_prompt)
+x = read_prompt()
+print(x)

@@ -15,13 +15,13 @@ class ArkEngine:
         )
 
     def chat(self, doctor, patient):
-        info = get_patient_info(patient)
-        content = "\n【你的病情】\n" + info + SYSTEM_PROMPT
-        system_prompt = [{"role": "system", "content": content}]
-        print(system_prompt)
-        messages = system_prompt + patient.messages
+        # info = get_patient_info(patient)
+        # content = "\n【你的病情】\n" + info + SYSTEM_PROMPT
+        # system_prompt = [{"role": "system", "content": content}]
+        # print(system_prompt)
+        # messages = system_prompt + patient.messages
         completion = self.client.chat.completions.create(
-            model=MODEL[patient.model],
-            messages=messages,
+            model=MODEL[patient.model.model],
+            messages=patient.messages,
         )
         return completion.choices[0].message.content

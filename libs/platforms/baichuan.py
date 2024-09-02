@@ -8,16 +8,13 @@ class BaiChuan:
         self.api_key = api_key
 
     def chat(self, doctor, patient):
-        data = (
-            {"model": patient.model, "messages": patient.messages, "stream": False},
-        )
+        data = {"model": patient.model.model, "messages": patient.messages, "stream": False}
         json_data = json.dumps(data)
         headers = {
             "Content-Type": "application/json",
             "Authorization": "Bearer " + self.api_key,
         }
         response = requests.post(self.url, data=json_data, headers=headers, timeout=60)
-        print(response)
         return json.loads(response.text)["choices"][0]["message"]["content"]
 
     # data = {
@@ -43,14 +40,14 @@ class BaiChuan:
     #     print("请求失败，X-BC-Request-Id:", response.headers.get("X-BC-Request-Id"))
 
 
-if __name__ == "__main__":
-    baichuan = BaiChuan("sk-aa5e883004120ac5f07ec52d02b81b4b")
-    response = baichuan.chat(
-        character_id="30973",
-        messages=[
-            {"role": "user", "content": "你好"},
-            {"role": "assistant", "content": "大夫，你好"},
-            {"role": "user", "content": "哪里不舒服？"},
-        ],
-    )
-    print(json.loads(response.text)["choices"][0]["message"]["content"])
+# if __name__ == "__main__":
+#     baichuan = BaiChuan("sk-aa5e883004120ac5f07ec52d02b81b4b")
+#     response = baichuan.chat(
+#         character_id="30973",
+#         messages=[
+#             {"role": "user", "content": "你好"},
+#             {"role": "assistant", "content": "大夫，你好"},
+#             {"role": "user", "content": "哪里不舒服？"},
+#         ],
+#     )
+#     print(json.loads(response.text)["choices"][0]["message"]["content"])

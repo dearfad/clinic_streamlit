@@ -34,6 +34,7 @@ match role:
     case Role.TEACHER:
         password = st.text_input("**密码**", type="password")
         if st.button("**登录**", use_container_width=True):
+            st.session_state.doctor = Doctor(role=role)
             # if password == st.secrets["teacher_key"]:
             st.switch_page("pages/teacher.py")
             # else:
@@ -42,6 +43,7 @@ match role:
     case Role.ADMIN:
         password = st.text_input("**密码**", type="password")
         if st.button("**登录**", use_container_width=True):
+            st.session_state.doctor = Doctor(role=role)
             # if password == st.secrets["admin_key"]:
             st.switch_page("pages/admin.py")
             # else:

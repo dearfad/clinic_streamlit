@@ -5,11 +5,11 @@ from libs.bvcutils import read_patients, reset_session_state
 # from libs.servers.tongyi import XingChen
 
 
-def set_page_header():
+def set_page_header(layout="centered"):
     st.set_page_config(
         page_title="虚拟门诊",
         page_icon="👩",
-        layout="centered",
+        layout=layout,
     )
     PAGE_STYLE = """
     <style>

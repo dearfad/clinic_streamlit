@@ -7,15 +7,15 @@ class MiniMax:
         self.client = OpenAI(api_key=api_key, base_url="https://api.minimax.chat/v1")
 
     def chat(self, doctor, patient):
-        info = get_patient_info(patient)
-        content = "\n【你的病情】\n" + info + SYSTEM_PROMPT
-        system_prompt = [{"role": "system", "content": content}]
-        print(system_prompt)
-        messages = system_prompt + patient.messages
+        # info = get_patient_info(patient)
+        # content = "\n【你的病情】\n" + info + SYSTEM_PROMPT
+        # system_prompt = [{"role": "system", "content": content}]
+        # print(system_prompt)
+        # messages = system_prompt + patient.messages
         response = self.client.chat.completions.create(
-            model="abab6.5s-chat",
-            messages=messages,
+            model=patient.model.model,
+            messages=patient.messages,
             stream=False,
         )
-        print(response)
+        # print(response)
         return  response.choices[0].message.content

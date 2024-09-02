@@ -34,13 +34,15 @@ class XingChen:
             self.chat_message_api = ChatMessageApiSub(api_client)
 
     def chat(self, doctor, patient) -> str:
-        info = get_patient_info(patient)
-        content = "\n【你的人设】\n" + info + SYSTEM_PROMPT
-        print(content)
-        system_prompt = [{'role':'system','content':content}]
+        # info = get_patient_info(patient)
+        # content = "\n【你的人设】\n" + info + SYSTEM_PROMPT
+        # print(content)
+        # system_prompt = [{'role':'system','content':content}]
+        content = patient.messages[0]['content']
+        messages = patient.messages[1:]
         chat_param = ChatReqParams(
             bot_profile=CharacterKey(
-                name=patient.info["姓名"],
+                # name="患者",
                 content=content,
                 # traits="强制要求"
             ),
@@ -50,7 +52,7 @@ class XingChen:
                 temperature=0.92,
                 incrementalOutput=False
             ),
-            messages=patient.messages,
+            messages=messages,
             context=ChatContext(use_chat_history=False),
             user_profile=UserProfile(user_id=doctor.id),
         )

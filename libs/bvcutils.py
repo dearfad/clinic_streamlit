@@ -9,7 +9,15 @@ import requests
 import streamlit as st
 from faker import Faker
 from libs.bvcconst import VOICES, SYSTEM_PROMPT
+import json
 
+def read_prompt():
+    with open('data/prompt.json', 'r', encoding='utf-8') as file:
+        return json.load(file)
+
+def write_prompt(data_json):
+    with open('data/prompt.json', 'w', encoding='utf-8') as file:
+        json.dump(data_json, file, indent=4)
 
 @st.cache_data
 def read_patients():

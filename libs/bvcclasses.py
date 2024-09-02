@@ -22,14 +22,19 @@ class Role(Enum):
         return self.value
 
 def assign_patients(role, mode) -> list:
-    patients_df = read_patients()
-    match role:
+    match (role, mode):
+        case (Role.TEACHER, '模型研究'):
+            models = read_models()
+            patients = [Patient(model=Model(**model)) for model in models.to_dict(orient="records")]
         case _:
-            patients_list = patients_df.sample(n=1, ignore_index=True).to_dict(orient="records")
-    patients = [Patient(**set_model(), **patient) for patient in patients_list]
-    for patient in patients:
-        for question in patient.questions:
-            random.shuffle(question['answers'])
+            patients_df = read_patients()
+            match role:
+                case _:
+                    patients_list = patients_df.sample(n=1, ignore_index=True).to_dict(orient="records")
+            patients = [Patient(**set_model(), **patient) for patient in patients_list]
+            for patient in patients:
+                for question in patient.questions:
+                    random.shuffle(question['answers'])
     return patients
 
 def set_model() -> dict:
@@ -45,7 +50,7 @@ class Doctor:
     major: str = None
     patients: list = field(default_factory=list)
 
-    def __post_init__(self):
+    def assign_patients(self):
         self.patients = assign_patients(self.role, self.mode)
 
 @dataclass
@@ -69,7 +74,7 @@ class Patient:
     chat_duration_time: timedelta = timedelta(seconds=0)
     end_time: datetime  = None
     inquiry_count: int = 1
-    info: dict = field(default_factory=dict)
+    info: dict|str = field(default_factory=dict)
     reports: dict = field(default_factory=dict)
     questions: list = field(default_factory=list)
 

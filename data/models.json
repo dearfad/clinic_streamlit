@@ -11,7 +11,7 @@
         "classname":"BaiLian"
     },
     {
-        "use":false,
+        "use":true,
         "platform":"通义星辰",
         "series":"星辰",
         "name":"xingchen-plus",
@@ -22,7 +22,7 @@
         "classname":"XingChen"
     },
     {
-        "use":false,
+        "use":true,
         "platform":"智谱AI",
         "series":"GLM",
         "name":"GLM-4-Flash",

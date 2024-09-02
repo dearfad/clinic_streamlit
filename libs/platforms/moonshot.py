@@ -12,13 +12,13 @@ class MoonShot:
         # info = get_patient_info(patient)
         # content = SYSTEM_PROMPT + info
         # system_prompt = [{"role": "system", "content": content}]
-        system_prompt = build_system_prompt(patient)
-        messages = system_prompt + patient.messages
+        # system_prompt = build_system_prompt(patient)
+        # messages = system_prompt + patient.messages
         response = self.client.chat.completions.create(
-            model = "moonshot-v1-8k",
-            messages = messages,
-            temperature = 0.1,
+            model = patient.model.model,
+            messages = patient.messages,
+            # temperature = 0.9,
         )
-        print(response)
+        # print(response)
         
         return response.choices[0].message.content
