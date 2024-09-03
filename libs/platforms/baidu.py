@@ -1,10 +1,11 @@
 import os
 import qianfan
+import streamlit as st
 
 
 class QianFan:
     def __init__(self, api_key):
-        # os.environ["QIANFAN_ACCESS_KEY"] = "baiduid"
+        os.environ["QIANFAN_ACCESS_KEY"] = st.secrets['baidu_access_Key']
         os.environ["QIANFAN_SECRET_KEY"] = api_key
         self.client = qianfan.ChatCompletion()
 

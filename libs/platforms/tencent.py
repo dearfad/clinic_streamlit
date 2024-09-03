@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 import json
-import os
 
 from tencentcloud.common import credential
-from tencentcloud.common.exception.tencent_cloud_sdk_exception import TencentCloudSDKException
 from tencentcloud.common.profile.client_profile import ClientProfile
 from tencentcloud.hunyuan.v20230901 import hunyuan_client, models
+import streamlit as st
 
 class HunYuan:
     def __init__(self, api_key):
-        # self.cred = credential.Credential("tencentid", api_key)
+        self.cred = credential.Credential(st.secrets["tencent_id"], api_key)
 
         self.cpf = ClientProfile()
         # 预先建立连接可以降低访问延迟
