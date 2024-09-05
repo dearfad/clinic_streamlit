@@ -17,7 +17,7 @@ def read_prompt():
 
 def write_prompt(data_json):
     with open('data/prompt.json', 'w', encoding='utf-8') as file:
-        json.dump(data_json, file, indent=4)
+        json.dump(data_json, file, indent=4, ensure_ascii=False)
 
 @st.cache_data
 def read_patients():

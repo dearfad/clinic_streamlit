@@ -36,7 +36,7 @@ PATIENT_INFO = """[人物信息]
 # 2. 请你拒绝回答跟你的病情无关的问题。
 # 3. 请你不要回答你对疾病诊断和治疗问题的相关想法;
 # 4. 请你不能说出你的姓名。
-# 5. 如果问哪里不舒服，请根据主诉回答。 
+# 5. 如果问哪里不舒服，请根据主诉回答。
 
 # 【语言风格】
 # 1. 请在对话中表现出焦急、疼痛、惜字如金。
@@ -44,31 +44,40 @@ PATIENT_INFO = """[人物信息]
 # """
 
 TOOLS = [
-    # 工具1 获取医生信息
+    # 工具1 获取报告信息
     {
         "type": "function",
         "function": {
-            "name": "get_doctor_info",
-            "description": "当你想知道用户的信息时非常有用。",
-            "parameters": {},
-        },
-    },
-    # 工具2 获取检查报告
-    {
-        "type": "function",
-        "function": {
-            "name": "get_report",
-            "description": "当你想发送给用户检查报告图片时非常有用。",
+            "name": "get_report_id",
+            "description": "根据用户提示的信息，查询报告编号",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "examination": {
+                    "report": {
                         "type": "string",
-                        "description": "检查报告，比如超声报告、血常规等。",
-                    }
+                        "description": "检查报告，如：超声，血常规",
+                    },
                 },
+                "required": ["report"],
             },
-            "required": ["examination"],
         },
     },
+    # 工具2 获取检查报告
+    # {
+    #     "type": "function",
+    #     "function": {
+    #         "name": "get_report",
+    #         "description": "当你想发送给用户检查报告图片时非常有用。",
+    #         "parameters": {
+    #             "type": "object",
+    #             "properties": {
+    #                 "examination": {
+    #                     "type": "string",
+    #                     "description": "检查报告，比如超声报告、血常规等。",
+    #                 }
+    #             },
+    #         },
+    #         "required": ["examination"],
+    #     },
+    # },
 ]

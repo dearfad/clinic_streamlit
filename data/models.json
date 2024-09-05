@@ -130,5 +130,27 @@
         "apikey":"lingyi",
         "module":"lingyi",
         "classname":"LingYi"
+    },
+    {
+        "use":true,
+        "platform":"智谱AI",
+        "series":"GLM",
+        "name":"GLM-4-AirX",
+        "model":"glm-4-airx",
+        "price":"付费",
+        "apikey":"zhipu",
+        "module":"zhipu",
+        "classname":"ZhiPu"
+    },
+    {
+        "use":true,
+        "platform":"智谱AI",
+        "series":"GLM",
+        "name":"GLM-4-Plus",
+        "model":"glm-4-plus",
+        "price":"付费",
+        "apikey":"zhipu",
+        "module":"zhipu",
+        "classname":"ZhiPu"
     }
 ]
