@@ -1,11 +1,4 @@
-# import streamlit as st
-import json
-from libs.bvcutils import read_prompt, write_prompt
-
-init_prompt = read_prompt()
-print(init_prompt)
-
-init_prompt['info'] = 'pl'
-write_prompt(init_prompt)
-x = read_prompt()
-print(x)
+import sensenova
+sensenova.access_key_id = "B2366510AA0147BAB70C8C32FA0FC6FA"
+sensenova.secret_access_key = "927DD0D163A74010A03007A7AEAE5BD4"
+print(sensenova.Model.list())

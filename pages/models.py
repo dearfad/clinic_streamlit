@@ -60,7 +60,7 @@ chat_cols = st.columns(len(selected_models))
 for i, col in enumerate(chat_cols):
     with col:
         st.session_state.chat_container[selected_models[i]] = st.container(
-            height=250, border=True
+            height=210, border=True
         )
         st.markdown(f"**{selected_models[i]}**")
 

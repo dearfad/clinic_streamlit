@@ -22,7 +22,7 @@
         "classname":"XingChen"
     },
     {
-        "use":false,
+        "use":true,
         "platform":"智谱AI",
         "series":"GLM",
         "name":"GLM-4-Flash",
@@ -99,7 +99,7 @@
         "classname":"HunYuan"
     },
     {
-        "use":true,
+        "use":false,
         "platform":"讯飞云",
         "series":"星火大模型",
         "name":"Spark4.0 Ultra",
@@ -108,5 +108,27 @@
         "apikey":"xunfei",
         "module":"xunfei",
         "classname":"XingHuo"
+    },
+    {
+        "use":false,
+        "platform":"商汤",
+        "series":"日日新大模型",
+        "name":"SenseChat",
+        "model":"SenseChat",
+        "price":"付费",
+        "apikey":"shangtang",
+        "module":"shangtang",
+        "classname":"ShangTang"
+    },
+    {
+        "use":false,
+        "platform":"零一万物",
+        "series":"Yi大模型",
+        "name":"yi-medium",
+        "model":"yi-medium",
+        "price":"付费",
+        "apikey":"lingyi",
+        "module":"lingyi",
+        "classname":"LingYi"
     }
 ]
