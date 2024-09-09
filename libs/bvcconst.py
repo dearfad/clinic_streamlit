@@ -44,40 +44,22 @@ PATIENT_INFO = """[人物信息]
 # """
 
 TOOLS = [
-    # 工具1 获取报告信息
+    # 获取报告图片
     {
         "type": "function",
         "function": {
-            "name": "get_report_id",
-            "description": "根据用户提示的信息，查询报告编号",
+            "name": "get_report",
+            "description": "如果用户想看一下检查报告时应用",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "report": {
                         "type": "string",
-                        "description": "检查报告，如：超声，血常规",
+                        "description": "检查报告，如：超声，血常规等",
                     },
                 },
                 "required": ["report"],
             },
         },
-    },
-    # 工具2 获取检查报告
-    # {
-    #     "type": "function",
-    #     "function": {
-    #         "name": "get_report",
-    #         "description": "当你想发送给用户检查报告图片时非常有用。",
-    #         "parameters": {
-    #             "type": "object",
-    #             "properties": {
-    #                 "examination": {
-    #                     "type": "string",
-    #                     "description": "检查报告，比如超声报告、血常规等。",
-    #                 }
-    #             },
-    #         },
-    #         "required": ["examination"],
-    #     },
-    # },
+    }
 ]

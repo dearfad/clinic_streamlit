@@ -1,6 +1,28 @@
 [
     {
-        "use":false,
+        "use":true,
+        "platform":"阿里云百炼",
+        "series":"通义千问",
+        "name":"通义千问-Max",
+        "model":"qwen-max",
+        "price":"计费",
+        "apikey":"bailian",
+        "module":"bailian",
+        "classname":"BaiLian"
+    },
+    {
+        "use":true,
+        "platform":"阿里云百炼",
+        "series":"通义千问",
+        "name":"通义千问-Plus",
+        "model":"qwen-plus",
+        "price":"计费",
+        "apikey":"bailian",
+        "module":"bailian",
+        "classname":"BaiLian"
+    },
+    {
+        "use":true,
         "platform":"阿里云百炼",
         "series":"通义千问",
         "name":"通义千问-Turbo",
@@ -22,7 +44,7 @@
         "classname":"XingChen"
     },
     {
-        "use":true,
+        "use":false,
         "platform":"智谱AI",
         "series":"GLM",
         "name":"GLM-4-Flash",
@@ -132,7 +154,7 @@
         "classname":"LingYi"
     },
     {
-        "use":true,
+        "use":false,
         "platform":"智谱AI",
         "series":"GLM",
         "name":"GLM-4-AirX",
@@ -143,11 +165,22 @@
         "classname":"ZhiPu"
     },
     {
-        "use":true,
+        "use":false,
         "platform":"智谱AI",
         "series":"GLM",
         "name":"GLM-4-Plus",
         "model":"glm-4-plus",
+        "price":"付费",
+        "apikey":"zhipu",
+        "module":"zhipu",
+        "classname":"ZhiPu"
+    },
+    {
+        "use":false,
+        "platform":"智谱AI",
+        "series":"GLM",
+        "name":"GLM-4-Air",
+        "model":"glm-4-air",
         "price":"付费",
         "apikey":"zhipu",
         "module":"zhipu",
