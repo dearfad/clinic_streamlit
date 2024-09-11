@@ -26,7 +26,7 @@ with col_left:
     st.markdown("**SYSTEM_PROMPT**")
     st.text_area(
         "**SYSTEM_PROMPT**",
-        value=read_prompt()['system_prompt'],
+        value=read_prompt()["system_prompt"],
         key="system_prompt",
         height=280,
         label_visibility="collapsed",
@@ -36,7 +36,7 @@ with col_center:
     st.markdown("**PATIENT_INFO**")
     st.text_area(
         "**PATIENT_INFO**",
-        value=read_prompt()['patient_info'],
+        value=read_prompt()["patient_info"],
         key="patient_info",
         height=280,
         label_visibility="collapsed",
@@ -47,11 +47,11 @@ with col_right:
         models_df,
         height=280,
         hide_index=True,
-        column_order=("use", "platform", "model"),
+        column_order=("use", "platform", "series", "name"),
         use_container_width=True,
     )
 
-selected_models = models[models["use"]]["model"].to_list()
+selected_models = models[models["use"]]["name"].to_list()
 if len(selected_models) == 0:
     st.warning("请至少选择一个模型...")
     st.stop()
@@ -75,13 +75,13 @@ for patient in st.session_state.doctor.patients:
             {"role": "user", "content": "你好"},
             {"role": "assistant", "content": "大夫，你好"},
         ]
-    if patient.model.model in selected_models:
+    if patient.model.name in selected_models:
         patient.model.use = True
     else:
         patient.model.use = False
 
     if patient.model.use:
-        with st.session_state.chat_container[patient.model.model]:
+        with st.session_state.chat_container[patient.model.name]:
             show_chat(patient.messages)
 
 cols = st.columns(3)
@@ -90,12 +90,12 @@ with cols[1]:
     if prompt := chat_input_placeholder.chat_input(""):
         for patient in st.session_state.doctor.patients:
             if patient.model.use:
-                with st.session_state.chat_container[patient.model.model]:
+                with st.session_state.chat_container[patient.model.name]:
                     with st.chat_message("医生"):
                         st.markdown(prompt)
                     patient.messages.append({"role": "user", "content": prompt})
                     with st.spinner("思考中..."):
-                        response = chat(st.session_state.doctor, patient)
+                        response = chat(patient)
                     with st.chat_message("患者"):
                         st.markdown(response)
                     patient.messages.append({"role": "assistant", "content": response})
@@ -113,9 +113,11 @@ with footer_col_right:
     if st.button("返回首页", use_container_width=True):
         st.switch_page("bvc.py")
 with foot_col_save:
-    if st.button('保存', use_container_width=True):
-        write_prompt({
+    if st.button("保存", use_container_width=True):
+        write_prompt(
+            {
                 "system_prompt": st.session_state.system_prompt,
-                "patient_info": st.session_state.patient_info
-            })
-        st.toast("saved...", icon='😍')
+                "patient_info": st.session_state.patient_info,
+            }
+        )
+        st.toast("saved...", icon="😍")

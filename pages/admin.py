@@ -8,7 +8,7 @@ st.markdown(":material/admin_panel_settings: **管理员**")
 
 with st.expander("模型设定", icon="🚨"):
     models = read_models()
-    modified_models = st.data_editor(models, num_rows="dynamic")
+    modified_models = st.data_editor(models, num_rows="dynamic", use_container_width=True)
     if st.button('保存', disabled=modified_models.equals(models), use_container_width=True, type="primary"):
         modified_models.to_excel('data/models.xlsx', index=False)
         read_models.clear()

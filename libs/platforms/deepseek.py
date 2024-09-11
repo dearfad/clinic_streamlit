@@ -1,12 +1,12 @@
 import streamlit as st
-from zhipuai import ZhipuAI
+from openai import OpenAI
 
 from libs.bvcconst import TOOLS
 
 
 def chat(patient):
     api_key = st.secrets[patient.model.module]
-    client = ZhipuAI(api_key=api_key)
+    client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     model = patient.model.name
     messages = patient.messages
     response = client.chat.completions.create(
@@ -14,8 +14,8 @@ def chat(patient):
         messages=messages,
         stream=False,
         tools=TOOLS,
-        # temperature=0.95,
-        # top_p=0.7,
+        # temperature=1,
+        # top_p=1,
     )
     if response.choices[0].message.tool_calls:
         tool_call = response.choices[0].message.tool_calls[0]

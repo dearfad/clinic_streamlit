@@ -59,11 +59,7 @@ class Model:
     platform: str = None
     series: str = None
     name: str = None
-    model: str = None
-    price: str = None
-    apikey: str = None
     module: str = None
-    classname: str = None
 
 
 @dataclass
