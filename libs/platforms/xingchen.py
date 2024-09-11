@@ -18,10 +18,23 @@ from xingchen import (
     ModelParameters,
     ResetChatHistoryRequest,
     UserProfile,
+    Function,
 )
 
-from libs.bvcutils import get_patient_info
-from libs.bvcconst import SYSTEM_PROMPT
+
+func = [
+    Function(
+        name="get_report",
+        description="如果用户想看一下超声报告时应用",
+        parameters={
+            "type": "object",
+            "properties": {
+                "report": {"type": "string", "description": "超声"},
+            },
+        },
+    )
+]
+
 
 class XingChen:
     def __init__(self, api_key):
@@ -34,11 +47,7 @@ class XingChen:
             self.chat_message_api = ChatMessageApiSub(api_client)
 
     def chat(self, doctor, patient) -> str:
-        # info = get_patient_info(patient)
-        # content = "\n【你的人设】\n" + info + SYSTEM_PROMPT
-        # print(content)
-        # system_prompt = [{'role':'system','content':content}]
-        content = patient.messages[0]['content']
+        content = patient.messages[0]["content"]
         messages = patient.messages[1:]
         chat_param = ChatReqParams(
             bot_profile=CharacterKey(
@@ -47,14 +56,12 @@ class XingChen:
                 # traits="强制要求"
             ),
             model_parameters=ModelParameters(
-                seed=1683806810,
-                top_p=0.95,   
-                temperature=0.92,
-                incrementalOutput=False
+                seed=1683806810, top_p=0.95, temperature=0.92, incrementalOutput=False
             ),
             messages=messages,
             context=ChatContext(use_chat_history=False),
             user_profile=UserProfile(user_id=doctor.id),
+            functions=func,
         )
         # chat_param = ChatReqParams(
         #     bot_profile=CharacterKey(character_id=patient.id),
@@ -68,7 +75,31 @@ class XingChen:
         try:
             response = self.chat_api.chat(chat_param).to_dict()
             if response["success"]:
-                return response["data"]["choices"][0]["messages"][0]["content"]
+                print(response)
+                if len(response["data"]["choices"][0]["messages"]) == 2:
+                    if response["data"]["choices"][0]["messages"][1]["function_call"][
+                        "api_call_list"
+                    ]:
+                        tool = response["data"]["choices"][0]["messages"][1][
+                            "function_call"
+                        ]
+                        tool_name = tool["api_call_list"][1]["api_name"]
+                        arg = tool["api_call_list"][1]["parameters"]
+                        if tool_name == "get_report":
+                            return f"好的，这是我的{arg['report']} ![](app/static/乳腺超声.jpg)"
+                    else:
+                        return response["data"]["choices"][0]["messages"][0]["content"]
+                else:
+                    if response["data"]["choices"][0]["messages"][0].get('function_call', None):
+                        tool = response["data"]["choices"][0]["messages"][0][
+                            "function_call"
+                        ]
+                        tool_name = tool["api_call_list"][0]["api_name"]
+                        arg = tool["api_call_list"][0]["parameters"]
+                        if tool_name == "get_report":
+                            return f"好的，这是我的{arg['report']} ![](app/static/乳腺超声.jpg)"
+                    else:
+                        return response["data"]["choices"][0]["messages"][0]["content"]
             else:
                 return (
                     f"( 似乎自己在思索什么，嘴里反复说着数字 ~ {response['code']} ~ )"

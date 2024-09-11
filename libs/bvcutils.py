@@ -26,7 +26,7 @@ def read_patients():
 
 @st.cache_data
 def read_models():
-    return pd.read_json("data/models.json", orient="records")
+    return pd.read_excel("data/models.xlsx")
 
 
 def reset_session_state(exclude=["voice"]):

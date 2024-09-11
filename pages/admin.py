@@ -10,7 +10,7 @@ with st.expander("模型设定", icon="🚨"):
     models = read_models()
     modified_models = st.data_editor(models, num_rows="dynamic")
     if st.button('保存', disabled=modified_models.equals(models), use_container_width=True, type="primary"):
-        modified_models.to_json('data/models.json', orient="records", indent=4, force_ascii=False)
+        modified_models.to_excel('data/models.xlsx', index=False)
         read_models.clear()
         st.rerun()
         

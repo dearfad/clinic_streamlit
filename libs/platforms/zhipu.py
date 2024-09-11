@@ -1,4 +1,5 @@
 from zhipuai import ZhipuAI
+
 from libs.bvcconst import TOOLS
 
 
@@ -11,7 +12,7 @@ class ZhiPu:
                 model=patient.model.model,
                 messages=patient.messages,
                 tools=TOOLS,
-                temperature=0.5,
+                temperature=0.95,
             )
         if response.choices[0].message.tool_calls:
             tool_call = response.choices[0].message.tool_calls[0]

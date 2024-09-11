@@ -25,3 +25,4 @@ qianfan
 # TENCENT
 tencentcloud-sdk-python
 
+openpyxl
