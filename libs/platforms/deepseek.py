@@ -5,7 +5,7 @@ from libs.bvcconst import TOOLS
 
 
 def chat(patient):
-    api_key = st.secrets[patient.model.module]
+    api_key = st.secrets['deepseek']
     client = OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     model = patient.model.name
     messages = patient.messages

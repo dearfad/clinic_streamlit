@@ -5,7 +5,7 @@ from libs.bvcconst import TOOLS
 
 
 def chat(patient):
-    api_key = st.secrets[patient.model.module]
+    api_key = st.secrets['zhipu']
     client = ZhipuAI(api_key=api_key)
     model = patient.model.name
     messages = patient.messages
