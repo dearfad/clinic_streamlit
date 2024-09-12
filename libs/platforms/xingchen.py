@@ -1,5 +1,3 @@
-import random
-
 from xingchen import (
     ApiClient,
     CharacterApiSub,
@@ -21,6 +19,7 @@ from xingchen import (
     Function,
 )
 
+import streamlit as st
 
 func = [
     Function(
@@ -35,21 +34,18 @@ func = [
     )
 ]
 
-
-class XingChen:
-    def __init__(self, api_key):
-        self.configuration = Configuration(host="https://nlp.aliyuncs.com")
+def chat(patient):
+    configuration = Configuration(host="https://nlp.aliyuncs.com")
         # xingchen QPS=1 APIMAX=10
-        self.configuration.access_token = api_key
-        with ApiClient(self.configuration) as api_client:
-            self.chat_api = ChatApiSub(api_client)
-            self.character_api = CharacterApiSub(api_client)
-            self.chat_message_api = ChatMessageApiSub(api_client)
+    configuration.access_token = st.secrets['xingchen']
+    with ApiClient(configuration) as api_client:
+        chat_api = ChatApiSub(api_client)
+        # character_api = CharacterApiSub(api_client)
+        # chat_message_api = ChatMessageApiSub(api_client)
 
-    def chat(self, doctor, patient) -> str:
-        content = patient.messages[0]["content"]
-        messages = patient.messages[1:]
-        chat_param = ChatReqParams(
+    content = patient.messages[0]["content"]
+    messages = patient.messages[1:]
+    chat_param = ChatReqParams(
             bot_profile=CharacterKey(
                 # name="患者",
                 content=content,
@@ -60,8 +56,8 @@ class XingChen:
             ),
             messages=messages,
             context=ChatContext(use_chat_history=False),
-            user_profile=UserProfile(user_id=doctor.id),
-            functions=func,
+            user_profile=UserProfile(user_id="012345"),
+            # functions=func,
         )
         # chat_param = ChatReqParams(
         #     bot_profile=CharacterKey(character_id=patient.id),
@@ -72,75 +68,75 @@ class XingChen:
         #     context=ChatContext(use_chat_history=True),
         #     user_profile=UserProfile(user_id=doctor.id),
         # )
-        try:
-            response = self.chat_api.chat(chat_param).to_dict()
-            if response["success"]:
-                print(response)
-                if len(response["data"]["choices"][0]["messages"]) == 2:
-                    if response["data"]["choices"][0]["messages"][1]["function_call"][
-                        "api_call_list"
-                    ]:
-                        tool = response["data"]["choices"][0]["messages"][1][
-                            "function_call"
-                        ]
-                        tool_name = tool["api_call_list"][1]["api_name"]
-                        arg = tool["api_call_list"][1]["parameters"]
-                        if tool_name == "get_report":
-                            return f"好的，这是我的{arg['report']} ![](app/static/乳腺超声.jpg)"
-                    else:
-                        return response["data"]["choices"][0]["messages"][0]["content"]
-                else:
-                    if response["data"]["choices"][0]["messages"][0].get('function_call', None):
-                        tool = response["data"]["choices"][0]["messages"][0][
-                            "function_call"
-                        ]
-                        tool_name = tool["api_call_list"][0]["api_name"]
-                        arg = tool["api_call_list"][0]["parameters"]
-                        if tool_name == "get_report":
-                            return f"好的，这是我的{arg['report']} ![](app/static/乳腺超声.jpg)"
-                    else:
-                        return response["data"]["choices"][0]["messages"][0]["content"]
-            else:
-                return (
-                    f"( 似乎自己在思索什么，嘴里反复说着数字 ~ {response['code']} ~ )"
-                )
-        except Exception as exception:
-            return f"( 脑子坏掉了，等会再问我吧 ~ 原因是: {exception})"
+    response = chat_api.chat(chat_param).to_dict()
+    print(response)
+    return response['data']
+        # if response["success"]:
+        #         if len(response["data"]["choices"][0]["messages"]) == 2:
+        #             if response["data"]["choices"][0]["messages"][1]["function_call"][
+        #                 "api_call_list"
+        #             ]:
+        #                 tool = response["data"]["choices"][0]["messages"][1][
+        #                     "function_call"
+        #                 ]
+        #                 tool_name = tool["api_call_list"][1]["api_name"]
+        #                 arg = tool["api_call_list"][1]["parameters"]
+        #                 if tool_name == "get_report":
+        #                     return f"好的，这是我的{arg['report']} ![](app/static/乳腺超声.jpg)"
+        #             else:
+        #                 return response["data"]["choices"][0]["messages"][0]["content"]
+        #         else:
+        #             if response["data"]["choices"][0]["messages"][0].get('function_call', None):
+        #                 tool = response["data"]["choices"][0]["messages"][0][
+        #                     "function_call"
+        #                 ]
+        #                 tool_name = tool["api_call_list"][0]["api_name"]
+        #                 arg = tool["api_call_list"][0]["parameters"]
+        #                 if tool_name == "get_report":
+        #                     return f"好的，这是我的{arg['report']} ![](app/static/乳腺超声.jpg)"
+        #             else:
+        #                 return response["data"]["choices"][0]["messages"][0]["content"]
+        #     else:
+        #         return (
+        #             f"( 似乎自己在思索什么，嘴里反复说着数字 ~ {response['code']} ~ )"
+        #         )
+        # except Exception as exception:
+        #     return f"( 脑子坏掉了，等会再问我吧 ~ 原因是: {exception})"
 
-    def character_create(self, patient):
-        pass
+    # def character_create(self, patient):
+    #     pass
 
-    def character_delete(self, patient):
-        pass
+    # def character_delete(self, patient):
+    #     pass
 
-    def character_update(self, character) -> bool:
-        body = CharacterUpdateDTO.from_dict(character)
-        result = self.character_api.update(character_update_dto=body)
-        return result.to_dict()["data"]
+    # def character_update(self, character) -> bool:
+    #     body = CharacterUpdateDTO.from_dict(character)
+    #     result = self.character_api.update(character_update_dto=body)
+    #     return result.to_dict()["data"]
 
-    def character_details(self, patient) -> dict:
-        # detail = self.character_api.character_details(character_id=patient.id)
-        detail = self.character_api.character_details(character_id=patient)
-        return detail.data.to_dict()
+    # def character_details(self, patient) -> dict:
+    #     # detail = self.character_api.character_details(character_id=patient.id)
+    #     detail = self.character_api.character_details(character_id=patient)
+    #     return detail.data.to_dict()
 
-    def character_search(self, scope="my") -> list:
-        body = CharacterQueryDTO(
-            where=CharacterQueryWhere(scope=scope), pageNum=1, pageSize=100
-        )
-        result = self.character_api.search(character_query_dto=body)
-        return result.data.to_dict()["list"]
+    # def character_search(self, scope="my") -> list:
+    #     body = CharacterQueryDTO(
+    #         where=CharacterQueryWhere(scope=scope), pageNum=1, pageSize=100
+    #     )
+    #     result = self.character_api.search(character_query_dto=body)
+    #     return result.data.to_dict()["list"]
 
-    def get_chat_histories(self, doctor, patient) -> list:
-        body = ChatHistoryQueryDTO(
-            where=ChatHistoryQueryWhere(characterId=patient.id, bizUserId=doctor.id),
-            orderBy=["gmtCreate desc"],
-            pageNum=1,
-            pageSize=10,
-        )
-        result = self.chat_message_api.chat_histories(chat_history_query_dto=body)
-        return result.data.to_dict()
+    # def get_chat_histories(self, doctor, patient) -> list:
+    #     body = ChatHistoryQueryDTO(
+    #         where=ChatHistoryQueryWhere(characterId=patient.id, bizUserId=doctor.id),
+    #         orderBy=["gmtCreate desc"],
+    #         pageNum=1,
+    #         pageSize=10,
+    #     )
+    #     result = self.chat_message_api.chat_histories(chat_history_query_dto=body)
+    #     return result.data.to_dict()
 
-    def reset_chat_history(self, doctor, patient) -> bool:
-        body = ResetChatHistoryRequest(characterId=patient.id, userId=doctor.id)
-        result = self.chat_message_api.reset_chat_history(request=body)
-        return result.data
+    # def reset_chat_history(self, doctor, patient) -> bool:
+    #     body = ResetChatHistoryRequest(characterId=patient.id, userId=doctor.id)
+    #     result = self.chat_message_api.reset_chat_history(request=body)
+    #     return result.data
