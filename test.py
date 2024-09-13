@@ -1,6 +1,8 @@
-from libs.bvcutils import read_models
+import sensenova
+import streamlit as st
 
-data = read_models()
-
-data.to_excel('data/models.xlsx', index=False)
+sensenova.access_key_id = st.secrets['shangtang_access_key_id']
+sensenova.secret_access_key = st.secrets['shangtang_secret_access_key']
+resp = sensenova.Model.list()
+st.write(resp)
 
