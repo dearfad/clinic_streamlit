@@ -69,8 +69,8 @@ def chat(patient):
         #     user_profile=UserProfile(user_id=doctor.id),
         # )
     response = chat_api.chat(chat_param).to_dict()
-    print(response)
-    return response['data']
+    # print(response)
+    return response['data']['choices'][0]['messages'][0]['content']
         # if response["success"]:
         #         if len(response["data"]["choices"][0]["messages"]) == 2:
         #             if response["data"]["choices"][0]["messages"][1]["function_call"][

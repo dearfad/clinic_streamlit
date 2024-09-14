@@ -9,4 +9,4 @@ doctor = st.session_state.doctor
 show_result(doctor)
 
 if st.button("返回首页", use_container_width=True):
-    st.switch_page("bvc.py")
+    st.switch_page("clinic.py")

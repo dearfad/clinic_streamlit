@@ -8,4 +8,4 @@ st.markdown('##### 教学研究')
 st.page_link('pages/models.py', label='模型研究', icon="🌎")
 
 if st.button("返回首页", use_container_width=True):
-    st.switch_page("bvc.py")
+    st.switch_page("clinic.py")

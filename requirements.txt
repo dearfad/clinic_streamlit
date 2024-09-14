@@ -25,4 +25,7 @@ qianfan
 # TENCENT
 tencentcloud-sdk-python
 
+# shangtang
+sensenova
+
 openpyxl

@@ -15,4 +15,4 @@ with st.expander("模型设定", icon="🚨"):
         st.rerun()
         
 if st.button("返回首页", use_container_width=True):
-    st.switch_page("bvc.py")
+    st.switch_page("clinic.py")

@@ -3,6 +3,7 @@ from libs.bvcpage import set_page_header, show_chat
 from libs.bvcutils import read_models, read_prompt, write_prompt
 from libs.bvcclasses import Doctor, Role
 from libs.bvcmodels import chat
+from datetime import datetime
 
 set_page_header(layout="wide")
 
@@ -94,8 +95,10 @@ with cols[1]:
                     with st.chat_message("医生"):
                         st.markdown(prompt)
                     patient.messages.append({"role": "user", "content": prompt})
+                    start_time = datetime.now()
                     with st.spinner("思考中..."):
                         response = chat(patient)
+                    st.markdown(f":stopwatch: {round((datetime.now()-start_time).total_seconds(),2)} 秒")
                     with st.chat_message("患者"):
                         st.markdown(response)
                     patient.messages.append({"role": "assistant", "content": response})
@@ -111,7 +114,7 @@ with footer_col_center:
         st.rerun()
 with footer_col_right:
     if st.button("返回首页", use_container_width=True):
-        st.switch_page("bvc.py")
+        st.switch_page("clinic.py")
 with foot_col_save:
     if st.button("保存", use_container_width=True):
         write_prompt(
