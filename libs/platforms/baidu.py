@@ -22,7 +22,7 @@ func = [
 
 
 def chat(patient):
-    os.environ["QIANFAN_ACCESS_KEY"] = st.secrets["baidu_access_Key"]
+    os.environ["QIANFAN_ACCESS_KEY"] = st.secrets["baidu_access_key"]
     os.environ["QIANFAN_SECRET_KEY"] = st.secrets["baidu_secret_key"]
     model = patient.model.name
     messages = patient.messages

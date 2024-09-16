@@ -17,7 +17,7 @@ def chat(patient):
         # temperature=1,
         # top_p=1,
     )
-    print(response)
+    # print(response)
     if response.choices[0].message.tool_calls:
         tool_call = response.choices[0].message.tool_calls[0]
         args = eval(tool_call.function.arguments)
