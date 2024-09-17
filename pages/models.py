@@ -1,7 +1,7 @@
 import streamlit as st
 from libs.bvcpage import set_page_header, show_chat
 from libs.bvcutils import read_models, read_prompt, write_prompt
-from libs.bvcclasses import Doctor, Role
+from libs.bvcclasses import Doctor, Role, Patient, Model
 from libs.bvcmodels import chat
 from datetime import datetime
 
@@ -22,8 +22,10 @@ if "chat_container" not in st.session_state:
     st.session_state.chat_container = {}
 
 
-col_left, col_center, col_right = st.columns(3)
-with col_left:
+col_system, col_teacher, col_center, col_questions, col_right = st.columns(
+    [2, 2, 2, 2, 1]
+)
+with col_system:
     st.markdown("**SYSTEM_PROMPT**")
     st.text_area(
         "**SYSTEM_PROMPT**",
@@ -32,23 +34,77 @@ with col_left:
         height=280,
         label_visibility="collapsed",
     )
-
-with col_center:
-    st.markdown("**PATIENT_INFO**")
+with col_teacher:
+    st.markdown("**TEACHER_PROMPT**")
     st.text_area(
-        "**PATIENT_INFO**",
-        value=read_prompt()["patient_info"],
-        key="patient_info",
+        "**TEACHER_PROMPT**",
+        value=read_prompt()["teacher_prompt"],
+        key="teacher_prompt",
         height=280,
         label_visibility="collapsed",
     )
+
+with col_center:
+    st.markdown("**PATIENT_INFO**")
+    disease = st.text_input("病种", value="乳房疾病")
+    if "patient_info" not in st.session_state:
+        st.session_state.patient_info = read_prompt()["patient_info"]
+    patient = st.text_area(
+        "**PATIENT_INFO**",
+        value=st.session_state.patient_info,
+        # key="patient_info",
+        height=220,
+        label_visibility="collapsed",
+    )
+    if st.button("生成病历", use_container_width=True):
+        patient = Patient()
+        patient.model = Model(platform="智谱AI", name="glm-4-flash", module="zhipu")
+        patient.messages = [
+            {
+                "role": "system",
+                "content": st.session_state.teacher_prompt,
+            },
+            {"role": "user", "content": disease},
+            # {"role": "assistant", "content": "大夫，你好"},
+        ]
+        response = chat(patient)
+        st.session_state.patient_info = response
+        st.rerun()
+
+with col_questions:
+    st.markdown("**QUESTIONS**")
+    if "questions" not in st.session_state:
+        st.session_state.questions = read_prompt()["questions"]
+    st.text_area(
+        "**QUESTIONS**",
+        value=st.session_state.questions,
+        # key="questions",
+        height=220,
+        label_visibility="collapsed",
+    )
+    if st.button("出题", use_container_width=True):
+        patient = Patient()
+        patient.model = Model(platform="智谱AI", name="glm-4-flash", module="zhipu")
+        patient.messages = [
+            {
+                "role": "system",
+                "content": "你是一名外科教师，请根据用户提供病历出3道选择题，按照职业医师考试的形式。在最后给出问题的答案并解析。",
+            },
+            {"role": "user", "content":  st.session_state.patient_info},
+            # {"role": "assistant", "content": "大夫，你好"},
+        ]
+        response = chat(patient)
+        st.session_state.questions = response
+        st.rerun()
+
+
 with col_right:
     st.markdown("**MODELS**")
     models = st.data_editor(
         models_df,
         height=280,
         hide_index=True,
-        column_order=("use", "platform", "series", "name"),
+        column_order=("use", "name"),
         use_container_width=True,
     )
 
@@ -98,7 +154,9 @@ with cols[1]:
                     start_time = datetime.now()
                     with st.spinner("思考中..."):
                         response = chat(patient)
-                    st.markdown(f":stopwatch: {round((datetime.now()-start_time).total_seconds(),2)} 秒")
+                    st.markdown(
+                        f":stopwatch: {round((datetime.now()-start_time).total_seconds(),2)} 秒"
+                    )
                     with st.chat_message("患者"):
                         st.markdown(response)
                     patient.messages.append({"role": "assistant", "content": response})
@@ -120,7 +178,9 @@ with foot_col_save:
         write_prompt(
             {
                 "system_prompt": st.session_state.system_prompt,
+                "teacher_prompt": st.session_state.teacher_prompt,
                 "patient_info": st.session_state.patient_info,
+                "questions": st.session_state.questions,
             }
         )
         st.toast("saved...", icon="😍")

@@ -23,18 +23,19 @@ class Role(Enum):
 
 def assign_patients(role, mode) -> list:
     match (role, mode):
-        case (Role.TEACHER, '模型研究'):
+        case _:
+        # case (Role.TEACHER, '模型研究'):
             models = read_models()
             patients = [Patient(model=Model(**model)) for model in models.to_dict(orient="records")]
-        case _:
-            patients_df = read_patients()
-            match role:
-                case _:
-                    patients_list = patients_df.sample(n=1, ignore_index=True).to_dict(orient="records")
-            patients = [Patient(**set_model(), **patient) for patient in patients_list]
-            for patient in patients:
-                for question in patient.questions:
-                    random.shuffle(question['answers'])
+        # case _:
+        #     patients_df = read_patients()
+        #     match role:
+        #         case _:
+        #             patients_list = patients_df.sample(n=1, ignore_index=True).to_dict(orient="records")
+        #     patients = [Patient(**set_model(), **patient) for patient in patients_list]
+        #     for patient in patients:
+        #         for question in patient.questions:
+        #             random.shuffle(question['answers'])
     return patients
 
 def set_model() -> dict:

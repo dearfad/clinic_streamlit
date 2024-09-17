@@ -1,6 +1,9 @@
 # UI
 streamlit
 
+# FAKEPATIENT
+faker
+
 # XINGCHEN
 xingchen
 
@@ -16,8 +19,6 @@ zhipuai
 # minimax
 openai
 
-# FAKEPATIENT
-faker
 
 # BAIDU
 qianfan
