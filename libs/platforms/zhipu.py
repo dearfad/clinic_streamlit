@@ -11,7 +11,7 @@ def chat(model: str, messages: list) -> str:
         messages=messages,
         stream=False,
         # tools=TOOLS,
-        temperature=0.1,
+        # temperature=0.1,
         # top_p=0.7,
     )
     # print(response)
