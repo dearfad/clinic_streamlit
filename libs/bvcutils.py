@@ -24,7 +24,7 @@ def read_patients():
     return pd.read_json("data/patients.json", orient="records")
 
 
-@st.cache_data
+# @st.cache_data
 def read_models():
     return pd.read_excel("data/models.xlsx")
 

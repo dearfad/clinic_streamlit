@@ -61,6 +61,7 @@ class Model:
     series: str = None
     name: str = None
     module: str = None
+    free: bool = None
 
 
 @dataclass

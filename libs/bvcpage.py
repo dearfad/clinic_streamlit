@@ -8,7 +8,7 @@ from libs.bvcutils import read_patients, reset_session_state
 def set_page_header(layout="centered"):
     st.set_page_config(
         page_title="虚拟门诊",
-        page_icon="👩",
+        page_icon=":health_worker:",
         layout=layout,
     )
     PAGE_STYLE = """
@@ -44,15 +44,16 @@ def set_page_header(layout="centered"):
     </style>
     """
     st.html(PAGE_STYLE)
-    st.subheader("👩 虚拟门诊", divider="gray")
-    st.caption("吉林大学中日联谊医院乳腺外科")
+    st.markdown(":health_worker: **虚拟门诊**")
+    # st.caption("吉林大学中?日联谊医院乳腺外科")
+
 
 def show_setting_page():
     col_left, col_center, col_right = st.columns(3)
     with col_left:
         if st.button("返回首页"):
             reset_session_state()
-            st.switch_page("bvc.py")
+            st.switch_page("clinic.py")
     with col_right:
         if "voice" not in st.session_state:
             st.session_state.voice = False
@@ -63,6 +64,7 @@ def show_setting_page():
     if "doctor" not in st.session_state:
         st.warning("**用户信息丢失，请点击返回首页**")
         st.stop()
+
 
 def show_role_info(role):
     match role:
@@ -108,7 +110,7 @@ def show_chat(messages):
                 st.markdown(message["content"])
         if message["role"] == "assistant":
             with st.chat_message("患者"):
-                st.markdown(message['content'])
+                st.markdown(message["content"])
 
 
 def show_patient_info(patient):
@@ -124,20 +126,26 @@ def show_patient_info(patient):
 def show_result(doctor):
     with st.container(border=True):
         if doctor.role == Role.STUDENT:
-                col_name, col_grade, col_major = st.columns(3)
-                with col_name:
-                    st.markdown(f"**姓名:** {doctor.name}")
-                with col_grade:
-                    st.markdown(f"**年级**: {doctor.grade}")
-                with col_major:
-                    st.markdown(f"**专业**: {doctor.major}")
+            col_name, col_grade, col_major = st.columns(3)
+            with col_name:
+                st.markdown(f"**姓名:** {doctor.name}")
+            with col_grade:
+                st.markdown(f"**年级**: {doctor.grade}")
+            with col_major:
+                st.markdown(f"**专业**: {doctor.major}")
         col_begin, col_end, col_duration = st.columns(3)
         with col_begin:
-            st.markdown(f":material/line_start_circle: {doctor.patients[0].begin_time.strftime("%Y-%m-%d %H:%M:%S")}")
+            st.markdown(
+                f":material/line_start_circle: {doctor.patients[0].begin_time.strftime("%Y-%m-%d %H:%M:%S")}"
+            )
         with col_end:
-            st.markdown(f":material/line_end_circle: {doctor.patients[-1].end_time.strftime("%Y-%m-%d %H:%M:%S")}")    
+            st.markdown(
+                f":material/line_end_circle: {doctor.patients[-1].end_time.strftime("%Y-%m-%d %H:%M:%S")}"
+            )
         with col_duration:
-            st.markdown(f":stopwatch: {(doctor.patients[-1].end_time-doctor.patients[0].begin_time).seconds} 秒")
+            st.markdown(
+                f":stopwatch: {(doctor.patients[-1].end_time-doctor.patients[0].begin_time).seconds} 秒"
+            )
 
     total_inquiry_count = 0
     total_questions_count = 0

@@ -11,7 +11,7 @@ with st.expander("模型设定", icon="🚨"):
     modified_models = st.data_editor(models, num_rows="dynamic", use_container_width=True)
     if st.button('保存', disabled=modified_models.equals(models), use_container_width=True, type="primary"):
         modified_models.to_excel('data/models.xlsx', index=False)
-        read_models.clear()
+        # read_models.clear()
         st.rerun()
         
 if st.button("返回首页", use_container_width=True):
