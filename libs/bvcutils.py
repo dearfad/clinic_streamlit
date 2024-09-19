@@ -12,6 +12,50 @@ from libs.bvcconst import VOICES, SYSTEM_PROMPT
 import json
 
 
+def update_prompt(table, id, prompt, memo):
+    conn = sqlite3.connect("data/clinic.db")
+    with conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            f"UPDATE {table} set prompt = ?, memo = ? where ID = ?", (prompt, memo, id)
+        )
+    return
+
+
+def delete_prompt(table, id):
+    conn = sqlite3.connect("data/clinic.db")
+    with conn:
+        cursor = conn.cursor()
+        cursor.execute(f"DELETE FROM {table} WHERE ID = ?", (id,))
+    return
+
+
+def insert_prompt(table, prompt, memo):
+    conn = sqlite3.connect("data/clinic.db")
+    with conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            f"INSERT INTO {table} (prompt, memo) VALUES (?, ?)", (prompt, memo)
+        )
+    return
+
+
+def select_prompt(table):
+    conn = sqlite3.connect("data/clinic.db")
+    with conn:
+        prompts = pd.read_sql(f"SELECT * FROM {table}", con=conn)
+    return prompts.to_dict(orient="records")
+
+
+def select_model():
+    connect = sqlite3.connect("data/clinic.db")
+    with connect:
+        models = pd.read_sql(
+            "SELECT name, module FROM models WHERE free=True", con=connect
+        )
+    return models.to_dict(orient="records")
+
+
 def read_prompt():
     with open("data/prompt.json", "r", encoding="utf-8") as file:
         return json.load(file)
@@ -27,9 +71,9 @@ def read_patients():
     return pd.read_json("data/patients.json", orient="records")
 
 
-def read_models(mode='xlsx'):
+def read_models(mode="xlsx"):
     match mode:
-        case 'sql':
+        case "sql":
             connect = sqlite3.connect("data/clinic.db")
             with connect:
                 models = pd.read_sql(
@@ -37,7 +81,7 @@ def read_models(mode='xlsx'):
                 )
             return models.to_dict(orient="records")
         case _:
-            return pd.read_excel('data/models.xlsx')
+            return pd.read_excel("data/models.xlsx")
 
 
 def reset_session_state(exclude=["voice"]):
