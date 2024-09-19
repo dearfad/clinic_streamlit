@@ -1,6 +1,8 @@
 # UI
 streamlit
 
+SQLAlchemy
+
 # FAKEPATIENT
 faker
 

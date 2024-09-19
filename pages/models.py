@@ -1,7 +1,7 @@
 import streamlit as st
 from libs.bvcpage import set_page_header, show_chat
 from libs.bvcutils import read_models, read_prompt, write_prompt
-from libs.bvcclasses import Doctor, Role, Patient, Model
+from libs.bvcclasses import Doctor, Role
 from libs.bvcmodels import chat, chat_patient
 from datetime import datetime
 
@@ -10,6 +10,76 @@ set_page_header(layout="wide")
 st.markdown("#### 模型研究")
 
 models_df = read_models()
+sql_model = read_models(mode="sql")
+
+col_teacher_prompt, col_patient_info, col_question_prompt, col_questions = st.columns(4)
+with col_teacher_prompt:    
+    if "teacher_prompt" not in st.session_state:
+        st.session_state.teacher_prompt = read_prompt()["teacher_prompt"]
+    st.text_area(
+        "**teacher_prompt**",
+        key="teacher_prompt",
+        # height=120,
+    )
+
+    if "user_prompt" not in st.session_state:
+        st.session_state.user_prompt = read_prompt()["user_prompt"]
+    st.text_input("**user_prompt**", key="user_prompt")
+    model_dict = st.selectbox("model", sql_model, format_func=lambda x:x['name'])
+    if st.button("生成病历", use_container_width=True):
+        messages = [
+            {
+                "role": "system",
+                "content": st.session_state.teacher_prompt,
+            },
+            {"role": "user", "content": st.session_state.user_prompt},
+        ]
+        with st.spinner("思考中..."):
+            response = chat(module=model_dict['module'], modelname=model_dict['name'], messages=messages)
+        st.session_state.patient_info = response
+        st.rerun()
+
+with col_patient_info:
+    if "patient_info" not in st.session_state:
+        st.session_state.patient_info = read_prompt()["patient_info"]
+    st.text_area(
+        "**patient_info**",
+        key="patient_info",
+        height=260,
+    )
+    
+with col_question_prompt:
+    if "question_prompt" not in st.session_state:
+        st.session_state.question_prompt = read_prompt()["question_prompt"]
+    st.text_area(
+        "**question_prompt**",
+        key="question_prompt",
+        height=200,
+    )
+    if st.button("出题", use_container_width=True):
+        messages = [
+            {
+                "role": "system",
+                "content": st.session_state.question_prompt,
+            },
+            {"role": "user", "content": st.session_state.patient_info},
+        ]
+        with st.spinner("思考中..."):
+            response = chat(module="zhipu", modelname="glm-4-flash", messages=messages)
+        st.session_state.questions = response
+        st.rerun()
+
+with col_questions:
+    if "questions" not in st.session_state:
+        st.session_state.questions = read_prompt()["questions"]
+    st.text_area(
+        "**questions**",
+        key="questions",
+        height=260,
+    )
+
+
+
 
 if "doctor" not in st.session_state:
     st.session_state.doctor = Doctor(role=Role.TEACHER, mode="模型研究")
@@ -49,72 +119,6 @@ with col_model:
     )
 
 
-col_teacher_prompt, col_patient_info, col_question_prompt, col_questions = st.columns(4)
-
-with col_teacher_prompt:
-    if "teacher_prompt" not in st.session_state:
-        st.session_state.teacher_prompt = read_prompt()["teacher_prompt"]
-    st.text_area(
-        "**teacher_prompt**",
-        key="teacher_prompt",
-        height=120,
-    )
-
-    if "user_prompt" not in st.session_state:
-        st.session_state.user_prompt = read_prompt()["user_prompt"]
-    st.text_input("**user_prompt**", key="user_prompt")
-
-    if st.button("生成病历", use_container_width=True):
-        messages = [
-            {
-                "role": "system",
-                "content": st.session_state.teacher_prompt,
-            },
-            {"role": "user", "content": st.session_state.user_prompt},
-        ]
-        with st.spinner("思考中..."):
-            response = chat(module="zhipu", modelname="glm-4-flash", messages=messages)
-        st.session_state.patient_info = response
-        st.rerun()
-
-with col_patient_info:
-    if "patient_info" not in st.session_state:
-        st.session_state.patient_info = read_prompt()["patient_info"]
-    st.text_area(
-        "**patient_info**",
-        key="patient_info",
-        height=260,
-    )
-
-with col_question_prompt:
-    if "question_prompt" not in st.session_state:
-        st.session_state.question_prompt = read_prompt()["question_prompt"]
-    st.text_area(
-        "**question_prompt**",
-        key="question_prompt",
-        height=200,
-    )
-    if st.button("出题", use_container_width=True):
-        messages = [
-            {
-                "role": "system",
-                "content": st.session_state.question_prompt,
-            },
-            {"role": "user", "content": st.session_state.patient_info},
-        ]
-        with st.spinner("思考中..."):
-            response = chat(module="zhipu", modelname="glm-4-flash", messages=messages)
-        st.session_state.questions = response
-        st.rerun()
-
-with col_questions:
-    if "questions" not in st.session_state:
-        st.session_state.questions = read_prompt()["questions"]
-    st.text_area(
-        "**questions**",
-        key="questions",
-        height=260,
-    )
 
 
 selected_models = models[models["use"]]["name"].to_list()
@@ -131,12 +135,11 @@ for i, col in enumerate(chat_cols):
         st.markdown(f"**{selected_models[i]}**")
 
 for patient in st.session_state.doctor.patients:
-    patient.info = st.session_state.patient_info
     if not patient.messages:
         patient.messages = [
             {
                 "role": "system",
-                "content": st.session_state.system_prompt + patient.info,
+                "content": st.session_state.system_prompt + st.session_state.patient_info,
             },
             {"role": "user", "content": "你好"},
             {"role": "assistant", "content": "大夫，你好"},

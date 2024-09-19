@@ -2,7 +2,7 @@ import os
 import pickle
 import random
 import uuid
-
+import sqlite3
 
 import pandas as pd
 import requests
@@ -11,22 +11,33 @@ from faker import Faker
 from libs.bvcconst import VOICES, SYSTEM_PROMPT
 import json
 
+
 def read_prompt():
-    with open('data/prompt.json', 'r', encoding='utf-8') as file:
+    with open("data/prompt.json", "r", encoding="utf-8") as file:
         return json.load(file)
 
+
 def write_prompt(data_json):
-    with open('data/prompt.json', 'w', encoding='utf-8') as file:
+    with open("data/prompt.json", "w", encoding="utf-8") as file:
         json.dump(data_json, file, indent=4, ensure_ascii=False)
+
 
 @st.cache_data
 def read_patients():
     return pd.read_json("data/patients.json", orient="records")
 
 
-# @st.cache_data
-def read_models():
-    return pd.read_excel("data/models.xlsx")
+def read_models(mode='xlsx'):
+    match mode:
+        case 'sql':
+            connect = sqlite3.connect("data/clinic.db")
+            with connect:
+                models = pd.read_sql(
+                    "SELECT name, module FROM models WHERE free=True", con=connect
+                )
+            return models.to_dict(orient="records")
+        case _:
+            return pd.read_excel('data/models.xlsx')
 
 
 def reset_session_state(exclude=["voice"]):
@@ -107,5 +118,5 @@ def build_system_prompt(patient):
     info = get_patient_info(patient)
     content = SYSTEM_PROMPT + info
     system_prompt = [{"role": "system", "content": content}]
-    print(system_prompt[0]['content'])
+    print(system_prompt[0]["content"])
     return system_prompt
