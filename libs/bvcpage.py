@@ -1,6 +1,6 @@
 import streamlit as st
 
-from libs.bvcclasses import Role
+from libs.bvcclasses import Role, User
 from libs.bvcutils import read_patients, reset_session_state
 # from libs.servers.tongyi import XingChen
 
@@ -94,7 +94,7 @@ def show_role_info(role):
 
         case Role.TEACHER:
             st.info(
-                "作为一名 **教师**，可以 **浏览分析** 数据", icon=":material/counter_1:"
+                "作为一名 **教师**，可以进行 **模型研究**", icon=":material/counter_1:"
             )
         case Role.ADMIN:
             st.info(
@@ -222,3 +222,4 @@ def show_result(doctor):
 #                     st.markdown("**:green[成功...]**")
 #                 else:
 #                     st.markdown("**:red[失败...]**")
+

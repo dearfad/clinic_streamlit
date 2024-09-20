@@ -2,58 +2,29 @@ import os
 import pickle
 import random
 import uuid
-import sqlite3
+
 
 import pandas as pd
 import requests
 import streamlit as st
 from faker import Faker
 from libs.bvcconst import VOICES, SYSTEM_PROMPT
+from libs.bvcdatabase import user_register
 import json
 
+def read_models():
+    pass
 
-def update_prompt(table, id, prompt, memo):
-    conn = sqlite3.connect("data/clinic.db")
-    with conn:
-        cursor = conn.cursor()
-        cursor.execute(
-            f"UPDATE {table} set prompt = ?, memo = ? where ID = ?", (prompt, memo, id)
-        )
-    return
-
-
-def delete_prompt(table, id):
-    conn = sqlite3.connect("data/clinic.db")
-    with conn:
-        cursor = conn.cursor()
-        cursor.execute(f"DELETE FROM {table} WHERE ID = ?", (id,))
-    return
-
-
-def insert_prompt(table, prompt, memo):
-    conn = sqlite3.connect("data/clinic.db")
-    with conn:
-        cursor = conn.cursor()
-        cursor.execute(
-            f"INSERT INTO {table} (prompt, memo) VALUES (?, ?)", (prompt, memo)
-        )
-    return
-
-
-def select_prompt(table):
-    conn = sqlite3.connect("data/clinic.db")
-    with conn:
-        prompts = pd.read_sql(f"SELECT * FROM {table}", con=conn)
-    return prompts.to_dict(orient="records")
-
-
-def select_model():
-    connect = sqlite3.connect("data/clinic.db")
-    with connect:
-        models = pd.read_sql(
-            "SELECT name, module FROM models WHERE free=True", con=connect
-        )
-    return models.to_dict(orient="records")
+@st.dialog("注册验证")
+def validate_register(username, password):
+    st.markdown(f"**用户名：{username}**")
+    validate_password = st.text_input("**校验密码**", type="password")
+    if st.button("**确认注册**"):
+        if password == validate_password:
+            user_register(username, password)
+            st.rerun()
+        else:
+            st.warning(":material/key: **密码错误**")
 
 
 def read_prompt():
@@ -69,19 +40,6 @@ def write_prompt(data_json):
 @st.cache_data
 def read_patients():
     return pd.read_json("data/patients.json", orient="records")
-
-
-def read_models(mode="xlsx"):
-    match mode:
-        case "sql":
-            connect = sqlite3.connect("data/clinic.db")
-            with connect:
-                models = pd.read_sql(
-                    "SELECT name, module FROM models WHERE free=True", con=connect
-                )
-            return models.to_dict(orient="records")
-        case _:
-            return pd.read_excel("data/models.xlsx")
 
 
 def reset_session_state(exclude=["voice"]):

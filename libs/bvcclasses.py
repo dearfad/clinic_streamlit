@@ -42,7 +42,7 @@ def set_model() -> dict:
     return read_models().sample(n=1).to_dict(orient="records")[0]
 
 @dataclass
-class Doctor:
+class User:
     role: Role = Role.VISITOR
     mode: str = None
     id: str = field(default_factory=generate_uuid)
@@ -52,7 +52,8 @@ class Doctor:
     patients: list = field(default_factory=list)
 
     def assign_patients(self):
-        self.patients = assign_patients(self.role, self.mode)
+        pass
+        # self.patients = assign_patients(self.role, self.mode)
 
 @dataclass
 class Model:
