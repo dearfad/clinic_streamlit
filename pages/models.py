@@ -35,7 +35,7 @@ with st.expander(":material/cases: **病例设计**", expanded=True):
         teacher_prompt_dict = st.selectbox(
             "**教师提示词**",
             select_prompt("teacher", st.session_state.user.name),
-            format_func=lambda x: x["memo"],
+            format_func=lambda x: f"{x["memo"]} - {x['model']}",
         )
 
         tab_text_area, tab_markdown = st.tabs(['编辑', '查看'])
@@ -139,7 +139,7 @@ with st.expander(":material/cases: **病例设计**", expanded=True):
     with col_patient_info:
         if "user_prompt" not in st.session_state:
             st.session_state.user_prompt = "乳房疾病"
-        st.text_input("**病例设定**", value=st.session_state.user_prompt)
+        user_prompt = st.text_input("**病例设定**", value=st.session_state.user_prompt)
         if "patient_info" not in st.session_state:
             st.session_state.patient_info = ""
         
@@ -165,7 +165,7 @@ with st.expander(":material/cases: **病例设计**", expanded=True):
                 },
                 {
                     "role": "user",
-                    "content": st.session_state.user_prompt,
+                    "content": user_prompt,
                 },
             ]
             with st.spinner("思考中..."):
