@@ -1,8 +1,8 @@
 import streamlit as st
 
+from streamlit_cookies_controller import CookieController, RemoveEmptyElementContainer
 from libs.bvcclasses import Role, User
 from libs.bvcutils import read_patients, reset_session_state
-# from libs.servers.tongyi import XingChen
 
 
 def set_page_header(layout="centered"):
@@ -44,8 +44,20 @@ def set_page_header(layout="centered"):
     </style>
     """
     st.html(PAGE_STYLE)
-    st.markdown(":health_worker: **虚拟门诊**")
-    # st.caption("吉林大学中?日联谊医院乳腺外科")
+    col_title, col_user = st.columns(2)
+    with col_title:
+        st.markdown(":health_worker: **虚拟门诊**")
+    with col_user:
+        cookie_controller = CookieController()
+        RemoveEmptyElementContainer()
+        user = cookie_controller.get('user')
+        if user:
+            st.session_state.user = user
+        else:
+            cookie_controller.set('user', 'visitor')
+            st.session_state.user = 'visitor'
+        st.caption(f"**用户：{st.session_state.user}**")
+
 
 
 def show_setting_page():

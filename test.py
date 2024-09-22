@@ -1,11 +1,6 @@
-import sqlite3
-import pandas as pd
+from streamlit_cookies_controller import CookieController
 import streamlit as st
 
-connect = sqlite3.connect('data/clinic.db')
-with connect:
-    models_df = pd.read_sql("SELECT name, module FROM models WHERE use=True", con=connect)
-
-models = models_df.to_dict(orient='records')
-m = st.selectbox('model', models, format_func=lambda x:x['name'])
-st.write(m)
+cookie_controller = CookieController()
+# cookie_controller.remove('user')
+st.write(cookie_controller.getAll())

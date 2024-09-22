@@ -5,11 +5,11 @@ import streamlit as st
 from libs.bvcclasses import Role, User
 from libs.bvcdatabase import (
     delete_prompt,
-    insert_prompt,
+    insert_teacher_prompt,
     # read_prompt,
     select_model,
-    select_prompt,
-    update_prompt,
+    select_teacher_prompt,
+    update_teacher_prompt,
 )
 from libs.bvcmodels import chat, chat_patient
 from libs.bvcpage import set_page_header, show_chat
@@ -34,7 +34,7 @@ with st.expander(":material/cases: **病例设计**", expanded=True):
     with col_teacher_prompt:
         teacher_prompt_dict = st.selectbox(
             "**教师提示词**",
-            select_prompt("teacher", st.session_state.user.name),
+            select_teacher_prompt(st.session_state.user.name),
             format_func=lambda x: f"{x["memo"]} - {x['model']}",
         )
 
@@ -87,8 +87,7 @@ with st.expander(":material/cases: **病例设计**", expanded=True):
                 use_container_width=True,
             ):
                 if st.session_state.user.name != "游客":
-                    insert_prompt(
-                        "teacher",
+                    insert_teacher_prompt(
                         prompt=teacher_prompt,
                         memo=teacher_prompt_memo,
                         model=model_dict['name'],
@@ -106,8 +105,7 @@ with st.expander(":material/cases: **病例设计**", expanded=True):
             ):
                 if st.session_state.user.name != "游客":
                     if st.session_state.user.name == teacher_prompt_creator:
-                        update_prompt(
-                            "teacher",
+                        update_teacher_prompt(
                             id=teacher_prompt_dict["id"],
                             prompt=teacher_prompt,
                             memo=teacher_prompt_memo,
@@ -180,7 +178,7 @@ with st.expander(":material/cases: **病例设计**", expanded=True):
     with col_question_prompt:
         question_prompt_dict = st.selectbox(
             "**问题提示词**",
-            select_prompt("teacher", st.session_state.user.name),
+            select_teacher_prompt(st.session_state.user.name),
             format_func=lambda x: x["memo"],
         )
         question_prompt_memo = st.text_input(

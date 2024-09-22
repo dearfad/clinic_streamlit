@@ -31,12 +31,12 @@ def user_login(username, password):
     return True if user and user[0] == password else False
 
 
-def update_prompt(table, id, prompt, memo, model, creator, public):
+def update_teacher_prompt(id, prompt, memo, model, creator, public):
     conn = sqlite3.connect("data/clinic.db")
     with conn:
         cursor = conn.cursor()
         cursor.execute(
-            f"UPDATE {table} set prompt = ?, memo = ?, model = ?, creator = ?, public = ? where ID = ?", (prompt, memo, model, creator, public, id)
+            "UPDATE teacher set prompt = ?, memo = ?, model = ?, creator = ?, public = ? where ID = ?", (prompt, memo, model, creator, public, id)
         )
     return
 
@@ -49,20 +49,20 @@ def delete_prompt(table, id):
     return
 
 
-def insert_prompt(table, prompt, memo, model, creator, public):
+def insert_teacher_prompt(prompt, memo, model, creator, public):
     conn = sqlite3.connect("data/clinic.db")
     with conn:
         cursor = conn.cursor()
         cursor.execute(
-            f"INSERT INTO {table} (prompt, memo, model, creator, public) VALUES (?, ?, ?, ?, ?)", (prompt, memo, model, creator, public)
+            "INSERT INTO teacher (prompt, memo, model, creator, public) VALUES (?, ?, ?, ?, ?)", (prompt, memo, model, creator, public)
         )
     return
 
 
-def select_prompt(table, creator):
+def select_teacher_prompt(creator):
     conn = sqlite3.connect("data/clinic.db")
     with conn:
-        prompts = pd.read_sql(f"SELECT * FROM {table} WHERE creator = ? OR public = True", con=conn, params=[creator])
+        prompts = pd.read_sql("SELECT * FROM teacher WHERE creator = ? OR public = True", con=conn, params=[creator])
     return prompts.to_dict(orient="records")
 
 def select_model():
