@@ -12,8 +12,21 @@ from libs.bvcconst import VOICES, SYSTEM_PROMPT
 from libs.bvcdatabase import user_register
 import json
 
+def get_current_user(cookie_controller):
+    user = cookie_controller.get("user")
+    if user:
+        st.session_state.user = user
+    else:
+        cookie_controller.set("user", "游客")
+        st.session_state.user = "游客"
+
+def set_current_user(cookie_controller, name):
+    cookie_controller.set("user", name)
+    st.session_state.user = name
+
 def read_models():
     pass
+
 
 @st.dialog("注册验证")
 def validate_register(username, password):

@@ -3,11 +3,9 @@ import streamlit as st
 from libs.bvcclasses import Role, User
 from libs.bvcdatabase import check_user_exist, user_login
 from libs.bvcpage import set_page_header, show_role_info
-from libs.bvcutils import reset_session_state, validate_register
+from libs.bvcutils import validate_register, set_current_user
 
 set_page_header()
-
-reset_session_state()
 
 role = st.selectbox("**类别**", Role)
 
@@ -52,10 +50,14 @@ match role:
                     st.warning(":material/key: **密码错误**，请咨询**管理员**相关信息")
 
     case Role.ADMIN:
-        password = st.text_input("**密码**", type="password")
-        if st.button("**登录**", use_container_width=True):
-            st.session_state.doctor = User(role=role)
-            if password == st.secrets["admin_key"]:
-                st.switch_page("pages/admin.py")
-            else:
-                st.warning(":material/key: **密码错误**，请咨询**管理员**相关信息")
+        if st.session_state.user == '管理员':
+            st.switch_page("pages/admin.py")
+        else:
+            password = st.text_input("**密码**", type="password")
+            if st.button("**登录**", use_container_width=True):
+                if password == st.secrets["admin_key"]:
+                    with st.empty():
+                        set_current_user(st.session_state.cookie_controller, name="管理员")
+                    st.switch_page("pages/admin.py")
+                else:
+                    st.warning(":material/key: **密码错误**，请咨询**管理员**相关信息")

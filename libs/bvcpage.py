@@ -1,8 +1,9 @@
 import streamlit as st
 
-from streamlit_cookies_controller import CookieController, RemoveEmptyElementContainer
+
 from libs.bvcclasses import Role, User
-from libs.bvcutils import read_patients, reset_session_state
+from libs.bvcutils import read_patients, reset_session_state, get_current_user
+from streamlit_cookies_controller import CookieController
 
 
 def set_page_header(layout="centered"):
@@ -11,6 +12,7 @@ def set_page_header(layout="centered"):
         page_icon=":health_worker:",
         layout=layout,
     )
+    st.session_state.cookie_controller = CookieController()
     PAGE_STYLE = """
     <style>
         header{
@@ -44,19 +46,13 @@ def set_page_header(layout="centered"):
     </style>
     """
     st.html(PAGE_STYLE)
+    with st.empty():
+        get_current_user(st.session_state.cookie_controller)
     col_title, col_user = st.columns(2)
     with col_title:
-        st.markdown(":health_worker: **虚拟门诊**")
+        st.markdown(":heavy_minus_sign: **虚拟门诊** :heavy_minus_sign:")
     with col_user:
-        cookie_controller = CookieController()
-        RemoveEmptyElementContainer()
-        user = cookie_controller.get('user')
-        if user:
-            st.session_state.user = user
-        else:
-            cookie_controller.set('user', 'visitor')
-            st.session_state.user = 'visitor'
-        st.caption(f"**用户：{st.session_state.user}**")
+        st.markdown(f":id: **{st.session_state.user}**")
 
 
 
