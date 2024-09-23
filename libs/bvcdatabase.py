@@ -1,9 +1,9 @@
 import sqlite3
-
+import streamlit as st
 import pandas as pd
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import DeclarativeBase, sessionmaker, Mapped, mapped_column
-from sqlalchemy import Integer, Text, Float, text
+from sqlalchemy import Integer, Text, Float
 
 engine = create_engine("sqlite:///data/clinic.db")
 Session = sessionmaker(bind=engine)
@@ -19,25 +19,26 @@ class Base(DeclarativeBase):
 
 class User(Base):
     __tablename__ = "user"
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(unique=True, nullable=False)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
+    password: Mapped[str] = mapped_column(Text, nullable=False)
 
 
 class Model(Base):
-    __tablename__ = "models"
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    use: Mapped[bool] = mapped_column(nullable=False)
-    free: Mapped[bool] = mapped_column(nullable=False)
-    platform: Mapped[str] = mapped_column(nullable=False)
-    series: Mapped[str] = mapped_column(nullable=False)
-    name: Mapped[str] = mapped_column(nullable=True)
-    module: Mapped[str] = mapped_column(nullable=True)
-    print_input: Mapped[float] = mapped_column(nullable=True)
-    print_output: Mapped[float] = mapped_column(nullable=True)
+    __tablename__ = "model"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    use: Mapped[bool] = mapped_column(Integer, nullable=True)
+    free: Mapped[bool] = mapped_column(Integer, nullable=True)
+    platform: Mapped[str] = mapped_column(Text, nullable=True)
+    series: Mapped[str] = mapped_column(Text, nullable=True)
+    name: Mapped[str] = mapped_column(Text, nullable=True)
+    module: Mapped[str] = mapped_column(Text, nullable=True)
+    price_input: Mapped[float] = mapped_column(Float, nullable=True)
+    price_output: Mapped[float] = mapped_column(Float, nullable=True)
 
 
-def create_all_table():
-    Base.metadata.create_all(engine)
+def create_table(table: Base):
+    Base.metadata.create_all(engine, tables=[table.__table__])
 
 
 def user_register(username, password):
@@ -110,24 +111,42 @@ def select_model():
 
 
 def select_all_model():
-    models = pd.read_sql("SELECT * FROM model", con=engine, index_col='id')
-    return models
+    return pd.read_sql("SELECT * FROM model", con=engine)
 
 
 def update_all_model(models: pd.DataFrame):
-    dtype = {
-        "id": Integer,
-        "use": Integer,
-        "free": Integer,
-        "platform": Text,
-        "series": Text,
-        "name": Text,
-        "module": Text,
-        "price_input": Float,
-        "price_output": Float,
-    }
-    models.to_sql(name="model", con=engine, if_exists="replace", index=True, index_label='id', dtype=dtype)
     with Session() as session:
-        session.execute(text("ALTER TABLE `model` COLUMN `id` INTERGER PRIMARY KEY AUTOINCREMENT"))
+        session.bulk_update_mappings(Model, models.to_dict(orient="records"))
         session.commit()
     return
+
+@st.dialog("添加模型")
+def add_model():
+    use = st.checkbox('使用')
+    free = st.checkbox('免费')
+    platform = st.text_input("平台")
+    series = st.text_input('系列')
+    name = st.text_input('名称')
+    module = st.text_input('模块')
+    price_input = st.number_input('输入价格')
+    price_output = st.number_input('输出价格')
+    col_confirm, col_cancel = st.columns(2)
+    with col_confirm:
+        if st.button("**添加**", use_container_width=True):
+            model = Model(
+                use = use,
+                free = free,
+                platform = platform,
+                series = series,
+                name = name,
+                module = module,
+                price_input = price_input,
+                price_output = price_output,
+            )
+            with Session() as session:
+                session.add(model)
+                session.commit()
+            st.rerun()
+    with col_cancel:
+        if st.button("**取消**", use_container_width=True):
+            st.rerun()
