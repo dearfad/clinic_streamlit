@@ -44,7 +44,7 @@ with st.expander("模型设定", icon="🚨", expanded=True):
         st.rerun()
 
 if st.button("退出登录", use_container_width=True, type="primary"):
-    set_current_user(name="游客")
+    set_current_user(st.session_state.cookie_controller, name="游客")
     st.switch_page("clinic.py")
 
 if st.button("返回首页", use_container_width=True):

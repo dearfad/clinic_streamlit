@@ -3,6 +3,8 @@ streamlit
 
 streamlit_cookies_controller
 
+sqlalchemy
+
 # FAKEPATIENT
 faker
 

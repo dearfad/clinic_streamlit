@@ -1,38 +1,64 @@
 import sqlite3
 
 import pandas as pd
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import DeclarativeBase, sessionmaker, Mapped, mapped_column
+from sqlalchemy import Integer, Text, Float, text
+
+engine = create_engine("sqlite:///data/clinic.db")
+Session = sessionmaker(bind=engine)
 
 
 def connect_db():
     return sqlite3.connect("data/clinic.db")
 
 
-def check_user_exist(username):
-    conn = connect_db()
-    with conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT name FROM users WHERE name = ?", (username,))
-        user = cursor.fetchone()
-    return True if user else False
+class Base(DeclarativeBase):
+    pass
+
+
+class User(Base):
+    __tablename__ = "user"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    name: Mapped[str] = mapped_column(unique=True, nullable=False)
+
+
+class Model(Base):
+    __tablename__ = "models"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    use: Mapped[bool] = mapped_column(nullable=False)
+    free: Mapped[bool] = mapped_column(nullable=False)
+    platform: Mapped[str] = mapped_column(nullable=False)
+    series: Mapped[str] = mapped_column(nullable=False)
+    name: Mapped[str] = mapped_column(nullable=True)
+    module: Mapped[str] = mapped_column(nullable=True)
+    print_input: Mapped[float] = mapped_column(nullable=True)
+    print_output: Mapped[float] = mapped_column(nullable=True)
+
+
+def create_all_table():
+    Base.metadata.create_all(engine)
 
 
 def user_register(username, password):
-    conn = connect_db()
-    with conn:
-        cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO users (name, password) VALUES (?, ?)", (username, password)
-        )
-    return
+    with Session() as session:
+        user = User(name=username, password=password)
+        session.add(user)
+        session.commit()
+
+
+def check_user_exist(username):
+    with Session() as session:
+        result = session.execute(select(User).where(User.name == username))
+        user = result.scalar_one()
+    return True if user else False
 
 
 def user_login(username, password):
-    conn = connect_db()
-    with conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT password FROM users WHERE name = ?", (username,))
-        user = cursor.fetchone()
-    return True if user and user[0] == password else False
+    with Session() as session:
+        result = session.execute(select(User).where(User.name == username))
+        user = result.scalar_one()
+    return True if user and user.password == password else False
 
 
 def update_teacher_prompt(id, prompt, memo, model, creator, public):
@@ -84,14 +110,24 @@ def select_model():
 
 
 def select_all_model():
-    conn = connect_db()
-    with conn:
-        models = pd.read_sql("SELECT * FROM models", con=conn, index_col="id")
+    models = pd.read_sql("SELECT * FROM model", con=engine, index_col='id')
     return models
 
 
 def update_all_model(models: pd.DataFrame):
-    conn = connect_db()
-    with conn:
-        models.to_sql(name="models", con=conn, if_exists="replace", index=True)
+    dtype = {
+        "id": Integer,
+        "use": Integer,
+        "free": Integer,
+        "platform": Text,
+        "series": Text,
+        "name": Text,
+        "module": Text,
+        "price_input": Float,
+        "price_output": Float,
+    }
+    models.to_sql(name="model", con=engine, if_exists="replace", index=True, index_label='id', dtype=dtype)
+    with Session() as session:
+        session.execute(text("ALTER TABLE `model` COLUMN `id` INTERGER PRIMARY KEY AUTOINCREMENT"))
+        session.commit()
     return
