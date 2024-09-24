@@ -1,7 +1,7 @@
 import sqlite3
 import streamlit as st
 import pandas as pd
-from sqlalchemy import create_engine, select
+from sqlalchemy import create_engine, select, delete, update
 from sqlalchemy.orm import DeclarativeBase, sessionmaker, Mapped, mapped_column
 from sqlalchemy import Integer, Text, Float
 
@@ -22,6 +22,7 @@ class User(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
     password: Mapped[str] = mapped_column(Text, nullable=False)
+    role: Mapped[str] = mapped_column(Text, nullable=False)
 
 
 class Model(Base):
@@ -43,15 +44,15 @@ def create_table(table: Base):
 
 def user_register(username, password):
     with Session() as session:
-        user = User(name=username, password=password)
+        user = User(name=username, password=password, role="student")
         session.add(user)
         session.commit()
 
 
-def check_user_exist(username):
+def check_user_exist(username: str) -> bool:
     with Session() as session:
         result = session.execute(select(User).where(User.name == username))
-        user = result.scalar_one()
+        user = result.scalar()
     return True if user else False
 
 
@@ -60,6 +61,18 @@ def user_login(username, password):
         result = session.execute(select(User).where(User.name == username))
         user = result.scalar_one()
     return True if user and user.password == password else False
+
+def get_user_role(username):
+    with Session() as session:
+        result = session.execute(select(User).where(User.name == username))
+        user = result.scalar()
+    return user.role
+
+def change_user_role(username, role):
+    with Session() as session:
+        session.execute(update(User).where(User.name == username).values(role=role))
+        session.commit()
+    return
 
 
 def update_teacher_prompt(id, prompt, memo, model, creator, public):
@@ -120,28 +133,29 @@ def update_all_model(models: pd.DataFrame):
         session.commit()
     return
 
+
 @st.dialog("添加模型")
 def add_model():
-    use = st.checkbox('使用')
-    free = st.checkbox('免费')
+    use = st.checkbox("使用")
+    free = st.checkbox("免费")
     platform = st.text_input("平台")
-    series = st.text_input('系列')
-    name = st.text_input('名称')
-    module = st.text_input('模块')
-    price_input = st.number_input('输入价格')
-    price_output = st.number_input('输出价格')
+    series = st.text_input("系列")
+    name = st.text_input("名称")
+    module = st.text_input("模块")
+    price_input = st.number_input("输入价格")
+    price_output = st.number_input("输出价格")
     col_confirm, col_cancel = st.columns(2)
     with col_confirm:
         if st.button("**添加**", use_container_width=True):
             model = Model(
-                use = use,
-                free = free,
-                platform = platform,
-                series = series,
-                name = name,
-                module = module,
-                price_input = price_input,
-                price_output = price_output,
+                use=use,
+                free=free,
+                platform=platform,
+                series=series,
+                name=name,
+                module=module,
+                price_input=price_input,
+                price_output=price_output,
             )
             with Session() as session:
                 session.add(model)
@@ -151,40 +165,57 @@ def add_model():
         if st.button("**取消**", use_container_width=True):
             st.rerun()
 
-@st.dialog("添加模型")
-def delete_model(models):
-    id = st.number_input('id', min_value=1, step=1)
-    row = models.loc[models['id'] == id]
-    if not row.empty:       
-        st.dataframe(row.T, use_container_width=True)
-        # use = st.checkbox('使用')
-        # free = st.checkbox('免费')
-        # platform = st.text_input("平台")
-        # series = st.text_input('系列')
-        # name = st.text_input('名称')
-        # module = st.text_input('模块')
-        # price_input = st.number_input('输入价格')
-        # price_output = st.number_input('输出价格')
+
+@st.dialog("删除模型")
+def delete_model(models: pd.DataFrame):
+    id = st.number_input("id", min_value=1, step=1)
+    model = models.loc[models["id"] == id]
+    if not model.empty:
+        model.columns = [
+            "ID",
+            "使用",
+            "免费",
+            "平台",
+            "系列",
+            "名称",
+            "模块",
+            "输入价格",
+            "输出价格",
+        ]
+        model = model.astype(str)
+        model_T = model.T.reset_index()
+        model_T.columns = ["name", "info"]
+        st.dataframe(
+            model_T,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "name": st.column_config.TextColumn(
+                    "项目",
+                ),
+                "info": st.column_config.TextColumn(
+                    "信息",
+                ),
+            },
+        )
     else:
-        st.markdown('没有相关模型')
+        st.markdown("没有相关模型")
     col_confirm, col_cancel = st.columns(2)
     with col_confirm:
         if st.button("**删除**", use_container_width=True):
+            with Session() as session:
+                session.execute(delete(Model).where(Model.id == id))
+                session.commit()
             st.rerun()
-    #         model = Model(
-    #             use = use,
-    #             free = free,
-    #             platform = platform,
-    #             series = series,
-    #             name = name,
-    #             module = module,
-    #             price_input = price_input,
-    #             price_output = price_output,
-    #         )
-    #         with Session() as session:
-    #             session.add(model)
-    #             session.commit()
-    #         st.rerun()
     with col_cancel:
         if st.button("**取消**", use_container_width=True):
             st.rerun()
+
+
+@st.dialog("更改权限")
+def change_role():
+    username = st.text_input("**用户名**")
+    role = st.selectbox("**权限**", ["student", "teacher"])
+    if st.button("更改"):
+        change_user_role(username, role)
+        st.rerun()

@@ -1,4 +1,4 @@
-from libs.bvcdatabase import Session, Model, create_table
+from libs.bvcdatabase import User, create_table
 
-create_table(Model)
+create_table(User)
     

@@ -2,7 +2,7 @@ import streamlit as st
 
 
 from libs.bvcclasses import Role, User
-from libs.bvcutils import read_patients, reset_session_state, get_current_user
+from libs.bvcutils import read_patients, reset_session_state, get_current_user, set_current_user
 from streamlit_cookies_controller import CookieController
 
 
@@ -54,6 +54,13 @@ def set_page_header(layout="centered"):
     with col_user:
         st.markdown(f":id: **{st.session_state.user}**")
 
+def set_page_footer():
+    if st.button("退出登录", use_container_width=True, type="primary"):
+        set_current_user(st.session_state.cookie_controller, name="游客")
+        st.switch_page("clinic.py")
+
+    if st.button("返回首页", use_container_width=True):
+        st.switch_page("clinic.py")
 
 
 def show_setting_page():

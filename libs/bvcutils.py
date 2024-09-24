@@ -31,7 +31,7 @@ def read_models():
 @st.dialog("注册验证")
 def validate_register(username, password):
     st.markdown(f"**用户名：{username}**")
-    validate_password = st.text_input("**校验密码**", type="password")
+    validate_password = st.text_input("**再次输入密码**", type="password")
     if st.button("**确认注册**"):
         if password == validate_password:
             user_register(username, password)

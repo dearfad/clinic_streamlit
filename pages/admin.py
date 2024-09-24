@@ -1,11 +1,10 @@
 import streamlit as st
-from libs.bvcpage import set_page_header
-from libs.bvcutils import set_current_user
-from libs.bvcdatabase import select_all_model, update_all_model, add_model,delete_model
+from libs.bvcpage import set_page_header, set_page_footer
+from libs.bvcdatabase import select_all_model, update_all_model, add_model, delete_model, change_role
 
 set_page_header(layout="wide")
 
-with st.expander("模型设定", icon="🚨", expanded=True):
+with st.expander("**模型设定**", icon="🚨", expanded=False):
     models = select_all_model()
     modified_models = st.data_editor(
         models,
@@ -14,11 +13,26 @@ with st.expander("模型设定", icon="🚨", expanded=True):
         hide_index=True,
         disabled=("id",),
         column_config={
+            "id": st.column_config.TextColumn(
+                "ID",
+            ),
             "use": st.column_config.CheckboxColumn(
                 "使用",
             ),
             "free": st.column_config.CheckboxColumn(
                 "免费",
+            ),
+            "platform": st.column_config.TextColumn(
+                "平台",
+            ),
+            "series": st.column_config.TextColumn(
+                "系列",
+            ),
+            "name": st.column_config.TextColumn(
+                "名称",
+            ),
+            "module": st.column_config.TextColumn(
+                "模块",
             ),
             "price_input": st.column_config.ProgressColumn(
                 "输入价格/千tokens",
@@ -40,8 +54,8 @@ with st.expander("模型设定", icon="🚨", expanded=True):
         if st.button(
             ":material/add: **添加**",
             use_container_width=True,
-            ):
-            add_model()            
+        ):
+            add_model()
     with col_update:
         if st.button(
             ":material/update: **更新**",
@@ -55,12 +69,11 @@ with st.expander("模型设定", icon="🚨", expanded=True):
         if st.button(
             ":material/delete: **删除**",
             use_container_width=True,
-            ):
+        ):
             delete_model(models)
 
-if st.button("退出登录", use_container_width=True, type="primary"):
-    set_current_user(st.session_state.cookie_controller, name="游客")
-    st.switch_page("clinic.py")
+with st.expander("**用户设定**", icon="🚨", expanded=False):
+    if st.button("**更改权限**", use_container_width=True):
+        change_role()
 
-if st.button("返回首页", use_container_width=True):
-    st.switch_page("clinic.py")
+set_page_footer()

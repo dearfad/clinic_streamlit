@@ -1,9 +1,9 @@
 import streamlit as st
 
 from libs.bvcclasses import Role, User
-from libs.bvcdatabase import check_user_exist, user_login
+from libs.bvcdatabase import check_user_exist, user_login, get_user_role
 from libs.bvcpage import set_page_header, show_role_info
-from libs.bvcutils import validate_register, set_current_user
+from libs.bvcutils import set_current_user, validate_register
 
 set_page_header()
 
@@ -31,23 +31,29 @@ match role:
             st.switch_page("pages/inquiry.py")
 
     case Role.TEACHER:
-        username = st.text_input("**用户名**")
-        password = st.text_input("**密码**", type="password")        
-        st.session_state.user_exist = True if check_user_exist(username) else False
-        col_register, col_login = st.columns(2)
-        with col_register:
-            if st.button("**注册**", use_container_width=True, type="primary", disabled=st.session_state.user_exist):
-                if password:
-                    validate_register(username, password)
-                else:
-                    st.warning("**请输入密码**")
-        with col_login:
-            if st.button("**登录**", use_container_width=True, disabled=not st.session_state.user_exist):
-                if user_login(username, password):
-                    st.session_state.user = User(role=role, name=username)
-                    st.switch_page("pages/teacher.py")
-                else:
-                    st.warning(":material/key: **密码错误**，请咨询**管理员**相关信息")
+        if st.session_state.user not in ['游客','管理员']:
+            role = get_user_role(st.session_state.user)
+            if role == 'teacher':
+                st.switch_page("pages/teacher.py")
+        else:
+            username = st.text_input("**用户名**")
+            password = st.text_input("**密码**", type="password")        
+            user_exist = check_user_exist(username)
+            col_register, col_login = st.columns(2)
+            with col_register:
+                if st.button("**注册**", use_container_width=True, type="primary", disabled=user_exist):
+                    if password and username:
+                        validate_register(username, password)
+                    else:
+                        st.warning(":material/key: 请输入**用户名**和**密码**")
+            with col_login:
+                if st.button("**登录**", use_container_width=True, disabled=not user_exist):
+                    if user_login(username, password):
+                        with st.empty():
+                            set_current_user(st.session_state.cookie_controller, name=username)
+                        st.switch_page("pages/teacher.py")
+                    else:
+                        st.warning(":material/key: **密码错误**")
 
     case Role.ADMIN:
         if st.session_state.user == '管理员':
