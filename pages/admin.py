@@ -1,7 +1,7 @@
 import streamlit as st
 from libs.bvcpage import set_page_header
 from libs.bvcutils import set_current_user
-from libs.bvcdatabase import select_all_model, update_all_model, add_model
+from libs.bvcdatabase import select_all_model, update_all_model, add_model,delete_model
 
 set_page_header(layout="wide")
 
@@ -56,7 +56,7 @@ with st.expander("模型设定", icon="🚨", expanded=True):
             ":material/delete: **删除**",
             use_container_width=True,
             ):
-            pass
+            delete_model(models)
 
 if st.button("退出登录", use_container_width=True, type="primary"):
     set_current_user(st.session_state.cookie_controller, name="游客")

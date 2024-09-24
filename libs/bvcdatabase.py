@@ -150,3 +150,41 @@ def add_model():
     with col_cancel:
         if st.button("**取消**", use_container_width=True):
             st.rerun()
+
+@st.dialog("添加模型")
+def delete_model(models):
+    id = st.number_input('id', min_value=1, step=1)
+    row = models.loc[models['id'] == id]
+    if not row.empty:       
+        st.dataframe(row.T, use_container_width=True)
+        # use = st.checkbox('使用')
+        # free = st.checkbox('免费')
+        # platform = st.text_input("平台")
+        # series = st.text_input('系列')
+        # name = st.text_input('名称')
+        # module = st.text_input('模块')
+        # price_input = st.number_input('输入价格')
+        # price_output = st.number_input('输出价格')
+    else:
+        st.markdown('没有相关模型')
+    col_confirm, col_cancel = st.columns(2)
+    with col_confirm:
+        if st.button("**删除**", use_container_width=True):
+            st.rerun()
+    #         model = Model(
+    #             use = use,
+    #             free = free,
+    #             platform = platform,
+    #             series = series,
+    #             name = name,
+    #             module = module,
+    #             price_input = price_input,
+    #             price_output = price_output,
+    #         )
+    #         with Session() as session:
+    #             session.add(model)
+    #             session.commit()
+    #         st.rerun()
+    with col_cancel:
+        if st.button("**取消**", use_container_width=True):
+            st.rerun()
