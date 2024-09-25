@@ -1,16 +1,25 @@
-import sqlite3
-import streamlit as st
 import pandas as pd
-from sqlalchemy import create_engine, select, delete, update, ForeignKey
-from sqlalchemy.orm import DeclarativeBase, sessionmaker, Mapped, mapped_column
-from sqlalchemy import Integer, Text, Float
+import streamlit as st
+from sqlalchemy import (
+    Float,
+    ForeignKey,
+    Integer,
+    Text,
+    create_engine,
+    delete,
+    select,
+    update,
+)
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Mapped,
+    mapped_column,
+    relationship,
+    sessionmaker,
+)
 
 engine = create_engine("sqlite:///data/clinic.db")
 Session = sessionmaker(bind=engine)
-
-
-def connect_db():
-    return sqlite3.connect("data/clinic.db")
 
 
 class Base(DeclarativeBase):
@@ -37,6 +46,7 @@ class Model(Base):
     price_input: Mapped[float] = mapped_column(Float, nullable=True)
     price_output: Mapped[float] = mapped_column(Float, nullable=True)
 
+
 class Teacher(Base):
     __tablename__ = "teacher"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -46,22 +56,29 @@ class Teacher(Base):
     creator: Mapped[str] = mapped_column(Text, nullable=True)
     public: Mapped[bool] = mapped_column(Integer, nullable=True)
 
+    teacher_cases: Mapped[list['Case']] = relationship(back_populates='teacher')
+
+
+class Chapter(Base):
+    __tablename__ = "chapter"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement="auto")
+    book: Mapped[str] = mapped_column(Text, nullable=True)
+    name: Mapped[str] = mapped_column(Text, nullable=True)
+    subject: Mapped[str] = mapped_column(Text, nullable=True)
+
+    chapter_cases: Mapped[list['Case']] = relationship(back_populates='chapter')
 
 class Case(Base):
     __tablename__ = "case"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    content: Mapped[str] = mapped_column(Text, nullable=True)
-    chapter_id: Mapped[str] = mapped_column(ForeignKey("chapter.id"))
+    teacher_id: Mapped[int] = mapped_column(ForeignKey("teacher.id", ondelete="SET NULL"), nullable=True)
+    chapter_id: Mapped[int] = mapped_column(ForeignKey("chapter.id", ondelete="SET NULL"), nullable=True)
     profile: Mapped[str] = mapped_column(Text, nullable=True)
+    content: Mapped[str] = mapped_column(Text, nullable=True)
     creator: Mapped[str] = mapped_column(Text, nullable=True)
-    prompt: Mapped[str] = mapped_column(Text, nullable=True)
 
-class Chapter(Base):
-    __tablename__ = "chapter"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    book: Mapped[str] = mapped_column(Text, nullable=True)
-    name: Mapped[str] = mapped_column(Text, nullable=True)
-    subject: Mapped[str] = mapped_column(Text, nullable=True)
+    teacher: Mapped[Teacher] = relationship(lazy=False, back_populates="teacher_cases")
+    chapter: Mapped[Chapter] = relationship(lazy=False, back_populates='chapter_cases')
 
 
 def create_table(table: Base):
@@ -105,7 +122,13 @@ def change_user_role(username, role):
 
 def update_teacher_prompt(id, prompt, memo, model, creator, public):
     with Session() as session:
-        session.execute(update(Teacher).where(Teacher.id == id).values(prompt = prompt, memo = memo, model = model, creator = creator, public = public))
+        session.execute(
+            update(Teacher)
+            .where(Teacher.id == id)
+            .values(
+                prompt=prompt, memo=memo, model=model, creator=creator, public=public
+            )
+        )
         session.commit()
     return
 
@@ -119,7 +142,9 @@ def delete_teacher_prompt(id):
 
 def add_teacher_prompt(prompt, memo, model, creator, public):
     with Session() as session:
-        teacher_prompt = Teacher(prompt=prompt, memo=memo, model=model, creator=creator, public=public)
+        teacher_prompt = Teacher(
+            prompt=prompt, memo=memo, model=model, creator=creator, public=public
+        )
         session.add(teacher_prompt)
         session.commit()
     return
@@ -235,6 +260,7 @@ def change_role():
     if st.button("更改"):
         change_user_role(username, role)
         st.rerun()
+
 
 @st.dialog("添加章节")
 def add_chapter():
