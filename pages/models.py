@@ -1,30 +1,20 @@
-from datetime import datetime
-
 import streamlit as st
 
-from libs.bvcclasses import Role, User
 from libs.bvcdatabase import (
-    delete_prompt,
-    insert_teacher_prompt,
-    # read_prompt,
+    delete_teacher_prompt,
+    add_teacher_prompt,
     select_model,
     select_teacher_prompt,
     update_teacher_prompt,
 )
 from libs.bvcmodels import chat, chat_patient
-from libs.bvcpage import set_page_header, show_chat
+from libs.bvcpage import set_page_header, set_page_footer, show_chat
 
 # ========== 设定 ==========
 set_page_header(layout="wide")
 
 # ========== 项目 ==========
-col_research, col_user = st.columns(2)
-with col_research:
-    st.markdown("##### :material/view_headline: 模型研究 :material/view_headline:")
-with col_user:
-    if "user" not in st.session_state:
-        st.session_state.user = User(role=Role.VISITOR, name="游客")
-    st.markdown(f"用户名：**{st.session_state.user.name}**")
+st.markdown("##### :material/view_headline: 模型研究 :material/view_headline:")
 
 # ========== 病例设计 ==========
 with st.expander(":material/cases: **病例设计**", expanded=True):
@@ -34,8 +24,8 @@ with st.expander(":material/cases: **病例设计**", expanded=True):
     with col_teacher_prompt:
         teacher_prompt_dict = st.selectbox(
             "**教师提示词**",
-            select_teacher_prompt(st.session_state.user.name),
-            format_func=lambda x: f"{x["memo"]} - {x['model']}",
+            select_teacher_prompt(st.session_state.user),
+            format_func=lambda x: f"{x["memo"]} == {x['model']} == {x['creator']}",
         )
 
         tab_text_area, tab_markdown = st.tabs(['编辑', '查看'])
@@ -43,7 +33,7 @@ with st.expander(":material/cases: **病例设计**", expanded=True):
             teacher_prompt = st.text_area(
                 "**提示词**",
                 value=teacher_prompt_dict["prompt"],
-                height=300,
+                height=280,
                 label_visibility="collapsed",          
             )
         with tab_markdown:
@@ -86,12 +76,12 @@ with st.expander(":material/cases: **病例设计**", expanded=True):
                 key="insert_teacher_prompt",
                 use_container_width=True,
             ):
-                if st.session_state.user.name != "游客":
-                    insert_teacher_prompt(
+                if st.session_state.user != "游客":
+                    add_teacher_prompt(
                         prompt=teacher_prompt,
                         memo=teacher_prompt_memo,
                         model=model_dict['name'],
-                        creator=st.session_state.user.name,
+                        creator=st.session_state.user,
                         public=teacher_public,
                     )
                     st.rerun()
@@ -103,14 +93,14 @@ with st.expander(":material/cases: **病例设计**", expanded=True):
                 key="update_teacher_prompt",
                 use_container_width=True,
             ):
-                if st.session_state.user.name != "游客":
-                    if st.session_state.user.name == teacher_prompt_creator:
+                if st.session_state.user != "游客":
+                    if st.session_state.user == teacher_prompt_creator:
                         update_teacher_prompt(
                             id=teacher_prompt_dict["id"],
                             prompt=teacher_prompt,
                             memo=teacher_prompt_memo,
                             model=model_dict['name'],
-                            creator=st.session_state.user.name,
+                            creator=st.session_state.user,
                             public=teacher_public,
                         )
                         st.rerun()
@@ -125,9 +115,9 @@ with st.expander(":material/cases: **病例设计**", expanded=True):
                 type="primary",
                 use_container_width=True,
             ):
-                if st.session_state.user.name != "游客":
-                    if st.session_state.user.name == teacher_prompt_creator:
-                        delete_prompt("teacher", id=teacher_prompt_dict["id"])
+                if st.session_state.user != "游客":
+                    if st.session_state.user == teacher_prompt_creator:
+                        delete_teacher_prompt(id=teacher_prompt_dict["id"])
                         st.rerun()
                     else:
                         st.toast("无权限删除提示词")
@@ -135,85 +125,88 @@ with st.expander(":material/cases: **病例设计**", expanded=True):
                     st.toast("游客无法进行此项操作，请登录！")
 
     with col_patient_info:
-        if "user_prompt" not in st.session_state:
-            st.session_state.user_prompt = "乳房疾病"
-        user_prompt = st.text_input("**病例设定**", value=st.session_state.user_prompt)
-        if "patient_info" not in st.session_state:
-            st.session_state.patient_info = ""
+        pass
+        # if "user_prompt" not in st.session_state:
+        #     st.session_state.user_prompt = "乳房疾病"
+        # user_prompt = st.text_input("**病例设定**", value=st.session_state.user_prompt)
+        # if "patient_info" not in st.session_state:
+        #     st.session_state.patient_info = ""
         
-        tab_patient_info, tab_patient_info_markdown = st.tabs(['编辑', '查看'])
-        with tab_patient_info:
-            patient_info = st.text_area(
-                "**病历**",
-                value=st.session_state.patient_info,
-                height=300,
-                label_visibility="collapsed",
-            )
-        with tab_patient_info_markdown:
-            with st.container(height=302):
-                st.markdown(patient_info)
+        # tab_patient_info, tab_patient_info_markdown = st.tabs(['编辑', '查看'])
+        # with tab_patient_info:
+        #     patient_info = st.text_area(
+        #         "**病历**",
+        #         value=st.session_state.patient_info,
+        #         height=300,
+        #         label_visibility="collapsed",
+        #     )
+        # with tab_patient_info_markdown:
+        #     with st.container(height=302):
+        #         st.markdown(patient_info)
 
-        if st.button("生成病历", use_container_width=True):
-            if not st.session_state.user_prompt:
-                st.session_state.user_prompt = "任意疾病"
-            messages = [
-                {
-                    "role": "system",
-                    "content": teacher_prompt,
-                },
-                {
-                    "role": "user",
-                    "content": user_prompt,
-                },
-            ]
-            with st.spinner("思考中..."):
-                response = chat(
-                    module=model_dict["module"],
-                    modelname=model_dict["name"],
-                    messages=messages,
-                )
-            st.session_state.patient_info = response
-            st.rerun()
+        # if st.button("生成病历", use_container_width=True):
+        #     if not st.session_state.user_prompt:
+        #         st.session_state.user_prompt = "任意疾病"
+        #     messages = [
+        #         {
+        #             "role": "system",
+        #             "content": teacher_prompt,
+        #         },
+        #         {
+        #             "role": "user",
+        #             "content": user_prompt,
+        #         },
+        #     ]
+        #     with st.spinner("思考中..."):
+        #         response = chat(
+        #             module=model_dict["module"],
+        #             modelname=model_dict["name"],
+        #             messages=messages,
+        #         )
+        #     st.session_state.patient_info = response
+        #     st.rerun()
 
     with col_question_prompt:
-        question_prompt_dict = st.selectbox(
-            "**问题提示词**",
-            select_teacher_prompt(st.session_state.user.name),
-            format_func=lambda x: x["memo"],
-        )
-        question_prompt_memo = st.text_input(
-            "**备注**", value=question_prompt_dict["memo"], key="question_prompt_memo"
-        )
-        # if "question_prompt" not in st.session_state:
-        #     st.session_state.question_prompt = read_prompt()["question_prompt"]
-        st.text_area(
-            "**问题提示词**",
-            key="question_prompt",
-            height=400,
-        )
+        pass
+        # question_prompt_dict = st.selectbox(
+        #     "**问题提示词**",
+        #     select_teacher_prompt(st.session_state.user.name),
+        #     format_func=lambda x: x["memo"],
+        # )
+        # question_prompt_memo = st.text_input(
+        #     "**备注**", value=question_prompt_dict["memo"], key="question_prompt_memo"
+        # )
+        # # if "question_prompt" not in st.session_state:
+        # #     st.session_state.question_prompt = read_prompt()["question_prompt"]
+        # st.text_area(
+        #     "**问题提示词**",
+        #     key="question_prompt",
+        #     height=400,
+        # )
 
     with col_questions:
+        pass
         # if "questions" not in st.session_state:
         #     st.session_state.questions = read_prompt()["questions"]
-        st.text_area(
-            "**questions**",
-            key="questions",
-            height=260,
-        )
-        if st.button("出题", use_container_width=True):
-            messages = [
-                {
-                    "role": "system",
-                    "content": st.session_state.question_prompt,
-                },
-                {"role": "user", "content": st.session_state.patient_info},
-            ]
-            with st.spinner("思考中..."):
-                response = chat(
-                    module="zhipu", modelname="glm-4-flash", messages=messages
-                )
-            st.session_state.questions = response
-            st.rerun()
+        # st.text_area(
+        #     "**questions**",
+        #     key="questions",
+        #     height=260,
+        # )
+        # if st.button("出题", use_container_width=True):
+        #     messages = [
+        #         {
+        #             "role": "system",
+        #             "content": st.session_state.question_prompt,
+        #         },
+        #         {"role": "user", "content": st.session_state.patient_info},
+        #     ]
+        #     with st.spinner("思考中..."):
+        #         response = chat(
+        #             module="zhipu", modelname="glm-4-flash", messages=messages
+        #         )
+        #     st.session_state.questions = response
+        #     st.rerun()
 
 # if "doctor" not in st.session_state:
 #     st.session_state.doctor = Doctor(role=Role.TEACHER, mode="模型研究")
@@ -330,10 +323,10 @@ with st.expander(":material/cases: **病例设计**", expanded=True):
 #             st.markdown(response)
 #         st.session_state.ask_messages.append({"role": "assistant", "content": response})
 
-footer_col_left, footer_col_center, foot_col_save, footer_col_right = st.columns(4)
-with footer_col_left:
-    if st.button("RERUN", use_container_width=True):
-        st.rerun()
+# footer_col_left, footer_col_center, foot_col_save, footer_col_right = st.columns(4)
+# with footer_col_left:
+#     if st.button("RERUN", use_container_width=True):
+#         st.rerun()
 # with footer_col_center:
 #     if st.button("清除对话", use_container_width=True):
 #         for patient in st.session_state.doctor.patients:
@@ -341,9 +334,9 @@ with footer_col_left:
 
 #         del st.session_state.ask_messages
 #         st.rerun()
-with footer_col_right:
-    if st.button("返回首页", use_container_width=True):
-        st.switch_page("clinic.py")
+# with footer_col_right:
+#     if st.button("返回首页", use_container_width=True):
+#         st.switch_page("clinic.py")
 # with foot_col_save:
 #     if st.button("保存", use_container_width=True):
 #         write_prompt(
@@ -355,3 +348,6 @@ with footer_col_right:
 #             }
 #         )
 #         st.toast("saved...", icon="😍")
+
+
+set_page_footer()

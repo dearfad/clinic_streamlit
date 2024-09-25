@@ -1,6 +1,6 @@
 import streamlit as st
 from libs.bvcpage import set_page_header, set_page_footer
-from libs.bvcdatabase import select_all_model, update_all_model, add_model, delete_model, change_role
+from libs.bvcdatabase import select_all_model, update_all_model, add_model, delete_model, change_role, add_chapter
 
 set_page_header(layout="wide")
 
@@ -72,8 +72,14 @@ with st.expander("**模型设定**", icon="🚨", expanded=False):
         ):
             delete_model(models)
 
-with st.expander("**用户设定**", icon="🚨", expanded=False):
-    if st.button("**更改权限**", use_container_width=True):
-        change_role()
+col_user_config, col_chapter_config = st.columns(2)
+with col_user_config:
+    with st.expander("**用户设定**", icon="🚨", expanded=False):
+        if st.button("**更改权限**", use_container_width=True):
+            change_role()
+with col_chapter_config:
+    with st.expander("**章节设定**", icon="🚨", expanded=False):
+        if st.button("**添加章节**", use_container_width=True):
+            add_chapter()    
 
 set_page_footer()

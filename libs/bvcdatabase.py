@@ -1,7 +1,7 @@
 import sqlite3
 import streamlit as st
 import pandas as pd
-from sqlalchemy import create_engine, select, delete, update
+from sqlalchemy import create_engine, select, delete, update, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, sessionmaker, Mapped, mapped_column
 from sqlalchemy import Integer, Text, Float
 
@@ -37,6 +37,32 @@ class Model(Base):
     price_input: Mapped[float] = mapped_column(Float, nullable=True)
     price_output: Mapped[float] = mapped_column(Float, nullable=True)
 
+class Teacher(Base):
+    __tablename__ = "teacher"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    prompt: Mapped[str] = mapped_column(Text, nullable=True)
+    memo: Mapped[str] = mapped_column(Text, nullable=True)
+    model: Mapped[str] = mapped_column(Text, nullable=True)
+    creator: Mapped[str] = mapped_column(Text, nullable=True)
+    public: Mapped[bool] = mapped_column(Integer, nullable=True)
+
+
+class Case(Base):
+    __tablename__ = "case"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    content: Mapped[str] = mapped_column(Text, nullable=True)
+    chapter_id: Mapped[str] = mapped_column(ForeignKey("chapter.id"))
+    profile: Mapped[str] = mapped_column(Text, nullable=True)
+    creator: Mapped[str] = mapped_column(Text, nullable=True)
+    prompt: Mapped[str] = mapped_column(Text, nullable=True)
+
+class Chapter(Base):
+    __tablename__ = "chapter"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    book: Mapped[str] = mapped_column(Text, nullable=True)
+    name: Mapped[str] = mapped_column(Text, nullable=True)
+    subject: Mapped[str] = mapped_column(Text, nullable=True)
+
 
 def create_table(table: Base):
     Base.metadata.create_all(engine, tables=[table.__table__])
@@ -62,11 +88,13 @@ def user_login(username, password):
         user = result.scalar_one()
     return True if user and user.password == password else False
 
+
 def get_user_role(username):
     with Session() as session:
         result = session.execute(select(User).where(User.name == username))
         user = result.scalar()
     return user.role
+
 
 def change_user_role(username, role):
     with Session() as session:
@@ -76,51 +104,39 @@ def change_user_role(username, role):
 
 
 def update_teacher_prompt(id, prompt, memo, model, creator, public):
-    conn = connect_db()
-    with conn:
-        cursor = conn.cursor()
-        cursor.execute(
-            "UPDATE teacher set prompt = ?, memo = ?, model = ?, creator = ?, public = ? where ID = ?",
-            (prompt, memo, model, creator, public, id),
-        )
+    with Session() as session:
+        session.execute(update(Teacher).where(Teacher.id == id).values(prompt = prompt, memo = memo, model = model, creator = creator, public = public))
+        session.commit()
     return
 
 
-def delete_prompt(table, id):
-    conn = connect_db()
-    with conn:
-        cursor = conn.cursor()
-        cursor.execute(f"DELETE FROM {table} WHERE ID = ?", (id,))
+def delete_teacher_prompt(id):
+    with Session() as session:
+        session.execute(delete(Teacher).where(Teacher.id == id))
+        session.commit()
     return
 
 
-def insert_teacher_prompt(prompt, memo, model, creator, public):
-    conn = connect_db()
-    with conn:
-        cursor = conn.cursor()
-        cursor.execute(
-            "INSERT INTO teacher (prompt, memo, model, creator, public) VALUES (?, ?, ?, ?, ?)",
-            (prompt, memo, model, creator, public),
-        )
+def add_teacher_prompt(prompt, memo, model, creator, public):
+    with Session() as session:
+        teacher_prompt = Teacher(prompt=prompt, memo=memo, model=model, creator=creator, public=public)
+        session.add(teacher_prompt)
+        session.commit()
     return
 
 
 def select_teacher_prompt(creator):
-    conn = connect_db()
-    with conn:
-        prompts = pd.read_sql(
-            "SELECT * FROM teacher WHERE creator = ? OR public = True",
-            con=conn,
-            params=[creator],
-        )
-    return prompts.to_dict(orient="records")
+    return pd.read_sql(
+        "SELECT * FROM teacher WHERE creator = ? OR public = True",
+        con=engine,
+        params=(creator,),
+    ).to_dict(orient="records")
 
 
 def select_model():
-    conn = connect_db()
-    with conn:
-        models = pd.read_sql("SELECT name, module FROM models WHERE use=True", con=conn)
-    return models.to_dict(orient="records")
+    return pd.read_sql(
+        "SELECT name, module FROM model WHERE use=True", con=engine
+    ).to_dict(orient="records")
 
 
 def select_all_model():
@@ -218,4 +234,16 @@ def change_role():
     role = st.selectbox("**权限**", ["student", "teacher"])
     if st.button("更改"):
         change_user_role(username, role)
+        st.rerun()
+
+@st.dialog("添加章节")
+def add_chapter():
+    book = st.text_input("**教科书**")
+    name = st.text_input("**章节**")
+    subject = st.text_input("**主题**")
+    if st.button("添加"):
+        with Session() as session:
+            chapter = Chapter(book=book, name=name, subject=subject)
+            session.add(chapter)
+            session.commit()
         st.rerun()

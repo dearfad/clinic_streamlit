@@ -1,4 +1,4 @@
-from libs.bvcdatabase import User, create_table
+from libs.bvcdatabase import Case, create_table
 
-create_table(User)
+create_table(Case)
     
