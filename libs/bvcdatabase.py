@@ -18,7 +18,7 @@ from sqlalchemy.orm import (
     sessionmaker,
 )
 
-engine = create_engine("sqlite:///data/clinic.db")
+engine = create_engine("sqlite:///data/clinic.db", echo=False)
 Session = sessionmaker(bind=engine)
 
 
@@ -30,8 +30,10 @@ class User(Base):
     __tablename__ = "user"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(Text, unique=True, nullable=False)
-    password: Mapped[str] = mapped_column(Text, nullable=False)
-    role: Mapped[str] = mapped_column(Text, nullable=False)
+    password: Mapped[str] = mapped_column(Text, nullable=True)
+    role: Mapped[str] = mapped_column(Text, nullable=True)
+
+    user_cases: Mapped[list["Cases"]] = relationship(back_populates="user")
 
 
 class Model(Base):
@@ -56,7 +58,7 @@ class Teacher(Base):
     creator: Mapped[str] = mapped_column(Text, nullable=True)
     public: Mapped[bool] = mapped_column(Integer, nullable=True)
 
-    teacher_cases: Mapped[list['Case']] = relationship(back_populates='teacher')
+    teacher_cases: Mapped[list["Cases"]] = relationship(back_populates="teacher")
 
 
 class Chapter(Base):
@@ -66,19 +68,27 @@ class Chapter(Base):
     name: Mapped[str] = mapped_column(Text, nullable=True)
     subject: Mapped[str] = mapped_column(Text, nullable=True)
 
-    chapter_cases: Mapped[list['Case']] = relationship(back_populates='chapter')
+    chapter_cases: Mapped[list["Cases"]] = relationship(back_populates="chapter")
 
-class Case(Base):
-    __tablename__ = "case"
+
+class Cases(Base):
+    __tablename__ = "cases"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    teacher_id: Mapped[int] = mapped_column(ForeignKey("teacher.id", ondelete="SET NULL"), nullable=True)
-    chapter_id: Mapped[int] = mapped_column(ForeignKey("chapter.id", ondelete="SET NULL"), nullable=True)
+    teacher_id: Mapped[int] = mapped_column(
+        ForeignKey("teacher.id", ondelete="SET NULL"), nullable=True
+    )
+    chapter_id: Mapped[int] = mapped_column(
+        ForeignKey("chapter.id", ondelete="SET NULL"), nullable=True
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id", ondelete="SET NULL"), nullable=True
+    )
     profile: Mapped[str] = mapped_column(Text, nullable=True)
     content: Mapped[str] = mapped_column(Text, nullable=True)
-    creator: Mapped[str] = mapped_column(Text, nullable=True)
 
     teacher: Mapped[Teacher] = relationship(lazy=False, back_populates="teacher_cases")
-    chapter: Mapped[Chapter] = relationship(lazy=False, back_populates='chapter_cases')
+    chapter: Mapped[Chapter] = relationship(lazy=False, back_populates="chapter_cases")
+    user: Mapped[User] = relationship(lazy=False, back_populates="user_cases")
 
 
 def create_table(table: Base):
@@ -273,3 +283,34 @@ def add_chapter():
             session.add(chapter)
             session.commit()
         st.rerun()
+
+def save_case(teacher: Teacher, chapter: Chapter, user: User, profile: str, content:str):
+    case = Cases(
+        teacher=teacher,
+        chapter=chapter,
+        user=user,
+        profile=profile,
+        content=content,
+    )
+    with Session() as session:
+        session.add(case)
+        session.commit()
+    return
+
+def get_teacher(memo: str):
+    with Session() as session:
+        result = session.execute(select(Teacher).where(Teacher.memo == memo))
+        teacher = result.scalar()
+    return teacher
+
+def get_chapter():
+    with Session() as session:
+        result = session.execute(select(Chapter).where(Chapter.id == 1))
+        chapter = result.scalar()
+    return chapter
+
+def get_user(username: str):
+    with Session() as session:
+        result = session.execute(select(User).where(User.name == username))
+        user = result.scalar()
+    return user

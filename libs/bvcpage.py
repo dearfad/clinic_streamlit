@@ -55,12 +55,17 @@ def set_page_header(layout="centered"):
         st.markdown(f":id: **{st.session_state.user}**")
 
 def set_page_footer():
-    if st.button("退出登录", use_container_width=True, type="primary"):
-        set_current_user(st.session_state.cookie_controller, name="游客")
-        st.switch_page("clinic.py")
-
-    if st.button("返回首页", use_container_width=True):
-        st.switch_page("clinic.py")
+    col_footer_left, col_footer_center, col_footer_right = st.columns(3)
+    with col_footer_left:
+        if st.button("RERUN", use_container_width=True):
+            st.rerun()
+    with col_footer_center:
+        if st.button("退出登录", use_container_width=True, type="primary"):
+            set_current_user(st.session_state.cookie_controller, name="游客")
+            st.switch_page("clinic.py")
+    with col_footer_right:
+        if st.button("返回首页", use_container_width=True):
+            st.switch_page("clinic.py")
 
 
 def show_setting_page():

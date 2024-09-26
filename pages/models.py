@@ -6,6 +6,10 @@ from libs.bvcdatabase import (
     select_model,
     select_teacher_prompt,
     update_teacher_prompt,
+    save_case,
+    get_teacher,
+    get_chapter,
+    get_user,
 )
 from libs.bvcmodels import chat, chat_patient
 from libs.bvcpage import set_page_header, set_page_footer, show_chat
@@ -125,46 +129,55 @@ with st.expander(":material/cases: **病例设计**", expanded=True):
                     st.toast("游客无法进行此项操作，请登录！")
 
     with col_patient_info:
-        pass
-        # if "user_prompt" not in st.session_state:
-        #     st.session_state.user_prompt = "乳房疾病"
-        # user_prompt = st.text_input("**病例设定**", value=st.session_state.user_prompt)
-        # if "patient_info" not in st.session_state:
-        #     st.session_state.patient_info = ""
+        if "user_prompt" not in st.session_state:
+            st.session_state.user_prompt = "乳房疾病"
+        user_prompt = st.text_input("**病例设定**", value=st.session_state.user_prompt)
+        if "patient_info" not in st.session_state:
+            st.session_state.patient_info = ""
         
-        # tab_patient_info, tab_patient_info_markdown = st.tabs(['编辑', '查看'])
-        # with tab_patient_info:
-        #     patient_info = st.text_area(
-        #         "**病历**",
-        #         value=st.session_state.patient_info,
-        #         height=300,
-        #         label_visibility="collapsed",
-        #     )
-        # with tab_patient_info_markdown:
-        #     with st.container(height=302):
-        #         st.markdown(patient_info)
+        tab_patient_info, tab_patient_info_markdown = st.tabs(['编辑', '查看'])
+        with tab_patient_info:
+            patient_info = st.text_area(
+                "**病历**",
+                value=st.session_state.patient_info,
+                height=300,
+                label_visibility="collapsed",
+            )
+        with tab_patient_info_markdown:
+            with st.container(height=302):
+                st.markdown(patient_info)
 
-        # if st.button("生成病历", use_container_width=True):
-        #     if not st.session_state.user_prompt:
-        #         st.session_state.user_prompt = "任意疾病"
-        #     messages = [
-        #         {
-        #             "role": "system",
-        #             "content": teacher_prompt,
-        #         },
-        #         {
-        #             "role": "user",
-        #             "content": user_prompt,
-        #         },
-        #     ]
-        #     with st.spinner("思考中..."):
-        #         response = chat(
-        #             module=model_dict["module"],
-        #             modelname=model_dict["name"],
-        #             messages=messages,
-        #         )
-        #     st.session_state.patient_info = response
-        #     st.rerun()
+        if st.button("生成病历", use_container_width=True):
+            if not st.session_state.user_prompt:
+                st.session_state.user_prompt = "任意疾病"
+            messages = [
+                {
+                    "role": "system",
+                    "content": teacher_prompt,
+                },
+                {
+                    "role": "user",
+                    "content": user_prompt,
+                },
+            ]
+            with st.spinner("思考中..."):
+                response = chat(
+                    module=model_dict["module"],
+                    modelname=model_dict["name"],
+                    messages=messages,
+                )
+            st.session_state.patient_info = response
+            st.rerun()
+        if st.button("保存病历", use_container_width=True):
+            save_case(
+                teacher=get_teacher(teacher_prompt_memo),
+                chapter=get_chapter(),
+                user = get_user(st.session_state.user),
+                profile=user_prompt,
+                content=patient_info,
+                )
+            st.toast('Case Saved...')
+
 
     with col_question_prompt:
         pass
