@@ -11,6 +11,7 @@ def set_page_header(layout="centered"):
         page_title="虚拟门诊",
         page_icon=":health_worker:",
         layout=layout,
+        initial_sidebar_state='auto',
     )
     st.session_state.cookie_controller = CookieController()
     PAGE_STYLE = """
@@ -46,6 +47,7 @@ def set_page_header(layout="centered"):
     </style>
     """
     st.html(PAGE_STYLE)
+
     with st.empty():
         get_current_user(st.session_state.cookie_controller)
     col_title, col_user = st.columns(2)

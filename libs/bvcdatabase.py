@@ -9,6 +9,7 @@ from sqlalchemy import (
     delete,
     select,
     update,
+    distinct,
 )
 from sqlalchemy.orm import (
     DeclarativeBase,
@@ -61,14 +62,14 @@ class Teacher(Base):
     teacher_cases: Mapped[list["Cases"]] = relationship(back_populates="teacher")
 
 
-class Chapter(Base):
-    __tablename__ = "chapter"
+class Category(Base):
+    __tablename__ = "category"
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement="auto")
     book: Mapped[str] = mapped_column(Text, nullable=True)
-    name: Mapped[str] = mapped_column(Text, nullable=True)
+    chapter: Mapped[str] = mapped_column(Text, nullable=True)
     subject: Mapped[str] = mapped_column(Text, nullable=True)
 
-    chapter_cases: Mapped[list["Cases"]] = relationship(back_populates="chapter")
+    category_cases: Mapped[list["Cases"]] = relationship(back_populates="category")
 
 
 class Cases(Base):
@@ -78,7 +79,7 @@ class Cases(Base):
         ForeignKey("teacher.id", ondelete="SET NULL"), nullable=True
     )
     chapter_id: Mapped[int] = mapped_column(
-        ForeignKey("chapter.id", ondelete="SET NULL"), nullable=True
+        ForeignKey("category.id", ondelete="SET NULL"), nullable=True
     )
     user_id: Mapped[int] = mapped_column(
         ForeignKey("user.id", ondelete="SET NULL"), nullable=True
@@ -87,7 +88,7 @@ class Cases(Base):
     content: Mapped[str] = mapped_column(Text, nullable=True)
 
     teacher: Mapped[Teacher] = relationship(lazy=False, back_populates="teacher_cases")
-    chapter: Mapped[Chapter] = relationship(lazy=False, back_populates="chapter_cases")
+    category: Mapped[Category] = relationship(lazy=False, back_populates="category_cases")
     user: Mapped[User] = relationship(lazy=False, back_populates="user_cases")
 
 
@@ -272,19 +273,9 @@ def change_role():
         st.rerun()
 
 
-@st.dialog("添加章节")
-def add_chapter():
-    book = st.text_input("**教科书**")
-    name = st.text_input("**章节**")
-    subject = st.text_input("**主题**")
-    if st.button("添加"):
-        with Session() as session:
-            chapter = Chapter(book=book, name=name, subject=subject)
-            session.add(chapter)
-            session.commit()
-        st.rerun()
 
-def save_case(teacher: Teacher, chapter: Chapter, user: User, profile: str, content:str):
+
+def save_case(teacher: Teacher, chapter: Category, user: User, profile: str, content:str):
     case = Cases(
         teacher=teacher,
         chapter=chapter,
@@ -303,14 +294,37 @@ def get_teacher(memo: str):
         teacher = result.scalar()
     return teacher
 
-def get_chapter():
-    with Session() as session:
-        result = session.execute(select(Chapter).where(Chapter.id == 1))
-        chapter = result.scalar()
-    return chapter
 
 def get_user(username: str):
     with Session() as session:
         result = session.execute(select(User).where(User.name == username))
         user = result.scalar()
     return user
+
+########### TABLE CATEGORY ###########
+
+@st.dialog("添加章节")
+def add_category():
+    book = st.text_input("**教科书**")
+    chapter = st.text_input("**章节**")
+    subject = st.text_input("**主题**")
+    if st.button("添加"):
+        with Session() as session:
+            category = Category(book=book, chapter=chapter, subject=subject)
+            session.add(category)
+            session.commit()
+        st.rerun()
+
+def get_category(book, name, subject):
+    with Session() as session:
+        result = session.execute(select(Category).where(Category.book == book, Category.name == name, Category.subject == subject))
+        category = result.scalar()
+        if category is None:
+            result = session.execute(select(Category).where(Category.id == 1))
+            chapter = result.scalar()
+    return chapter
+
+def select_category(field: str):
+    with Session() as session:
+        result = session.execute(select(distinct(getattr(Category, field)))).scalars().all()
+    return result

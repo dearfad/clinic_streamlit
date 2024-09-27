@@ -1,6 +1,6 @@
 import streamlit as st
 from libs.bvcpage import set_page_header, set_page_footer
-from libs.bvcdatabase import select_all_model, update_all_model, add_model, delete_model, change_role, add_chapter
+from libs.bvcdatabase import select_all_model, update_all_model, add_model, delete_model, change_role, add_category
 
 set_page_header(layout="wide")
 
@@ -80,6 +80,6 @@ with col_user_config:
 with col_chapter_config:
     with st.expander("**章节设定**", icon="🚨", expanded=False):
         if st.button("**添加章节**", use_container_width=True):
-            add_chapter()    
+            add_category()    
 
 set_page_footer()

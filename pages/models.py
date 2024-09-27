@@ -8,8 +8,9 @@ from libs.bvcdatabase import (
     update_teacher_prompt,
     save_case,
     get_teacher,
-    get_chapter,
+    get_category,
     get_user,
+    select_category,
 )
 from libs.bvcmodels import chat, chat_patient
 from libs.bvcpage import set_page_header, set_page_footer, show_chat
@@ -168,10 +169,17 @@ with st.expander(":material/cases: **病例设计**", expanded=True):
                 )
             st.session_state.patient_info = response
             st.rerun()
+        cols = st.columns(3)
+        with cols[0]:
+            book = st.selectbox("**教科书**", select_category('book'))
+        with cols[1]:
+            chapter = st.selectbox("**章节**", select_category('chapter'))
+        with cols[2]:
+            subject = st.selectbox("**主题**", select_category('subject'))
         if st.button("保存病历", use_container_width=True):
             save_case(
                 teacher=get_teacher(teacher_prompt_memo),
-                chapter=get_chapter(),
+                chapter=get_category(book, chapter, subject),
                 user = get_user(st.session_state.user),
                 profile=user_prompt,
                 content=patient_info,
