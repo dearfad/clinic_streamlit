@@ -1,7 +1,7 @@
 # UI
 streamlit
 
-streamlit_cookies_controller
+# streamlit_cookies_controller
 
 sqlalchemy
 

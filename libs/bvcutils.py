@@ -9,7 +9,6 @@ import requests
 import streamlit as st
 from faker import Faker
 from libs.bvcconst import VOICES, SYSTEM_PROMPT
-from libs.bvcdatabase import user_register
 import json
 
 
@@ -27,16 +26,7 @@ def read_models():
     pass
 
 
-@st.dialog("注册验证")
-def validate_register(username, password):
-    st.markdown(f"**用户名：{username}**")
-    validate_password = st.text_input("**再次输入密码**", type="password")
-    if st.button("**确认注册**"):
-        if password == validate_password:
-            user_register(username, password)
-            st.rerun()
-        else:
-            st.warning(":material/key: **密码错误**")
+
 
 
 def read_prompt():

@@ -13,7 +13,7 @@ from libs.bvcutils import (
 from libs.bvcutils import read_models
 
 class Role(Enum):
-    VISITOR = "游客"
+    VISITOR = "访客"
     STUDENT = "学生"
     TEACHER = "教师"
     ADMIN = "管理员"
