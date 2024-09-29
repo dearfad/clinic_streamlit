@@ -2,9 +2,13 @@ import streamlit as st
 
 
 from libs.bvcclasses import Role, User
-from libs.bvcutils import read_patients, reset_session_state, get_current_user, set_current_user
-from streamlit_cookies_controller import CookieController
+from libs.bvcutils import read_patients, reset_session_state, get_current_user
 
+from streamlit_cookies_controller import CookieController, RemoveEmptyElementContainer
+
+@st.cache_data
+def get_controller():
+    return CookieController()
 
 def set_page_header(layout="centered"):
     st.set_page_config(
@@ -13,7 +17,6 @@ def set_page_header(layout="centered"):
         layout=layout,
         initial_sidebar_state='auto',
     )
-    st.session_state.cookie_controller = CookieController()
     PAGE_STYLE = """
     <style>
         header{
@@ -44,17 +47,25 @@ def set_page_header(layout="centered"):
             padding-left: 0rem;
             padding-right: 0rem;        
         }
+        div[data-testid='element-container']:has(iframe[title='streamlit_cookies_controller.cookie_controller.cookie_controller']){
+            display:none;
+        }
     </style>
     """
     st.html(PAGE_STYLE)
-
+    st.session_state.cookiecontroller = get_controller()
     with st.empty():
-        get_current_user(st.session_state.cookie_controller)
+        get_current_user(st.session_state.cookiecontroller)
     col_title, col_user = st.columns(2)
     with col_title:
         st.markdown(":heavy_minus_sign: **虚拟门诊** :heavy_minus_sign:")
     with col_user:
         st.markdown(f":id: **{st.session_state.user}**")
+
+def set_current_user(cookiecontroller, name):
+    print(cookiecontroller)
+    cookiecontroller.set("user", name)
+    st.session_state.user = name
 
 def set_page_footer():
     col_footer_left, col_footer_center, col_footer_right = st.columns(3)
@@ -63,7 +74,7 @@ def set_page_footer():
             st.rerun()
     with col_footer_center:
         if st.button("退出登录", use_container_width=True, type="primary"):
-            set_current_user(st.session_state.cookie_controller, name="游客")
+            set_current_user(st.session_state.cookiecontroller, name="游客")
             st.switch_page("clinic.py")
     with col_footer_right:
         if st.button("返回首页", use_container_width=True):

@@ -2,8 +2,8 @@ import streamlit as st
 
 from libs.bvcclasses import Role, User
 from libs.bvcdatabase import check_user_exist, user_login, get_user_role
-from libs.bvcpage import set_page_header, show_role_info
-from libs.bvcutils import set_current_user, validate_register
+from libs.bvcpage import set_page_header, show_role_info, set_current_user
+from libs.bvcutils import  validate_register
 
 set_page_header()
 
@@ -50,7 +50,7 @@ match role:
                 if st.button("**登录**", use_container_width=True, disabled=not user_exist):
                     if user_login(username, password):
                         with st.empty():
-                            set_current_user(st.session_state.cookie_controller, name=username)
+                            set_current_user(st.session_state.cookiecontroller, name=username)
                         st.switch_page("pages/teacher.py")
                     else:
                         st.warning(":material/key: **密码错误**")
@@ -63,7 +63,7 @@ match role:
             if st.button("**登录**", use_container_width=True):
                 if password == st.secrets["admin_key"]:
                     with st.empty():
-                        set_current_user(st.session_state.cookie_controller, name="管理员")
+                        set_current_user(st.session_state.cookiecontroller, name="管理员")
                     st.switch_page("pages/admin.py")
                 else:
                     st.warning(":material/key: **密码错误**，请咨询**管理员**相关信息")
