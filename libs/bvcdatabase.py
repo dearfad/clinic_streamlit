@@ -48,8 +48,8 @@ class Model(Base):
     price_output: Mapped[float] = mapped_column(Float, nullable=True)
 
 
-class Teacher(Base):
-    __tablename__ = "teacher"
+class CasePrompt(Base):
+    __tablename__ = "caseprompt"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     prompt: Mapped[str] = mapped_column(Text, nullable=True)
     memo: Mapped[str] = mapped_column(Text, nullable=True)
@@ -57,7 +57,17 @@ class Teacher(Base):
     creator: Mapped[str] = mapped_column(Text, nullable=True)
     public: Mapped[bool] = mapped_column(Integer, nullable=True)
 
-    teacher_cases: Mapped[list["Case"]] = relationship(back_populates="teacher")
+    caseprompt_cases: Mapped[list["Case"]] = relationship(back_populates="caseprompt")
+
+
+class TestPrompt(Base):
+    __tablename__ = "testprompt"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    prompt: Mapped[str] = mapped_column(Text, nullable=True)
+    memo: Mapped[str] = mapped_column(Text, nullable=True)
+    model: Mapped[str] = mapped_column(Text, nullable=True)
+    creator: Mapped[str] = mapped_column(Text, nullable=True)
+    public: Mapped[bool] = mapped_column(Integer, nullable=True)
 
 
 class Category(Base):
@@ -73,17 +83,19 @@ class Category(Base):
 class Case(Base):
     __tablename__ = "case"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    teacher_id: Mapped[int] = mapped_column(
-        ForeignKey("teacher.id", ondelete="SET NULL"), nullable=True
+    caseprompt_id: Mapped[int] = mapped_column(
+        ForeignKey("caseprompt.id", ondelete="SET NULL"), nullable=True
     )
-    chapter_id: Mapped[int] = mapped_column(
+    category_id: Mapped[int] = mapped_column(
         ForeignKey("category.id", ondelete="SET NULL"), nullable=True
     )
     creator: Mapped[str] = mapped_column(Text, nullable=True)
     profile: Mapped[str] = mapped_column(Text, nullable=True)
     content: Mapped[str] = mapped_column(Text, nullable=True)
 
-    teacher: Mapped[Teacher] = relationship(lazy=False, back_populates="teacher_cases")
+    caseprompt: Mapped[CasePrompt] = relationship(
+        lazy=False, back_populates="caseprompt_cases"
+    )
     category: Mapped[Category] = relationship(
         lazy=False, back_populates="category_cases"
     )
@@ -95,7 +107,15 @@ def create_table(table: Base):
 
 ####################### CRUD - READ ###############################
 def read_table(table: str):
-    return pd.read_sql(f"SELECT * FROM {table}", con=engine)
+    query = f"SELECT * FROM \"{table}\""
+    return pd.read_sql(query, con=engine)
+
+
+def table_to_class(table: str) -> Base:
+    return {
+        "caseprompt": CasePrompt,
+        "testprompt": TestPrompt,
+    }.get(table)
 
 
 ###################################################################
@@ -130,6 +150,13 @@ def create_model():
     with col_cancel:
         if st.button("**取消**", use_container_width=True):
             st.rerun()
+
+
+#### model - READ #####
+def read_use_model():
+    return pd.read_sql(
+        "SELECT name, module FROM model WHERE use=True", con=engine
+    ).to_dict(orient="records")
 
 
 #### model - UPDATE #####
@@ -203,6 +230,7 @@ def create_user(username, password):
         else:
             st.warning(":material/key: **密码错误**")
 
+
 #### user - READ ####
 def read_user_role(username: str) -> str:
     with Session() as session:
@@ -210,17 +238,20 @@ def read_user_role(username: str) -> str:
         user = result.scalar()
     return user.role
 
+
 def read_user_exist(username: str) -> bool:
     with Session() as session:
         result = session.execute(select(User).where(User.name == username))
         user = result.scalar()
     return True if user else False
 
+
 def read_user_login(username, password):
     with Session() as session:
         result = session.execute(select(User).where(User.name == username))
         user = result.scalar()
     return True if user and user.password == password else False
+
 
 #### user - UPDATE ####
 @st.dialog("更改权限")
@@ -252,22 +283,46 @@ def create_case_category():
 
 
 ###################################################################
-
-
-
-
-
-
-
-
-
-
-
-def update_teacher_prompt(id, prompt, memo, model, creator, public):
+#### prompt - CREATE ####
+def create_prompt(table, prompt, memo, model, creator, public):
     with Session() as session:
+        prompt_class = table_to_class(table)
+        new_prompt = prompt_class(
+                    prompt=prompt,
+                    memo=memo,
+                    model=model,
+                    creator=creator,
+                    public=public,
+                )
+        session.add(new_prompt)
+        session.commit()
+    return
+
+
+#### prompt - READ ####
+def read_prompt(table, creator):
+    query = f"SELECT * FROM {table} WHERE creator = ? OR public = True"
+    return pd.read_sql(
+        query,
+        con=engine,
+        params=(creator,),
+    ).to_dict(orient="records")
+
+
+def read_caseprompt_memo(memo: str) -> CasePrompt:
+    with Session() as session:
+        result = session.execute(select(CasePrompt).where(CasePrompt.memo == memo))
+        caseprompt = result.scalar()
+    return caseprompt
+
+
+#### prompt - UPDATE ####
+def update_prompt(table, id, prompt, memo, model, creator, public):
+    with Session() as session:
+        prompt_class = table_to_class(table)
         session.execute(
-            update(Teacher)
-            .where(Teacher.id == id)
+            update(prompt_class)
+            .where(prompt_class.id == id)
             .values(
                 prompt=prompt, memo=memo, model=model, creator=creator, public=public
             )
@@ -276,44 +331,56 @@ def update_teacher_prompt(id, prompt, memo, model, creator, public):
     return
 
 
-def delete_teacher_prompt(id):
+#### prompt - DELETE ####
+def delete_prompt(table, id):
     with Session() as session:
-        session.execute(delete(Teacher).where(Teacher.id == id))
+        prompt_class = table_to_class(table)
+        session.execute(delete(prompt_class).where(prompt_class.id == id))
         session.commit()
     return
 
 
-def add_teacher_prompt(prompt, memo, model, creator, public):
+#############################################################
+########### category - READ ###########
+
+
+def read_category(book, chapter, subject) -> Category:
     with Session() as session:
-        teacher_prompt = Teacher(
-            prompt=prompt, memo=memo, model=model, creator=creator, public=public
+        result = session.execute(
+            select(Category).where(
+                Category.book == book,
+                Category.chapter == chapter,
+                Category.subject == subject,
+            )
         )
-        session.add(teacher_prompt)
-        session.commit()
-    return
+        category = result.scalar()
+        if category is None:
+            result = session.execute(select(Category).where(Category.id == 1))
+            category = result.scalar()
+    return category
 
 
-def select_teacher_prompt(creator):
-    return pd.read_sql(
-        "SELECT * FROM teacher WHERE creator = ? OR public = True",
-        con=engine,
-        params=(creator,),
-    ).to_dict(orient="records")
+def read_category_field(field: str):
+    with Session() as session:
+        result = (
+            session.execute(select(distinct(getattr(Category, field)))).scalars().all()
+        )
+    return result
 
 
-def select_model():
-    return pd.read_sql(
-        "SELECT name, module FROM model WHERE use=True", con=engine
-    ).to_dict(orient="records")
-
-
-def save_case(
-    teacher: Teacher, chapter: Category, user: User, profile: str, content: str
+#########################################################################
+#### case - CREATE ####
+def create_case(
+    caseprompt: CasePrompt,
+    category: Category,
+    creator: User,
+    profile: str,
+    content: str,
 ):
     case = Case(
-        teacher=teacher,
-        chapter=chapter,
-        user=user,
+        caseprompt=caseprompt,
+        category=category,
+        creator=creator,
         profile=profile,
         content=content,
     )
@@ -322,43 +389,4 @@ def save_case(
         session.commit()
     return
 
-
-def get_teacher(memo: str):
-    with Session() as session:
-        result = session.execute(select(Teacher).where(Teacher.memo == memo))
-        teacher = result.scalar()
-    return teacher
-
-
-def get_user(username: str):
-    with Session() as session:
-        result = session.execute(select(User).where(User.name == username))
-        user = result.scalar()
-    return user
-
-
-########### TABLE CATEGORY ###########
-
-
-def get_category(book, name, subject):
-    with Session() as session:
-        result = session.execute(
-            select(Category).where(
-                Category.book == book,
-                Category.name == name,
-                Category.subject == subject,
-            )
-        )
-        category = result.scalar()
-        if category is None:
-            result = session.execute(select(Category).where(Category.id == 1))
-            chapter = result.scalar()
-    return chapter
-
-
-def select_category(field: str):
-    with Session() as session:
-        result = (
-            session.execute(select(distinct(getattr(Category, field)))).scalars().all()
-        )
-    return result
+    
