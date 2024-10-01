@@ -17,7 +17,7 @@ def page_prompt_manager(table: str):
         format_func=lambda x: f"{x["memo"]} == {x['model']} == {x['creator']}",
         key=f"{table}_prompt_dict",
     )
-    tab_text_area, tab_markdown = st.tabs(["编辑", "查看"])
+    tab_markdown, tab_text_area = st.tabs(["查看", "编辑"])
     with tab_text_area:
         prompt = st.text_area(
             "**提示词**",
@@ -32,7 +32,9 @@ def page_prompt_manager(table: str):
 
     col_memo, col_public, col_model, col_creator = st.columns(4)
     with col_memo:
-        prompt_memo = st.text_input("**备注**", value=prompt_dict["memo"], key=f"{table}_memo")
+        prompt_memo = st.text_input(
+            "**备注**", value=prompt_dict["memo"], key=f"{table}_memo"
+        )
     with col_public:
         prompt_public = st.selectbox(
             label="**公开**",
@@ -50,13 +52,16 @@ def page_prompt_manager(table: str):
             st.toast("模型不在使用，请更新！")
             index = 0
         model_dict = st.selectbox(
-            label="**模型**", 
-            options=models, index=index, format_func=lambda x: x["name"], key=f'{table}_model_dict'
+            label="**模型**",
+            options=models,
+            index=index,
+            format_func=lambda x: x["name"],
+            key=f"{table}_model_dict",
         )
     with col_creator:
         prompt_creator = st.text_input(
-            label="**作者**", 
-            value=prompt_dict["creator"], 
+            label="**作者**",
+            value=prompt_dict["creator"],
             disabled=True,
             key=f"{table}_prompt_creator",
         )

@@ -47,6 +47,12 @@ PAGE_STYLE = """
             padding-top: 1rem;
             padding-bottom: 1rem;
         }
+        .stChatMessage{
+            padding-top: 0rem;
+            padding-bottom: 0rem;
+            padding-left: 0rem;
+            padding-right: 0rem;
+        }
     </style>
     
     """
@@ -138,14 +144,14 @@ def set_page_footer():
 #             )
 
 
-# def show_chat(messages):
-#     for message in messages:
-#         if message["role"] == "user":
-#             with st.chat_message("医生"):
-#                 st.markdown(message["content"])
-#         if message["role"] == "assistant":
-#             with st.chat_message("患者"):
-#                 st.markdown(message["content"])
+def show_chat(messages):
+    for message in messages:
+        if message["role"] == "user":
+            with st.chat_message("医生"):
+                st.markdown(message["content"])
+        if message["role"] == "assistant":
+            with st.chat_message("患者"):
+                st.markdown(message["content"])
 
 
 # def show_patient_info(patient):

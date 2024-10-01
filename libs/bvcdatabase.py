@@ -69,6 +69,25 @@ class TestPrompt(Base):
     creator: Mapped[str] = mapped_column(Text, nullable=True)
     public: Mapped[bool] = mapped_column(Integer, nullable=True)
 
+    testprompt_tests: Mapped[list["Test"]] = relationship(back_populates="testprompt")
+
+class SimPrompt(Base):
+    __tablename__ = "simprompt"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    prompt: Mapped[str] = mapped_column(Text, nullable=True)
+    memo: Mapped[str] = mapped_column(Text, nullable=True)
+    model: Mapped[str] = mapped_column(Text, nullable=True)
+    creator: Mapped[str] = mapped_column(Text, nullable=True)
+    public: Mapped[bool] = mapped_column(Integer, nullable=True)
+
+class AskPrompt(Base):
+    __tablename__ = "askprompt"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    prompt: Mapped[str] = mapped_column(Text, nullable=True)
+    memo: Mapped[str] = mapped_column(Text, nullable=True)
+    model: Mapped[str] = mapped_column(Text, nullable=True)
+    creator: Mapped[str] = mapped_column(Text, nullable=True)
+    public: Mapped[bool] = mapped_column(Integer, nullable=True)
 
 class Category(Base):
     __tablename__ = "category"
@@ -99,6 +118,26 @@ class Case(Base):
     category: Mapped[Category] = relationship(
         lazy=False, back_populates="category_cases"
     )
+    case_tests: Mapped[list["Test"]] = relationship(back_populates="case")
+
+
+class Test(Base):
+    __tablename__ = "test"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    testprompt_id: Mapped[int] = mapped_column(
+        ForeignKey("testprompt.id", ondelete="SET NULL"), nullable=True
+    )
+    case_id: Mapped[int] = mapped_column(
+        ForeignKey("case.id", ondelete="SET NULL"), nullable=True
+    )
+    creator: Mapped[str] = mapped_column(Text, nullable=True)
+    profile: Mapped[str] = mapped_column(Text, nullable=True)
+    content: Mapped[str] = mapped_column(Text, nullable=True)
+
+    testprompt: Mapped[TestPrompt] = relationship(
+        lazy=False, back_populates="testprompt_tests"
+    )
+    case: Mapped[Case] = relationship(lazy=False, back_populates="case_tests")
 
 
 def create_table(table: Base):
@@ -107,7 +146,7 @@ def create_table(table: Base):
 
 ####################### CRUD - READ ###############################
 def read_table(table: str):
-    query = f"SELECT * FROM \"{table}\""
+    query = f'SELECT * FROM "{table}"'
     return pd.read_sql(query, con=engine)
 
 
@@ -115,6 +154,8 @@ def table_to_class(table: str) -> Base:
     return {
         "caseprompt": CasePrompt,
         "testprompt": TestPrompt,
+        "simprompt": SimPrompt,
+        "askprompt": AskPrompt,
     }.get(table)
 
 
@@ -288,12 +329,12 @@ def create_prompt(table, prompt, memo, model, creator, public):
     with Session() as session:
         prompt_class = table_to_class(table)
         new_prompt = prompt_class(
-                    prompt=prompt,
-                    memo=memo,
-                    model=model,
-                    creator=creator,
-                    public=public,
-                )
+            prompt=prompt,
+            memo=memo,
+            model=model,
+            creator=creator,
+            public=public,
+        )
         session.add(new_prompt)
         session.commit()
     return
@@ -314,6 +355,13 @@ def read_caseprompt_memo(memo: str) -> CasePrompt:
         result = session.execute(select(CasePrompt).where(CasePrompt.memo == memo))
         caseprompt = result.scalar()
     return caseprompt
+
+
+def read_testprompt_memo(memo: str) -> TestPrompt:
+    with Session() as session:
+        result = session.execute(select(TestPrompt).where(TestPrompt.memo == memo))
+        testprompt = result.scalar()
+    return testprompt
 
 
 #### prompt - UPDATE ####
@@ -389,4 +437,25 @@ def create_case(
         session.commit()
     return
 
-    
+
+#### case - READ ####
+def read_case(id: str) -> Case:
+    with Session() as session:
+        result = session.execute(select(Case).where(Case.id == id))
+        case = result.scalar()
+    return case
+
+#########################################################################
+#### test - CREATE ####
+def create_test(testprompt: TestPrompt, case: Case, creator: User, profile: str, content: str):
+    test = Test(
+        testprompt=testprompt,
+        case=case,
+        creator=creator,
+        profile=profile,
+        content=content,
+    )
+    with Session() as session:
+        session.add(test)
+        session.commit()
+    return

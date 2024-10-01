@@ -1,9 +1,9 @@
 import streamlit as st
 
 from libs.bvcdatabase import (
-    read_category,
-    read_caseprompt_memo,
     create_case,
+    read_caseprompt_memo,
+    read_category,
     read_category_field,
 )
 from libs.bvcmodels import chat
@@ -20,11 +20,10 @@ def page_case_generate():
     #### CASE CONTENT ###################################################################
     with col_case:
         case_config = st.text_input("**病例设定**", value="乳房疾病")
-        tab_case_content, tab_case_content_markdown = st.tabs(["编辑", "查看"])
+        tab_case_content_markdown, tab_case_content = st.tabs(["查看", "编辑"])
 
         if "generated_case" not in st.session_state:
             st.session_state.generated_case = ""
-        
 
         with tab_case_content:
             case_content = st.text_area(
@@ -60,12 +59,13 @@ def page_case_generate():
                         "content": disease,
                     },
                 ]
-                with st.spinner("思考中..."):
-                    response = chat(
-                        module=st.session_state.caseprompt_model_dict["module"],
-                        modelname=st.session_state.caseprompt_model_dict["name"],
-                        messages=messages,
-                    )
+                with st.session_state.info_placeholder:
+                    with st.spinner("思考中..."):
+                        response = chat(
+                            module=st.session_state.caseprompt_model_dict["module"],
+                            modelname=st.session_state.caseprompt_model_dict["name"],
+                            messages=messages,
+                        )
                 st.session_state.generated_case = response
                 st.rerun()
         with col_case_save:
