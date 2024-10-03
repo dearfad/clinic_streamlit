@@ -118,7 +118,7 @@ class Case(Base):
     category: Mapped[Category] = relationship(
         lazy=False, back_populates="category_cases"
     )
-    case_tests: Mapped[list["Test"]] = relationship(back_populates="case")
+    case_test: Mapped[list["Test"]] = relationship(lazy=False, back_populates="case")
 
 
 class Test(Base):
@@ -137,7 +137,7 @@ class Test(Base):
     testprompt: Mapped[TestPrompt] = relationship(
         lazy=False, back_populates="testprompt_tests"
     )
-    case: Mapped[Case] = relationship(lazy=False, back_populates="case_tests")
+    case: Mapped[Case] = relationship(lazy=False, back_populates="case_test")
 
 
 def create_table(table: Base):
@@ -444,6 +444,13 @@ def read_case(id: str) -> Case:
         result = session.execute(select(Case).where(Case.id == id))
         case = result.scalar()
     return case
+
+
+def read_case_test(id: str) -> list[Test]:
+    with Session() as session:
+        result = session.execute(select(Case).where(Case.id == id))
+        test = result.scalar()
+    return test.case_test
 
 #########################################################################
 #### test - CREATE ####
