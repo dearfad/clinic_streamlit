@@ -8,6 +8,9 @@ from pages.page_teacher.ask_answer import page_ask_answer
 
 set_page_header(layout="wide")
 
+if 'info_placeholder' not in st.session_state:
+    st.session_state.info_placeholder = ''
+
 st.markdown("##### :material/view_headline: 模型研究 :material/view_headline:")
 
 

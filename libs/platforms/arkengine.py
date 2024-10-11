@@ -15,13 +15,13 @@ MODEL = {
 }
 
 
-def chat(patient):
+def chat(model: str, messages: list) -> str:
     api_key = st.secrets["arkengine"]
     client = OpenAI(
         api_key=api_key, base_url="https://ark.cn-beijing.volces.com/api/v3"
     )
-    model = patient.model.name
-    messages = patient.messages
+    model = model
+    messages = messages
     response = client.chat.completions.create(
         model=MODEL[model],
         messages=messages,
@@ -31,9 +31,9 @@ def chat(patient):
         # top_p=0.8,
     )
     # print(response)
-    if response.choices[0].message.tool_calls:
-        tool_call = response.choices[0].message.tool_calls[0]
-        args = eval(tool_call.function.arguments)
-        if tool_call.function.name == "get_report":
-            return f"好的，这是我的{args['report']} ![](app/static/乳腺超声.jpg)"
+    # if response.choices[0].message.tool_calls:
+    #     tool_call = response.choices[0].message.tool_calls[0]
+    #     args = eval(tool_call.function.arguments)
+    #     if tool_call.function.name == "get_report":
+    #         return f"好的，这是我的{args['report']} ![](app/static/乳腺超声.jpg)"
     return response.choices[0].message.content

@@ -71,6 +71,7 @@ class TestPrompt(Base):
 
     testprompt_tests: Mapped[list["Test"]] = relationship(back_populates="testprompt")
 
+
 class SimPrompt(Base):
     __tablename__ = "simprompt"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -80,6 +81,7 @@ class SimPrompt(Base):
     creator: Mapped[str] = mapped_column(Text, nullable=True)
     public: Mapped[bool] = mapped_column(Integer, nullable=True)
 
+
 class AskPrompt(Base):
     __tablename__ = "askprompt"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -88,6 +90,7 @@ class AskPrompt(Base):
     model: Mapped[str] = mapped_column(Text, nullable=True)
     creator: Mapped[str] = mapped_column(Text, nullable=True)
     public: Mapped[bool] = mapped_column(Integer, nullable=True)
+
 
 class Category(Base):
     __tablename__ = "category"
@@ -341,7 +344,7 @@ def create_prompt(table, prompt, memo, model, creator, public):
 
 
 #### prompt - READ ####
-def read_prompt(table, creator):
+def read_prompt(table: str, creator: str = None) -> list[dict]:
     query = f"SELECT * FROM {table} WHERE creator = ? OR public = True"
     return pd.read_sql(
         query,
@@ -452,9 +455,12 @@ def read_case_test(id: str) -> list[Test]:
         test = result.scalar()
     return test.case_test
 
+
 #########################################################################
 #### test - CREATE ####
-def create_test(testprompt: TestPrompt, case: Case, creator: User, profile: str, content: str):
+def create_test(
+    testprompt: TestPrompt, case: Case, creator: User, profile: str, content: str
+):
     test = Test(
         testprompt=testprompt,
         case=case,
