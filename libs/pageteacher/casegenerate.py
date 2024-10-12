@@ -9,7 +9,7 @@ from libs.bvcdatabase import (
     read_caseprompt_memo,
     read_category,
     get_user,
-    read_category_field,
+    read_category_field_distinct,
 )
 from libs.bvcmodels import chat
 
@@ -142,11 +142,11 @@ def page_case_generate():
 
         cols = st.columns(3)
         with cols[0]:
-            book = st.selectbox("**教科书**", read_category_field("book"))
+            book = st.selectbox("**教科书**", read_category_field_distinct("book"))
         with cols[1]:
-            chapter = st.selectbox("**章节**", read_category_field("chapter"))
+            chapter = st.selectbox("**章节**", read_category_field_distinct("chapter"))
         with cols[2]:
-            subject = st.selectbox("**主题**", read_category_field("subject"))
+            subject = st.selectbox("**主题**", read_category_field_distinct("subject"))
         
         col_case_generate, col_case_save = st.columns(2)
         with col_case_generate:

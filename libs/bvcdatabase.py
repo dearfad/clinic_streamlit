@@ -411,12 +411,13 @@ def read_category(book, chapter, subject) -> Category:
     return category
 
 
-def read_category_field(field: str):
+def read_category_field_distinct(field: str):
     with Session() as session:
         result = (
             session.execute(select(distinct(getattr(Category, field)))).scalars().all()
         )
     return result
+
 
 
 #########################################################################
@@ -452,8 +453,21 @@ def read_case(id: str) -> Case:
 def read_case_test(id: str) -> list[Test]:
     with Session() as session:
         result = session.execute(select(Case).where(Case.id == id))
-        test = result.scalar()
-    return test.case_test
+        case = result.scalar()
+    return case.case_test
+
+def read_case_category(id: str):
+    with Session() as session:
+        result = session.execute(select(Case).where(Case.id == id))
+        case = result.scalar()
+    return case.category
+
+#### case - DELETE ####
+def delete_case(id):
+    with Session() as session:
+        session.execute(delete(Case).where(Case.id == id))
+        session.commit()
+    return
 
 
 #########################################################################

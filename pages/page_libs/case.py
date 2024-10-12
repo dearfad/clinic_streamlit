@@ -1,17 +1,21 @@
 import streamlit as st
 from libs.bvcdatabase import (
-    create_case,
-    read_caseprompt_memo,
-    read_category,
-    read_category_field,
+    read_category_field_distinct,
+    read_table,
+    read_case_category,
 )
-from libs.bvcmodels import chat
 
 
-def page_case_manager():
-    if "generated_case" not in st.session_state:
-        st.session_state.generated_case = ""
-    case_config = st.text_input("**病例设定**", value="乳房疾病")
+
+def page_case_manager(page):
+    cases = read_table(table='case').to_dict(orient="records")
+    case_dict = st.selectbox(
+        label="**病例选择**",
+        options=cases,
+        format_func=lambda x: f"{x['profile']} == {x['creator']}",
+        key=f"{page}_case_dict",
+    )
+
     tab_case_markdown, tab_case_textarea, tab_case_manager = st.tabs(
         ["查看", "编辑", "管理"]
     )
@@ -20,8 +24,8 @@ def page_case_manager():
             "**病例**",
             height=408,
             label_visibility="collapsed",
-            value=st.session_state.generated_case,
-            key="case_content",
+            value=case_dict['content'],
+            key=f"{page}_case_content",
         )
     with tab_case_markdown:
         with st.container(height=410):
@@ -30,42 +34,18 @@ def page_case_manager():
         with st.container(height=410, border=True):
             cols = st.columns(3)
             with cols[0]:
-                book = st.selectbox("**教科书**", read_category_field("book"))
+                book = st.selectbox("**教科书**", read_category_field_distinct("book"), key=f"{page}_book")
             with cols[1]:
-                chapter = st.selectbox("**章节**", read_category_field("chapter"))
+                chapter = st.selectbox("**章节**", read_category_field_distinct("chapter"), key=f"{page}_chapter")
             with cols[2]:
-                subject = st.selectbox("**主题**", read_category_field("subject"))
+                subject = st.selectbox("**主题**", read_category_field_distinct("subject"), key=f"{page}_subject")
 
-    col_case_generate, col_case_save = st.columns(2)
-    with col_case_generate:
-        if st.button("生成病历", use_container_width=True):
-            disease = case_config if case_config else "任意疾病"
-            messages = [
-                {
-                    "role": "system",
-                    "content": st.session_state.caseprompt,
-                },
-                {
-                    "role": "user",
-                    "content": disease,
-                },
-            ]
-            with st.session_state.info_placeholder:
-                with st.spinner("思考中..."):
-                    response = chat(
-                        module=st.session_state.caseprompt_model_dict["module"],
-                        modelname=st.session_state.caseprompt_model_dict["name"],
-                        messages=messages,
-                    )
-            st.session_state.generated_case = response
-            st.rerun()
-    with col_case_save:
-        if st.button("保存病历", use_container_width=True):
-            create_case(
-                caseprompt=read_caseprompt_memo(st.session_state.caseprompt_memo),
-                category=read_category(book, chapter, subject),
-                creator=st.session_state.user,
-                profile=case_config,
-                content=case_content,
-            )
-            st.toast("Case Saved...")
+    col_book, col_chapter, col_subject = st.columns(3)
+    category = read_case_category(case_dict['id'])
+    with col_book:
+        st.caption(f"**教科书**：{category.book}")
+    with col_chapter:
+        st.caption(f"**章节**：{category.chapter}")
+    with col_subject:
+        st.caption(f"**主题**：{category.subject}")
+    
