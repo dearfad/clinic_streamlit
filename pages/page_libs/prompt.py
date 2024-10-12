@@ -58,7 +58,7 @@ def page_prompt_manager(table: str):
                 options=[False, True],
                 index=prompt_dict["public"],
                 format_func=lambda x: "是" if x else "否",
-                key=f"{table}_prompt_public",
+                key=f"{table}_public",
             )
         with col_model:
             models = read_use_model()
@@ -80,7 +80,7 @@ def page_prompt_manager(table: str):
                 label="**作者**",
                 value=prompt_dict["creator"],
                 disabled=True,
-                key=f"{table}_prompt_creator",
+                key=f"{table}_creator",
             )
 
         col_prompt_insert, col_prompt_update, col_prompt_delete = st.columns(3)
@@ -88,7 +88,7 @@ def page_prompt_manager(table: str):
             if st.button(
                 "添加",
                 icon=":material/add:",
-                key=f"{table}_create_prompt",
+                key=f"{table}_create",
                 use_container_width=True,
             ):
                 if st.session_state.user != "访客":
@@ -106,7 +106,7 @@ def page_prompt_manager(table: str):
         with col_prompt_update:
             if st.button(
                 ":material/update: 更新",
-                key=f"{table}_update_prompt",
+                key=f"{table}_update",
                 use_container_width=True,
             ):
                 if st.session_state.user != "访客":
@@ -128,7 +128,7 @@ def page_prompt_manager(table: str):
         with col_prompt_delete:
             if st.button(
                 ":material/delete: 删除",
-                key=f"{table}_delete_prompt",
+                key=f"{table}_delete",
                 type="primary",
                 use_container_width=True,
             ):
