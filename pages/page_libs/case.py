@@ -1,32 +1,40 @@
 import streamlit as st
+from libs.bvcdatabase import (
+    create_case,
+    read_caseprompt_memo,
+    read_category,
+    read_category_field,
+)
+from libs.bvcmodels import chat
 
 
 def page_case_manager():
-    case_config = st.text_input("**病例设定**", value="乳房疾病")
-    tab_case_content_markdown, tab_case_content = st.tabs(["查看", "编辑"])
-
     if "generated_case" not in st.session_state:
         st.session_state.generated_case = ""
-
-    with tab_case_content:
+    case_config = st.text_input("**病例设定**", value="乳房疾病")
+    tab_case_markdown, tab_case_textarea, tab_case_manager = st.tabs(
+        ["查看", "编辑", "管理"]
+    )
+    with tab_case_textarea:
         case_content = st.text_area(
             "**病例**",
-            height=400,
+            height=408,
             label_visibility="collapsed",
             value=st.session_state.generated_case,
             key="case_content",
         )
-    with tab_case_content_markdown:
-        with st.container(height=402):
+    with tab_case_markdown:
+        with st.container(height=410):
             st.markdown(case_content)
-
-    cols = st.columns(3)
-    with cols[0]:
-        book = st.selectbox("**教科书**", read_category_field("book"))
-    with cols[1]:
-        chapter = st.selectbox("**章节**", read_category_field("chapter"))
-    with cols[2]:
-        subject = st.selectbox("**主题**", read_category_field("subject"))
+    with tab_case_manager:
+        with st.container(height=410, border=True):
+            cols = st.columns(3)
+            with cols[0]:
+                book = st.selectbox("**教科书**", read_category_field("book"))
+            with cols[1]:
+                chapter = st.selectbox("**章节**", read_category_field("chapter"))
+            with cols[2]:
+                subject = st.selectbox("**主题**", read_category_field("subject"))
 
     col_case_generate, col_case_save = st.columns(2)
     with col_case_generate:
