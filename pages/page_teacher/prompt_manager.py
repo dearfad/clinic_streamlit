@@ -9,7 +9,7 @@ from libs.bvcdatabase import (
 )
 
 
-def page_prompt_manager(table: str):
+def page_prompt_manager():
     """
     提示词管理
 
@@ -20,6 +20,11 @@ def page_prompt_manager(table: str):
             - 'simprompt': 对话模拟
             - 'askprompt': 问答评价
     """
+
+    table = st.selectbox(
+        "提示词表",
+        ["caseprompt", "testprompt", "storyprompt", "simprompt", "askprompt"],
+    )
 
     prompts = read_prompt(table, st.session_state.user)
 

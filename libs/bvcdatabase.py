@@ -2,20 +2,17 @@ import pandas as pd
 import streamlit as st
 from sqlalchemy import (
     Float,
-    ForeignKey,
     Integer,
     Text,
     create_engine,
     delete,
     select,
     update,
-    distinct,
 )
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
     mapped_column,
-    relationship,
     sessionmaker,
 )
 
@@ -57,9 +54,6 @@ class CasePrompt(Base):
     creator: Mapped[str] = mapped_column(Text, nullable=True)
     public: Mapped[bool] = mapped_column(Integer, nullable=True)
 
-    caseprompt_cases: Mapped[list["Case"]] = relationship(back_populates="caseprompt")
-
-
 class TestPrompt(Base):
     __tablename__ = "testprompt"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -69,8 +63,14 @@ class TestPrompt(Base):
     creator: Mapped[str] = mapped_column(Text, nullable=True)
     public: Mapped[bool] = mapped_column(Integer, nullable=True)
 
-    testprompt_tests: Mapped[list["Test"]] = relationship(back_populates="testprompt")
-
+class StoryPrompt(Base):
+    __tablename__ = "storyprompt"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    prompt: Mapped[str] = mapped_column(Text, nullable=True)
+    memo: Mapped[str] = mapped_column(Text, nullable=True)
+    model: Mapped[str] = mapped_column(Text, nullable=True)
+    creator: Mapped[str] = mapped_column(Text, nullable=True)
+    public: Mapped[bool] = mapped_column(Integer, nullable=True)
 
 class SimPrompt(Base):
     __tablename__ = "simprompt"
@@ -81,7 +81,6 @@ class SimPrompt(Base):
     creator: Mapped[str] = mapped_column(Text, nullable=True)
     public: Mapped[bool] = mapped_column(Integer, nullable=True)
 
-
 class AskPrompt(Base):
     __tablename__ = "askprompt"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -91,56 +90,17 @@ class AskPrompt(Base):
     creator: Mapped[str] = mapped_column(Text, nullable=True)
     public: Mapped[bool] = mapped_column(Integer, nullable=True)
 
-
-class Category(Base):
-    __tablename__ = "category"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement="auto")
-    book: Mapped[str] = mapped_column(Text, nullable=True)
-    chapter: Mapped[str] = mapped_column(Text, nullable=True)
-    subject: Mapped[str] = mapped_column(Text, nullable=True)
-
-    category_cases: Mapped[list["Case"]] = relationship(back_populates="category")
-
-
 class Case(Base):
     __tablename__ = "case"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    caseprompt_id: Mapped[int] = mapped_column(
-        ForeignKey("caseprompt.id", ondelete="SET NULL"), nullable=True
-    )
-    category_id: Mapped[int] = mapped_column(
-        ForeignKey("category.id", ondelete="SET NULL"), nullable=True
-    )
     creator: Mapped[str] = mapped_column(Text, nullable=True)
     profile: Mapped[str] = mapped_column(Text, nullable=True)
     content: Mapped[str] = mapped_column(Text, nullable=True)
-
-    caseprompt: Mapped[CasePrompt] = relationship(
-        lazy=False, back_populates="caseprompt_cases"
-    )
-    category: Mapped[Category] = relationship(
-        lazy=False, back_populates="category_cases"
-    )
-    test: Mapped["Test"] = relationship(lazy=False, back_populates="case")
-
-
-class Test(Base):
-    __tablename__ = "test"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    testprompt_id: Mapped[int] = mapped_column(
-        ForeignKey("testprompt.id", ondelete="SET NULL"), nullable=True
-    )
-    case_id: Mapped[int] = mapped_column(
-        ForeignKey("case.id", ondelete="SET NULL"), nullable=True
-    )
-    creator: Mapped[str] = mapped_column(Text, nullable=True)
-    profile: Mapped[str] = mapped_column(Text, nullable=True)
-    content: Mapped[str] = mapped_column(Text, nullable=True)
-
-    testprompt: Mapped[TestPrompt] = relationship(
-        lazy=False, back_populates="testprompt_tests"
-    )
-    case: Mapped[Case] = relationship(lazy=False, back_populates="test")
+    test: Mapped[str] = mapped_column(Text, nullable=True)
+    story: Mapped[str] = mapped_column(Text, nullable=True)
+    book: Mapped[str] = mapped_column(Text, nullable=False)
+    chapter: Mapped[str] = mapped_column(Text, nullable=False)
+    subject: Mapped[str] = mapped_column(Text, nullable=False)
 
 
 def create_table(table: Base):
@@ -148,6 +108,7 @@ def create_table(table: Base):
 
 
 ####################### CRUD - READ ###############################
+# @st.cache_data(ttl=60)
 def read_table(table: str):
     query = f'SELECT * FROM "{table}"'
     return pd.read_sql(query, con=engine)
@@ -157,6 +118,7 @@ def table_to_class(table: str) -> Base:
     return {
         "caseprompt": CasePrompt,
         "testprompt": TestPrompt,
+        "storyprompt": StoryPrompt,
         "simprompt": SimPrompt,
         "askprompt": AskPrompt,
     }.get(table)
@@ -312,18 +274,18 @@ def update_user_role():
 
 ###################################################################
 #### chapter - CREATE ####
-@st.dialog("添加章节")
-def create_case_category():
-    book = st.text_input("**教科书**")
-    chapter = st.text_input("**章节**")
-    subject = st.text_input("**主题**")
-    if st.button("添加"):
-        with Session() as session:
-            category = Category(book=book, chapter=chapter, subject=subject)
-            session.add(category)
-            session.commit()
-        st.rerun()
-    return
+# @st.dialog("添加章节")
+# def create_case_category():
+#     book = st.text_input("**教科书**")
+#     chapter = st.text_input("**章节**")
+#     subject = st.text_input("**主题**")
+#     if st.button("添加"):
+#         with Session() as session:
+#             category = Category(book=book, chapter=chapter, subject=subject)
+#             session.add(category)
+#             session.commit()
+#         st.rerun()
+#     return
 
 
 ###################################################################
@@ -395,45 +357,51 @@ def delete_prompt(table, id):
 ########### category - READ ###########
 
 
-def read_category(book, chapter, subject) -> Category:
-    with Session() as session:
-        result = session.execute(
-            select(Category).where(
-                Category.book == book,
-                Category.chapter == chapter,
-                Category.subject == subject,
-            )
-        )
-        category = result.scalar()
-        if category is None:
-            result = session.execute(select(Category).where(Category.id == 1))
-            category = result.scalar()
-    return category
+# def read_category(book, chapter, subject) -> Category:
+#     with Session() as session:
+#         result = session.execute(
+#             select(Category).where(
+#                 Category.book == book,
+#                 Category.chapter == chapter,
+#                 Category.subject == subject,
+#             )
+#         )
+#         category = result.scalar()
+#         if category is None:
+#             result = session.execute(select(Category).where(Category.id == 1))
+#             category = result.scalar()
+#     return category
 
 
-def read_category_field_distinct(field: str):
-    with Session() as session:
-        result = (
-            session.execute(select(distinct(getattr(Category, field)))).scalars().all()
-        )
-    return result
+# def read_category_field_distinct(field: str):
+#     with Session() as session:
+#         result = (
+#             session.execute(select(distinct(getattr(Category, field)))).scalars().all()
+#         )
+#     return result
 
 
 #########################################################################
 #### case - CREATE ####
 def create_case(
-    caseprompt: CasePrompt,
-    category: Category,
-    creator: User,
+    creator: str,
     profile: str,
     content: str,
+    test: str,
+    story: str,
+    book: str,
+    chapter: str,
+    subject: str,
 ):
     case = Case(
-        caseprompt=caseprompt,
-        category=category,
         creator=creator,
         profile=profile,
         content=content,
+        test=test,
+        story=story,
+        book=book,
+        chapter=chapter,
+        subject=subject,
     )
     with Session() as session:
         session.add(case)
@@ -442,7 +410,7 @@ def create_case(
 
 
 #### case - READ ####
-def read_case(id: str, field: str = None) -> Case | Test | Category:
+def read_case(id: str, field: str = None) -> Case | None:
     with Session() as session:
         result = session.execute(select(Case).where(Case.id == id))
         case = result.scalar()
@@ -456,30 +424,29 @@ def read_case(id: str, field: str = None) -> Case | Test | Category:
 
 #### case - UPDATE ####
 @st.dialog("更改病例类别")
-def update_case_category(id: str):
-    book = st.selectbox("**教科书**", read_category_field_distinct("book"))
-    chapter = st.selectbox("**章节**", read_category_field_distinct("chapter"))
-    subject = st.selectbox("**主题**", read_category_field_distinct("subject"))
+def update_case_info(case: Case):
+    profile = st.text_input("**简介**", value=case.profile)
+    book = st.text_input("**教科书**", value=case.book)
+    chapter = st.text_input("**章节**", value=case.chapter)
+    subject = st.text_input("**主题**", value=case.subject)
     if st.button("更新"):
         with Session() as session:
-            result = session.execute(
-                select(Category).where(
-                    Category.book == book,
-                    Category.chapter == chapter,
-                    Category.subject == subject,
-                )
+            session.execute(
+                update(Case)
+                .where(Case.id == case.id)
+                .values(profile=profile, book=book, chapter=chapter, subject=subject)
             )
-            category = result.scalar()
-            session.execute(update(Case).where(Case.id == id).values(category_id=category.id))
             session.commit()
         st.rerun()
     return
 
-def update_case(id: str, field: str, value: str):
+
+def update_case_field(id: str, field: str, value: str):
     with Session() as session:
         session.execute(update(Case).where(Case.id == id).values(**{field: value}))
         session.commit()
     return
+
 
 #### case - DELETE ####
 def delete_case(id):
