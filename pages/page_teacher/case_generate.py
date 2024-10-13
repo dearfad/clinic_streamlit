@@ -1,7 +1,7 @@
 import streamlit as st
 
 from pages.page_libs.prompt import page_prompt_manager
-from pages.page_libs.case import page_case_manager
+# from pages.page_libs.case import page_case_manager
 from libs.bvcmodels import chat
 from libs.bvcdatabase import (
     create_case,
@@ -15,7 +15,7 @@ def page_case_generate():
     with col_caseprompt:
         page_prompt_manager(table="caseprompt")
     with col_case:
-        page_case_manager(page='case_generate')
+        # page_case_manager(page='case_generate')
         case_config = st.text_input("**病例设定**", value="乳房疾病", key='generate_case_config')
         col_case_generate, col_case_save, col_case_delete = st.columns(3)
         with col_case_generate:

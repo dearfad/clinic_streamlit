@@ -121,7 +121,7 @@ class Case(Base):
     category: Mapped[Category] = relationship(
         lazy=False, back_populates="category_cases"
     )
-    case_test: Mapped[list["Test"]] = relationship(lazy=False, back_populates="case")
+    test: Mapped["Test"] = relationship(lazy=False, back_populates="case")
 
 
 class Test(Base):
@@ -140,7 +140,7 @@ class Test(Base):
     testprompt: Mapped[TestPrompt] = relationship(
         lazy=False, back_populates="testprompt_tests"
     )
-    case: Mapped[Case] = relationship(lazy=False, back_populates="case_test")
+    case: Mapped[Case] = relationship(lazy=False, back_populates="test")
 
 
 def create_table(table: Base):
@@ -419,7 +419,6 @@ def read_category_field_distinct(field: str):
     return result
 
 
-
 #########################################################################
 #### case - CREATE ####
 def create_case(
@@ -443,24 +442,44 @@ def create_case(
 
 
 #### case - READ ####
-def read_case(id: str) -> Case:
+def read_case(id: str, field: str = None) -> Case | Test | Category:
     with Session() as session:
         result = session.execute(select(Case).where(Case.id == id))
         case = result.scalar()
-    return case
+    if case is None:
+        return None
+    if field:
+        return getattr(case, field)
+    else:
+        return case
 
 
-def read_case_test(id: str) -> list[Test]:
+#### case - UPDATE ####
+@st.dialog("更改病例类别")
+def update_case_category(id: str):
+    book = st.selectbox("**教科书**", read_category_field_distinct("book"))
+    chapter = st.selectbox("**章节**", read_category_field_distinct("chapter"))
+    subject = st.selectbox("**主题**", read_category_field_distinct("subject"))
+    if st.button("更新"):
+        with Session() as session:
+            result = session.execute(
+                select(Category).where(
+                    Category.book == book,
+                    Category.chapter == chapter,
+                    Category.subject == subject,
+                )
+            )
+            category = result.scalar()
+            session.execute(update(Case).where(Case.id == id).values(category_id=category.id))
+            session.commit()
+        st.rerun()
+    return
+
+def update_case(id: str, field: str, value: str):
     with Session() as session:
-        result = session.execute(select(Case).where(Case.id == id))
-        case = result.scalar()
-    return case.case_test
-
-def read_case_category(id: str):
-    with Session() as session:
-        result = session.execute(select(Case).where(Case.id == id))
-        case = result.scalar()
-    return case.category
+        session.execute(update(Case).where(Case.id == id).values(**{field: value}))
+        session.commit()
+    return
 
 #### case - DELETE ####
 def delete_case(id):
