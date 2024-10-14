@@ -45,50 +45,16 @@ class Model(Base):
     price_output: Mapped[float] = mapped_column(Float, nullable=True)
 
 
-class CasePrompt(Base):
-    __tablename__ = "caseprompt"
+class Prompt(Base):
+    __tablename__ = "prompt"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    category: Mapped[str] = mapped_column(Text, nullable=True)
     prompt: Mapped[str] = mapped_column(Text, nullable=True)
     memo: Mapped[str] = mapped_column(Text, nullable=True)
     model: Mapped[str] = mapped_column(Text, nullable=True)
     creator: Mapped[str] = mapped_column(Text, nullable=True)
     public: Mapped[bool] = mapped_column(Integer, nullable=True)
 
-class TestPrompt(Base):
-    __tablename__ = "testprompt"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    prompt: Mapped[str] = mapped_column(Text, nullable=True)
-    memo: Mapped[str] = mapped_column(Text, nullable=True)
-    model: Mapped[str] = mapped_column(Text, nullable=True)
-    creator: Mapped[str] = mapped_column(Text, nullable=True)
-    public: Mapped[bool] = mapped_column(Integer, nullable=True)
-
-class StoryPrompt(Base):
-    __tablename__ = "storyprompt"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    prompt: Mapped[str] = mapped_column(Text, nullable=True)
-    memo: Mapped[str] = mapped_column(Text, nullable=True)
-    model: Mapped[str] = mapped_column(Text, nullable=True)
-    creator: Mapped[str] = mapped_column(Text, nullable=True)
-    public: Mapped[bool] = mapped_column(Integer, nullable=True)
-
-class SimPrompt(Base):
-    __tablename__ = "simprompt"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    prompt: Mapped[str] = mapped_column(Text, nullable=True)
-    memo: Mapped[str] = mapped_column(Text, nullable=True)
-    model: Mapped[str] = mapped_column(Text, nullable=True)
-    creator: Mapped[str] = mapped_column(Text, nullable=True)
-    public: Mapped[bool] = mapped_column(Integer, nullable=True)
-
-class AskPrompt(Base):
-    __tablename__ = "askprompt"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    prompt: Mapped[str] = mapped_column(Text, nullable=True)
-    memo: Mapped[str] = mapped_column(Text, nullable=True)
-    model: Mapped[str] = mapped_column(Text, nullable=True)
-    creator: Mapped[str] = mapped_column(Text, nullable=True)
-    public: Mapped[bool] = mapped_column(Integer, nullable=True)
 
 class Case(Base):
     __tablename__ = "case"
@@ -112,16 +78,6 @@ def create_table(table: Base):
 def read_table(table: str):
     query = f'SELECT * FROM "{table}"'
     return pd.read_sql(query, con=engine)
-
-
-def table_to_class(table: str) -> Base:
-    return {
-        "caseprompt": CasePrompt,
-        "testprompt": TestPrompt,
-        "storyprompt": StoryPrompt,
-        "simprompt": SimPrompt,
-        "askprompt": AskPrompt,
-    }.get(table)
 
 
 ###################################################################
@@ -288,100 +244,73 @@ def update_user_role():
 #     return
 
 
-###################################################################
-#### prompt - CREATE ####
-def create_prompt(table, prompt, memo, model, creator, public):
+#########################################################
+
+#################### prompt - CREATE ####################
+def create_prompt(
+    category: str, prompt: str, memo: str, model: str, creator: str, public: bool
+):
     with Session() as session:
-        prompt_class = table_to_class(table)
-        new_prompt = prompt_class(
+        prompt = Prompt(
+            category=category,
             prompt=prompt,
             memo=memo,
             model=model,
             creator=creator,
             public=public,
         )
-        session.add(new_prompt)
+        session.add(prompt)
         session.commit()
     return
 
 
-#### prompt - READ ####
-def read_prompt(table: str, creator: str = None) -> list[dict]:
-    query = f"SELECT * FROM {table} WHERE creator = ? OR public = True"
+#################### prompt - READ ####################
+def read_prompt(category: str, creator: str = None) -> list[dict]:
+    query = "SELECT * FROM prompt WHERE (creator = ? OR public = True) AND category = ?"
     return pd.read_sql(
         query,
         con=engine,
-        params=(creator,),
+        params=(creator, category),
     ).to_dict(orient="records")
 
 
-def read_caseprompt_memo(memo: str) -> CasePrompt:
+#################### prompt - UPDATE ####################
+def update_prompt(
+    id: str,
+    category: str,
+    prompt: str,
+    memo: str,
+    model: str,
+    creator: str,
+    public: bool,
+):
     with Session() as session:
-        result = session.execute(select(CasePrompt).where(CasePrompt.memo == memo))
-        caseprompt = result.scalar()
-    return caseprompt
-
-
-def read_testprompt_memo(memo: str) -> TestPrompt:
-    with Session() as session:
-        result = session.execute(select(TestPrompt).where(TestPrompt.memo == memo))
-        testprompt = result.scalar()
-    return testprompt
-
-
-#### prompt - UPDATE ####
-def update_prompt(table, id, prompt, memo, model, creator, public):
-    with Session() as session:
-        prompt_class = table_to_class(table)
         session.execute(
-            update(prompt_class)
-            .where(prompt_class.id == id)
+            update(Prompt)
+            .where(Prompt.id == id)
             .values(
-                prompt=prompt, memo=memo, model=model, creator=creator, public=public
+                category=category,
+                prompt=prompt,
+                memo=memo,
+                model=model,
+                creator=creator,
+                public=public,
             )
         )
         session.commit()
     return
 
 
-#### prompt - DELETE ####
-def delete_prompt(table, id):
+#################### prompt - DELETE ####################
+def delete_prompt(id: str):
     with Session() as session:
-        prompt_class = table_to_class(table)
-        session.execute(delete(prompt_class).where(prompt_class.id == id))
+        session.execute(delete(Prompt).where(Prompt.id == id))
         session.commit()
     return
 
+#########################################################
 
 #############################################################
-########### category - READ ###########
-
-
-# def read_category(book, chapter, subject) -> Category:
-#     with Session() as session:
-#         result = session.execute(
-#             select(Category).where(
-#                 Category.book == book,
-#                 Category.chapter == chapter,
-#                 Category.subject == subject,
-#             )
-#         )
-#         category = result.scalar()
-#         if category is None:
-#             result = session.execute(select(Category).where(Category.id == 1))
-#             category = result.scalar()
-#     return category
-
-
-# def read_category_field_distinct(field: str):
-#     with Session() as session:
-#         result = (
-#             session.execute(select(distinct(getattr(Category, field)))).scalars().all()
-#         )
-#     return result
-
-
-#########################################################################
 #### case - CREATE ####
 def create_case(
     creator: str,
@@ -452,23 +381,5 @@ def update_case_field(id: str, field: str, value: str):
 def delete_case(id):
     with Session() as session:
         session.execute(delete(Case).where(Case.id == id))
-        session.commit()
-    return
-
-
-#########################################################################
-#### test - CREATE ####
-def create_test(
-    testprompt: TestPrompt, case: Case, creator: User, profile: str, content: str
-):
-    test = Test(
-        testprompt=testprompt,
-        case=case,
-        creator=creator,
-        profile=profile,
-        content=content,
-    )
-    with Session() as session:
-        session.add(test)
         session.commit()
     return

@@ -38,26 +38,25 @@ import streamlit as st
 #     </style>
 #     """
 
-# PAGE_STYLE = """
-#     <style>
-#         header{
-#             visibility: hidden;
-#         }
-#         .block-container{
-#             padding-top: 1rem;
-#             padding-bottom: 1rem;
-#         }
-#         .stChatMessage{
-#             padding-top: 0rem;
-#             padding-bottom: 0rem;
-#             padding-left: 0rem;
-#             padding-right: 0rem;
-#         }
-#     </style>
-    
-#     """
+PAGE_STYLE = """
+    <style>
+        header{
+            visibility: hidden;
+        }
+        .block-container{
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        .stChatMessage{
+            padding-top: 0rem;
+            padding-bottom: 0rem;
+            padding-left: 0rem;
+            padding-right: 0rem;
+        }
+    </style>
+    """
 
-PAGE_STYLE = ''
+# PAGE_STYLE = ''
 
 def set_page_header(layout="centered"):
     st.set_page_config(

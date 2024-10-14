@@ -12,50 +12,37 @@ def page_case_generate():
     col_caseprompt, col_testprompt, col_storyprompt = st.columns(3)
     models = read_use_model()
     with col_caseprompt:
-        caseprompts = read_prompt("caseprompt", st.session_state.user)
+        caseprompts = read_prompt(category="case", creator=st.session_state.user)
 
         caseprompt_dict = st.selectbox(
             label="**病历提示词**",
             options=caseprompts,
-            format_func=lambda x: f"{x["memo"]} == {x['model']} == {x['creator']}",
+            format_func=lambda x: f"{x["memo"]} == {x['model']}",
         )
         case_profile = st.text_input("**病例设定**", value="乳房疾病")
 
-        case_model_dict = st.selectbox(
-            label="**病历模型**",
-            options=models,
-            format_func=lambda x: x["name"],
-        )
+
 
     with col_testprompt:
-        testprompts = read_prompt("testprompt", st.session_state.user)
-
+        testprompts = read_prompt(category='test', creator=st.session_state.user)
         testprompt_dict = st.selectbox(
             label="**问题提示词**",
             options=testprompts,
-            format_func=lambda x: f"{x["memo"]} == {x['model']} == {x['creator']}",
+            format_func=lambda x: f"{x["memo"]} == {x['model']}",
         )
         test_profile = st.text_input("**问题设定**", value="乳腺癌")
-        test_model_dict = st.selectbox(
-            label="**问题模型**",
-            options=models,
-            format_func=lambda x: x["name"],
-        )
+
 
     with col_storyprompt:
-        storyprompts = read_prompt("storyprompt", st.session_state.user)
+        storyprompts = read_prompt(category="story", creator=st.session_state.user)
 
         storyprompt_dict = st.selectbox(
             label="**故事提示词**",
             options=storyprompts,
-            format_func=lambda x: f"{x["memo"]} == {x['model']} == {x['creator']}",
+            format_func=lambda x: f"{x["memo"]} == {x['model']}",
         )
         story_profile = st.text_input("**故事设定**", value="悲惨")
-        story_model_dict = st.selectbox(
-            label="**故事模型**",
-            options=models,
-            format_func=lambda x: x["name"],
-        )
+
 
     if "generated_case" not in st.session_state:
         st.session_state.generated_case = ""
@@ -64,13 +51,32 @@ def page_case_generate():
     if "generated_story" not in st.session_state:
         st.session_state.generated_story = ""
 
-    with st.container(height=366):
-            st.markdown('**预览病历**')
-            st.markdown(st.session_state.generated_case)
-            st.markdown('**预览问题**')
-            st.markdown(st.session_state.generated_test)
-            st.markdown('**预览故事**')
-            st.markdown(st.session_state.generated_story)
+    tab_case_preview, tab_case_model = st.tabs(["**预览病历**", "**模型信息**"])
+    with tab_case_preview:
+        with st.container(height=442):
+                st.markdown('**预览病历**')
+                st.markdown(st.session_state.generated_case)
+                st.markdown('**预览问题**')
+                st.markdown(st.session_state.generated_test)
+                st.markdown('**预览故事**')
+                st.markdown(st.session_state.generated_story)
+    with tab_case_model:
+        with st.container(height=442):
+            case_model_dict = st.selectbox(
+                label="**病历模型**",
+                options=models,
+                format_func=lambda x: x["name"],
+            )
+            test_model_dict = st.selectbox(
+                label="**问题模型**",
+                options=models,
+                format_func=lambda x: x["name"],
+            )
+            story_model_dict = st.selectbox(
+                label="**故事模型**",
+                options=models,
+                format_func=lambda x: x["name"],
+            )
 
     col_case_generate, col_case_save = st.columns(2)
     with col_case_generate:

@@ -8,6 +8,7 @@ from libs.bvcdatabase import (
     read_use_model,
 )
 
+PROMPT_HEIGHT = 440
 
 def page_prompt_manager():
     """
@@ -21,42 +22,42 @@ def page_prompt_manager():
             - 'askprompt': 问答评价
     """
 
-    table = st.selectbox(
-        "提示词表",
-        ["caseprompt", "testprompt", "storyprompt", "simprompt", "askprompt"],
+    category = st.selectbox(
+        "**提示词表**",
+        ["case", "test", "story", "sim", "ask"],
     )
 
-    prompts = read_prompt(table, st.session_state.user)
+    prompts = read_prompt(category=category, creator=st.session_state.user)
 
     prompt_dict = st.selectbox(
         label="**提示词**",
         options=prompts,
-        format_func=lambda x: f"{x["memo"]} == {x['model']} == {x['creator']}",
-        key=f"{table}_prompt_dict",
+        format_func=lambda x: f"{x["memo"]} == {x['model']}",
+        key=f"{category}_prompt_dict",
     )
 
-    tab_prompt_markdown, tab_prompt_textarea, tab_prompt_manager = st.tabs(
+    tab_prompt_markdown, tab_prompt_edit, tab_prompt_manager = st.tabs(
         ["查看", "编辑", "管理"]
     )
 
-    with tab_prompt_textarea:
+    with tab_prompt_edit:
         prompt = st.text_area(
             "**提示词**",
             value=prompt_dict["prompt"],
-            height=464,
+            height=PROMPT_HEIGHT,
             label_visibility="collapsed",
-            key=f"{table}",
+            key=f"{category}_prompt",
         )
     with tab_prompt_markdown:
-        with st.container(height=466):
+        with st.container(height=PROMPT_HEIGHT+2):
             st.markdown(prompt)
 
     with tab_prompt_manager:
-        with st.container(height=466, border=True):
+        with st.container(height=PROMPT_HEIGHT+2, border=True):
             col_memo, col_public, col_model, col_creator = st.columns(4)
             with col_memo:
                 prompt_memo = st.text_input(
-                    "**备注**", value=prompt_dict["memo"], key=f"{table}_memo"
+                    "**备注**", value=prompt_dict["memo"], key=f"{category}_memo"
                 )
             with col_public:
                 prompt_public = st.selectbox(
@@ -64,7 +65,7 @@ def page_prompt_manager():
                     options=[False, True],
                     index=prompt_dict["public"],
                     format_func=lambda x: "是" if x else "否",
-                    key=f"{table}_public",
+                    key=f"{category}_public",
                 )
             with col_model:
                 models = read_use_model()
@@ -79,14 +80,14 @@ def page_prompt_manager():
                     options=models,
                     index=index,
                     format_func=lambda x: x["name"],
-                    key=f"{table}_model_dict",
+                    key=f"{category}_model_dict",
                 )
             with col_creator:
                 prompt_creator = st.text_input(
                     label="**作者**",
                     value=prompt_dict["creator"],
                     disabled=True,
-                    key=f"{table}_creator",
+                    key=f"{category}_creator",
                 )
 
             col_prompt_insert, col_prompt_update, col_prompt_delete = st.columns(3)
@@ -94,12 +95,12 @@ def page_prompt_manager():
                 if st.button(
                     "添加",
                     icon=":material/add:",
-                    key=f"{table}_create",
+                    key=f"{category}_create",
                     use_container_width=True,
                 ):
                     if st.session_state.user != "访客":
                         create_prompt(
-                            table=table,
+                            category=category,
                             prompt=prompt,
                             memo=prompt_memo,
                             model=model_dict["name"],
@@ -112,14 +113,14 @@ def page_prompt_manager():
             with col_prompt_update:
                 if st.button(
                     ":material/update: 更新",
-                    key=f"{table}_update",
+                    key="prompt_update",
                     use_container_width=True,
                 ):
                     if st.session_state.user != "访客":
                         if st.session_state.user == prompt_creator:
                             update_prompt(
-                                table=table,
                                 id=prompt_dict["id"],
+                                category=category,
                                 prompt=prompt,
                                 memo=prompt_memo,
                                 model=model_dict["name"],
@@ -134,13 +135,13 @@ def page_prompt_manager():
             with col_prompt_delete:
                 if st.button(
                     ":material/delete: 删除",
-                    key=f"{table}_delete",
+                    key=f"{category}_delete",
                     type="primary",
                     use_container_width=True,
                 ):
                     if st.session_state.user != "访客":
                         if st.session_state.user == prompt_creator:
-                            delete_prompt(table=table, id=prompt_dict["id"])
+                            delete_prompt(id=prompt_dict["id"])
                             st.rerun()
                         else:
                             st.toast("无权限删除提示词")

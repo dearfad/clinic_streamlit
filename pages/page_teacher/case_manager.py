@@ -17,7 +17,7 @@ def page_case_manager():
     with col_case_filter_book:
         selected_book_unique = list(cases['book'].unique())
         selected_book_unique.insert(0, '任意')
-        selected_book = st.selectbox('教科书', options=selected_book_unique)
+        selected_book = st.selectbox('**教科书**', options=selected_book_unique)
         if selected_book == '任意':
             condition_book = pd.Series([True] * len(cases), index=cases.index)
         else:
@@ -25,7 +25,7 @@ def page_case_manager():
     with col_case_filter_chapter:
         selected_chapter_unique = list(cases['chapter'].unique())
         selected_chapter_unique.insert(0, '任意')
-        selected_chapter = st.selectbox('章节', options=selected_chapter_unique)
+        selected_chapter = st.selectbox('**章节**', options=selected_chapter_unique)
         if selected_chapter == '任意':
             condition_chapter = pd.Series([True] * len(cases), index=cases.index)
         else:
@@ -33,7 +33,7 @@ def page_case_manager():
     with col_case_filter_subject:
         selected_subject_unique = list(cases['subject'].unique())
         selected_subject_unique.insert(0, '任意')
-        selected_subject = st.selectbox('主题', options=selected_subject_unique)
+        selected_subject = st.selectbox('**主题**', options=selected_subject_unique)
         if selected_subject == '任意':
             condition_subject = pd.Series([True] * len(cases), index=cases.index)
         else:
@@ -64,6 +64,7 @@ def page_case_manager():
             height=VIEW_HEIGHT-58,
             label_visibility="collapsed",
             value=case.content,
+            key="case_content",
         )
         col_update_content, col_update_category = st.columns(2)
         with col_update_content:
@@ -98,6 +99,7 @@ def page_case_manager():
             height=VIEW_HEIGHT-58,
             label_visibility="collapsed",
             value=case.story if case.story else "",
+            key="story_content"
         )
         if st.button("故事更新"):
             pass
