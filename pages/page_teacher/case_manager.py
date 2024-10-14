@@ -89,6 +89,7 @@ def page_case_manager():
             height=VIEW_HEIGHT-58,
             label_visibility="collapsed",
             value=case.test if case.test else "",
+            key='test_content'
         )
         if st.button("问题更新"):
             pass

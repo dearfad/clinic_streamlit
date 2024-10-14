@@ -58,6 +58,7 @@ PAGE_STYLE = """
 
 # PAGE_STYLE = ''
 
+
 def set_page_header(layout="centered"):
     st.set_page_config(
         page_title="虚拟门诊",
@@ -144,8 +145,8 @@ def set_page_footer():
 #             )
 
 
-def show_chat(messages):
-    for message in messages:
+def show_chat(messages, loc=0):
+    for message in messages[loc:]:
         if message["role"] == "user":
             with st.chat_message("医生"):
                 st.markdown(message["content"])
