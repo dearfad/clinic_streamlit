@@ -34,3 +34,7 @@ tencentcloud-sdk-python
 sensenova
 
 openpyxl
+
+#fastapi
+fastapi
+uvicorn[standard]
