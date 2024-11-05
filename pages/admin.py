@@ -6,7 +6,7 @@ from libs.bvcdatabase import (
     create_model,
     delete_model,
     update_user_role,
-    create_case_category,
+    # create_case_category,
 )
 
 set_page_header(layout="wide")
@@ -85,8 +85,9 @@ with col_user_config:
         if st.button("**更改权限**", use_container_width=True):
             update_user_role()
 with col_chapter_config:
-    with st.expander("**章节设定**", icon="🚨", expanded=False):
-        if st.button("**添加章节**", use_container_width=True):
-            create_case_category()
+    pass
+    # with st.expander("**章节设定**", icon="🚨", expanded=False):
+    #     if st.button("**添加章节**", use_container_width=True):
+    #         create_case_category()
 
 set_page_footer()
